@@ -53,6 +53,7 @@ import { buildPdf } from "./utils/buildPdf";
 import { downloadSinglePng, downloadAllPngs } from "./utils/exportPng";
 import { themeFromAccent } from "./utils/colorExtractor";
 import { saveApiKey, loadApiKey } from "./utils/secureStorage";
+import { formatForLinkedIn, renderBoldPreview } from "./utils/linkedinFormat";
 
 const SS = 540;
 
@@ -279,7 +280,7 @@ export default function App() {
         ),
         {
           type: "text",
-          text: `Generate ${getGenerateText(contentType)}${files.length ? " from attached file(s)" : ""}${files.length && input.trim() ? " and" : ""}${input.trim() ? " from:\n\n" + input : ""}`,
+          text: `Generate ${getGenerateText(contentType)}${files.length ? " from attached file(s)" : ""}${files.length && input.trim() ? " and" : ""}${input.trim() ? " from:\n\n" + input : ""}${source.trim() ? `\n\nSOURCE/REFERENCE: "${source.trim()}" — Reference this source naturally in the post body to add credibility. Attribute key insights to it.` : ""}`,
         },
       ];
       const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -479,7 +480,8 @@ export default function App() {
     setPost((prev) => ({ ...prev, [field]: value }));
   }
 
-  function postText() {
+  // Raw post text with **bold** markers (for preview and char count)
+  function postTextRaw() {
     if (!post) return "";
     let t = post.hook + "\n\n" + post.body + "\n\n" + post.cta;
     t += "\n\n" + post.hashtags.map((h) => `#${h.replace(/^#/, "")}`).join(" ");
@@ -487,8 +489,13 @@ export default function App() {
     return t;
   }
 
+  // LinkedIn-ready text with Unicode bold (for clipboard)
+  function postTextLinkedIn() {
+    return formatForLinkedIn(postTextRaw());
+  }
+
   function copyPost() {
-    navigator.clipboard.writeText(postText()).then(() => {
+    navigator.clipboard.writeText(postTextLinkedIn()).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -1178,7 +1185,8 @@ export default function App() {
 
                   {/* Character counter */}
                   {(() => {
-                    const len = postText().length;
+                    const linkedInText = postTextLinkedIn();
+                    const len = linkedInText.length;
                     const over = len > 3000;
                     return (
                       <div style={{
@@ -1201,10 +1209,15 @@ export default function App() {
                     );
                   })()}
 
-                  {/* Full preview */}
+                  {/* Full preview with bold rendering */}
                   <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: 16, whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.75, color: T.text, wordBreak: "break-word" }}>
-                    {postText()}
+                    {renderBoldPreview(postTextRaw()).map((part, i) =>
+                      typeof part === "string" ? <span key={i}>{part}</span> : <strong key={i} style={{ fontWeight: 700 }}>{part.text}</strong>
+                    )}
                   </div>
+                  <p style={{ fontSize: 10, color: T.muted, textAlign: "center", opacity: 0.7 }}>
+                    Preview shows bold. Copied text uses LinkedIn-compatible Unicode bold formatting.
+                  </p>
 
                   {source.trim() && (
                     <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.5, padding: "8px 12px", background: T.soft, borderRadius: 8 }}>
