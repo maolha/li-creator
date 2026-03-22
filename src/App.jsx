@@ -49,6 +49,7 @@ import { ScaledSlide, SlideInner } from "./components/SlideRenderer";
 import { buildPdf } from "./utils/buildPdf";
 import { downloadSinglePng, downloadAllPngs } from "./utils/exportPng";
 import { themeFromAccent } from "./utils/colorExtractor";
+import { saveApiKey, loadApiKey } from "./utils/secureStorage";
 
 const SS = 540;
 
@@ -76,7 +77,7 @@ export default function App() {
   const [copied, setCopied] = useState(false);
   const [cardPx, setCardPx] = useState(480);
   const [activeTab, setActiveTab] = useState("slides");
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem("cf_api_key") || "");
+  const [apiKey, setApiKey] = useState("");
   const [showApiInput, setShowApiInput] = useState(false);
   const [contentType, setContentType] = useState("carousel");
   const [regeneratingSlide, setRegeneratingSlide] = useState(null);
@@ -98,8 +99,10 @@ export default function App() {
   const T = allThemes[theme] || THEMES["Midnight Pro"];
   const ct = contrastText(T.accent);
 
-  // Persist API key & custom themes
-  useEffect(() => { if (apiKey) localStorage.setItem("cf_api_key", apiKey); }, [apiKey]);
+  // Load encrypted API key on mount
+  useEffect(() => { loadApiKey().then((k) => { if (k) setApiKey(k); }); }, []);
+
+  // Persist API key encrypted
   useEffect(() => { localStorage.setItem("cf_custom_themes", JSON.stringify(customThemes)); }, [customThemes]);
 
   // Responsive card size
@@ -514,7 +517,7 @@ export default function App() {
                 style={{ flex: 1, background: T.bg, color: T.text, border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 14px", fontSize: 13, fontFamily: "'JetBrains Mono', monospace" }}
               />
               <button
-                onClick={() => setShowApiInput(false)}
+                onClick={() => { saveApiKey(apiKey); setShowApiInput(false); }}
                 style={{ background: T.accent, color: ct, border: "none", borderRadius: 8, padding: "10px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
               >
                 Save
