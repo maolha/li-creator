@@ -21,6 +21,93 @@ const LAYOUTS = {
 
 export { LAYOUTS as SPEAKER_LAYOUTS, ASPECT_RATIOS as SPEAKER_ASPECTS };
 
+// Responsive sizes based on aspect ratio
+function getSizes(aspect, count) {
+  const isWide = aspect === "16:9";
+  const isTall = aspect === "9:16";
+  return {
+    pad: isWide ? 20 : isTall ? 22 : 36,
+    padY: isWide ? 16 : isTall ? 24 : 28,
+    titleSize: isWide ? 22 : isTall ? 28 : 34,
+    titleSizeLong: isWide ? 18 : isTall ? 22 : 26,
+    sessionSize: isWide ? 10 : 13,
+    photoSz: isWide
+      ? (count === 1 ? 64 : count === 2 ? 56 : 48)
+      : isTall
+      ? (count === 1 ? 90 : count === 2 ? 76 : 64)
+      : (count === 1 ? 110 : count === 2 ? 96 : 80),
+    nameSz: isWide
+      ? (count === 1 ? 14 : 11)
+      : (count === 1 ? 18 : count === 2 ? 15 : 13),
+    roleSz: isWide ? 9 : (count === 1 ? 13 : 11),
+    companySz: isWide ? 8 : (count === 1 ? 12 : 10),
+    pillSz: isWide ? 9 : 11,
+    ctaSz: isWide ? 10 : 12,
+    ctaPad: isWide ? "6px 16px" : "8px 22px",
+    dateSz: isWide ? 9 : 11,
+    brandSz: isWide ? 9 : 11,
+    barH: isWide ? 4 : 6,
+    accentBarW: isWide ? 40 : 50,
+    accentBarH: isWide ? 2 : 3,
+    gap: isWide ? 10 : 16,
+    photoGap: isWide ? 6 : 8,
+    logoH: isWide ? 22 : isTall ? 26 : 32,
+  };
+}
+
+function LogoOrBrand({ eventLogo, logoDarkBg, brand, theme, logoH }) {
+  if (eventLogo) {
+    return (
+      <div style={{ background: logoDarkBg ? "#1a1a2e" : "transparent", borderRadius: logoDarkBg ? 6 : 0, padding: logoDarkBg ? "4px 8px" : 0 }}>
+        <img src={eventLogo} alt="" style={{ height: logoH, maxWidth: logoH * 3, objectFit: "contain", display: "block" }} />
+      </div>
+    );
+  }
+  return <span style={{ fontSize: Math.max(9, logoH * 0.35), fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: theme.accent, opacity: 0.85 }}>{brand}</span>;
+}
+
+function SpeakerPhotos({ speakers, count, photoSz, photoRadius, theme, nameSz, roleSz, companySz, photoGap, direction, ct }) {
+  const textColor = ct || theme.text;
+  const accentColor = ct ? ct : theme.accent;
+  const mutedColor = ct ? (ct === "#FFFFFF" ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.4)") : theme.muted;
+  const borderStyle = ct ? "2px solid rgba(255,255,255,0.3)" : `3px solid ${theme.accent}`;
+  const photoBg = ct ? "rgba(255,255,255,0.1)" : theme.soft;
+
+  return (
+    <div style={{ display: "flex", gap: count === 1 ? 0 : photoGap * 2, alignItems: "flex-start", justifyContent: count === 1 ? "flex-start" : "center", width: "100%" }}>
+      {speakers.filter((s) => s?.name).map((speaker, i) => (
+        <div key={i} style={{
+          display: "flex",
+          flexDirection: count === 1 ? "row" : "column",
+          alignItems: count === 1 ? "center" : "center",
+          gap: count === 1 ? photoGap * 2 : photoGap,
+          flex: count > 1 ? 1 : undefined,
+          width: count > 1 ? 0 : undefined,
+        }}>
+          <div style={{
+            width: photoSz, height: photoSz, borderRadius: photoRadius,
+            background: photoBg, border: borderStyle,
+            overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            {speaker.photo ? (
+              <img src={speaker.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              <div style={{ fontSize: photoSz * 0.35, color: accentColor, opacity: 0.3, fontFamily: "'DM Serif Display',serif" }}>
+                {speaker.name?.charAt(0)?.toUpperCase() || "?"}
+              </div>
+            )}
+          </div>
+          <div style={{ textAlign: count === 1 ? "left" : "center", minHeight: nameSz * 2.5 }}>
+            <div style={{ fontSize: nameSz, fontWeight: 700, color: textColor, lineHeight: 1.25 }}>{speaker.name}</div>
+            {speaker.title && <div style={{ fontSize: roleSz, color: ct ? textColor : accentColor, fontWeight: 500, marginTop: 2, lineHeight: 1.3, opacity: ct ? 0.7 : 1 }}>{speaker.title}</div>}
+            {speaker.company && <div style={{ fontSize: companySz, color: mutedColor, marginTop: 1, lineHeight: 1.3 }}>{speaker.company}</div>}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function SpeakerSlideInner({ data, T, brand }) {
   const { eventTitle, eventDate, cta, eventLogo, sessionTitle, regUrl, tagLabel, logoDarkBg } = data || {};
   const speakers = Array.isArray(data?.speakers) ? data.speakers : [];
@@ -30,20 +117,13 @@ export function SpeakerSlideInner({ data, T, brand }) {
   const bgMode = style.bgMode || "dark";
   const { w: SW, h: SH } = ASPECT_RATIOS[aspect] || ASPECT_RATIOS["1:1"];
 
-  // Override theme colors based on bgMode
   const accentRgb = hexToRgbStr(T.accent);
   const accentCt = contrastText(T.accent);
   const theme = bgMode === "light" ? {
-    ...T,
-    card: "#FFFFFF",
-    text: "#1A1A2E",
-    muted: "#6B6B7B",
-    border: "rgba(26,26,46,0.10)",
-    soft: `rgba(${accentRgb},0.07)`,
+    ...T, card: "#FFFFFF", text: "#1A1A2E", muted: "#6B6B7B",
+    border: "rgba(26,26,46,0.10)", soft: `rgba(${accentRgb},0.07)`,
   } : bgMode === "invert" ? {
-    ...T,
-    card: T.accent,
-    text: accentCt,
+    ...T, card: T.accent, text: accentCt,
     muted: accentCt === "#FFFFFF" ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.5)",
     border: accentCt === "#FFFFFF" ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.12)",
     soft: accentCt === "#FFFFFF" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)",
@@ -54,209 +134,144 @@ export function SpeakerSlideInner({ data, T, brand }) {
   const ctaTextColor = contrastText(ctaColor);
   const ct = contrastText(theme.accent);
   const count = speakers.filter((s) => s?.name).length || 1;
-  const photoShape = style.photoShape || "circle";
-  const isWide = aspect === "16:9";
-  const isTall = aspect === "9:16";
+  const photoRadius = (style.photoShape || "circle") === "circle" ? "50%" : (style.photoShape === "rounded" ? 12 : 0);
+  const sz = getSizes(aspect, count);
+  const tSz = (eventTitle?.length || 0) > 35 ? sz.titleSizeLong : sz.titleSize;
 
-  const photoRadius = photoShape === "circle" ? "50%" : photoShape === "rounded" ? 12 : 0;
-  const pad = isWide ? "24px 32px" : isTall ? "28px 28px" : "28px 36px";
-  const titleSize = isWide
-    ? (eventTitle?.length > 35 ? 22 : 28)
-    : isTall
-    ? (eventTitle?.length > 35 ? 24 : 32)
-    : (eventTitle?.length > 40 ? 26 : eventTitle?.length > 25 ? 32 : 38);
-  const photoSz = isWide
-    ? (count === 1 ? 80 : count === 2 ? 72 : 60)
-    : isTall
-    ? (count === 1 ? 100 : count === 2 ? 88 : 72)
-    : (count === 1 ? 110 : count === 2 ? 96 : 80);
-
-  // ── CENTERED LAYOUT ──
+  // ── CENTERED ──
   if (layout === "centered") {
     return (
-      <div style={{ width: SW, height: SH, background: theme.card, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxSizing: "border-box", textAlign: "center" }}>
-        <div style={{ position: "absolute", top: 0, left: 0, width: SW, height: 6, background: theme.accent }} />
-        <div style={{ position: "absolute", top: -100, right: -100, width: 350, height: 350, borderRadius: "50%", background: theme.accent, opacity: 0.05 }} />
+      <div style={{ width: SW, height: SH, background: theme.card, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxSizing: "border-box", textAlign: "center", padding: `${sz.padY}px ${sz.pad}px` }}>
+        <div style={{ position: "absolute", top: 0, left: 0, width: SW, height: sz.barH, background: theme.accent }} />
 
-        {eventLogo ? (
-          <div style={{ background: logoDarkBg ? "#1a1a2e" : "transparent", borderRadius: logoDarkBg ? 6 : 0, padding: logoDarkBg ? "5px 10px" : 0, marginBottom: 16 }}>
-            <img src={eventLogo} alt="" style={{ height: 28, maxWidth: 90, objectFit: "contain", display: "block" }} />
-          </div>
-        ) : (
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: theme.accent, opacity: 0.7, marginBottom: 16 }}>{brand}</span>
-        )}
+        <LogoOrBrand eventLogo={eventLogo} logoDarkBg={logoDarkBg} brand={brand} theme={theme} logoH={sz.logoH * 0.8} />
 
-        <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: eventTitle?.length > 35 ? 28 : 36, fontWeight: 400, lineHeight: 1.15, color: theme.text, margin: "0 40px 8px", fontStyle: "italic" }}>
+        <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: tSz, fontWeight: 400, lineHeight: 1.15, color: theme.text, margin: `10px 0 ${sessionTitle ? 4 : 10}px`, fontStyle: "italic" }}>
           {eventTitle || "Event Title"}
         </h2>
-        {sessionTitle && <div style={{ fontSize: 13, color: theme.muted, margin: "0 40px 16px", fontWeight: 500 }}>{sessionTitle}</div>}
+        {sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginBottom: 10, fontWeight: 500 }}>{sessionTitle}</div>}
+        {eventDate && <div style={{ fontSize: sz.dateSz, color: theme.muted, marginBottom: 12 }}>{eventDate}</div>}
 
-        {eventDate && <div style={{ fontSize: 12, color: theme.muted, marginBottom: 20 }}>{eventDate}</div>}
-
-        <div style={{ display: "flex", gap: count === 1 ? 0 : 20, alignItems: "flex-start", justifyContent: "center", marginBottom: 24 }}>
-          {speakers.filter((s) => s?.name).map((speaker, i) => (
-            <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, flex: count > 1 ? 1 : undefined, width: count > 1 ? 0 : undefined }}>
-              <div style={{ width: photoSz, height: photoSz, borderRadius: photoRadius, background: theme.soft, border: `3px solid ${theme.accent}`, overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {speaker.photo ? <img src={speaker.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
-                  <div style={{ fontSize: 30, color: theme.accent, opacity: 0.3, fontFamily: "'DM Serif Display',serif" }}>{speaker.name?.charAt(0)?.toUpperCase() || "?"}</div>}
-              </div>
-              <div style={{ textAlign: "center", minHeight: 36 }}>
-                <div style={{ fontSize: count === 1 ? 16 : 13, fontWeight: 700, color: theme.text }}>{speaker.name}</div>
-                {speaker.title && <div style={{ fontSize: 11, color: theme.accent, fontWeight: 500, marginTop: 1 }}>{speaker.title}</div>}
-                {speaker.company && <div style={{ fontSize: 10, color: theme.muted, marginTop: 1 }}>{speaker.company}</div>}
-              </div>
-            </div>
-          ))}
+        <div style={{ marginBottom: 14 }}>
+          <SpeakerPhotos speakers={speakers} count={count} photoSz={sz.photoSz} photoRadius={photoRadius} theme={theme} nameSz={sz.nameSz} roleSz={sz.roleSz} companySz={sz.companySz} photoGap={sz.photoGap} />
         </div>
 
-        <div style={{ background: ctaColor, color: ctaTextColor, padding: "10px 28px", borderRadius: 10, fontSize: 13, fontWeight: 700, letterSpacing: "-0.01em" }}>
+        <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>
           {cta || "Register now"}
         </div>
       </div>
     );
   }
 
-  // ── BOLD BANNER LAYOUT ──
+  // ── BOLD BANNER ──
   if (layout === "bold") {
     return (
       <div style={{ width: SW, height: SH, background: theme.accent, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
         <div style={{ position: "absolute", top: -80, right: -80, width: 300, height: 300, borderRadius: "50%", background: "rgba(255,255,255,0.07)" }} />
-        <div style={{ position: "absolute", bottom: -60, left: -40, width: 250, height: 250, borderRadius: "50%", background: "rgba(0,0,0,0.05)" }} />
 
-        <div style={{ padding: "32px 36px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 999, padding: "4px 14px", fontSize: 11, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: "rgba(255,255,255,0.9)" }}>
+        <div style={{ padding: `${sz.padY}px ${sz.pad}px 0`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 999, padding: `3px ${sz.pad * 0.4}px`, fontSize: sz.pillSz, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: "rgba(255,255,255,0.9)" }}>
             {tagLabel || (count > 1 ? "Speakers" : "Speaker")}
           </div>
-          {eventDate && <div style={{ fontSize: 12, color: ct, opacity: 0.6 }}>{eventDate}</div>}
+          {eventDate && <div style={{ fontSize: sz.dateSz, color: ct, opacity: 0.6 }}>{eventDate}</div>}
         </div>
 
-        <div style={{ flex: 1, padding: "20px 36px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: eventTitle?.length > 35 ? 30 : 42, fontWeight: 400, lineHeight: 1.12, color: ct, margin: "0 0 8px", fontStyle: "italic" }}>
+        <div style={{ flex: 1, padding: `${sz.padY * 0.5}px ${sz.pad}px`, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: tSz * 1.1, fontWeight: 400, lineHeight: 1.12, color: ct, margin: `0 0 ${sessionTitle ? 4 : 12}px`, fontStyle: "italic" }}>
             {eventTitle || "Event Title"}
           </h2>
-          {sessionTitle && <div style={{ fontSize: 13, color: ct, opacity: 0.7, marginBottom: 20, fontWeight: 500 }}>{sessionTitle}</div>}
+          {sessionTitle && <div style={{ fontSize: sz.sessionSize, color: ct, opacity: 0.7, marginBottom: 12, fontWeight: 500 }}>{sessionTitle}</div>}
 
-          <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-            {speakers.filter((s) => s?.name).map((speaker, i) => (
-              <div key={i} style={{ display: "flex", alignItems: count === 1 ? "center" : "center", flexDirection: count === 1 ? "row" : "column", gap: count === 1 ? 14 : 6, flex: count > 1 ? 1 : undefined, width: count > 1 ? 0 : undefined }}>
-                <div style={{ width: photoSz, height: photoSz, borderRadius: photoRadius, background: "rgba(255,255,255,0.1)", border: "2px solid rgba(255,255,255,0.3)", overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {speaker.photo ? <img src={speaker.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
-                    <div style={{ fontSize: 24, color: ct, opacity: 0.4, fontFamily: "'DM Serif Display',serif" }}>{speaker.name?.charAt(0)?.toUpperCase() || "?"}</div>}
-                </div>
-                <div style={{ textAlign: count === 1 ? "left" : "center", minHeight: 36 }}>
-                  <div style={{ fontSize: count === 1 ? 16 : 12, fontWeight: 700, color: ct }}>{speaker.name}</div>
-                  {speaker.title && <div style={{ fontSize: 11, color: ct, opacity: 0.7, marginTop: 1 }}>{speaker.title}</div>}
-                  {speaker.company && <div style={{ fontSize: 10, color: ct, opacity: 0.5, marginTop: 1 }}>{speaker.company}</div>}
-                </div>
-              </div>
-            ))}
-          </div>
+          <SpeakerPhotos speakers={speakers} count={count} photoSz={sz.photoSz} photoRadius={photoRadius} theme={theme} nameSz={sz.nameSz} roleSz={sz.roleSz} companySz={sz.companySz} photoGap={sz.photoGap} ct={ct} />
         </div>
 
-        <div style={{ padding: "0 36px 28px", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(255,255,255,0.18)", paddingTop: 16, margin: "0 36px" }}>
-          <div style={{ background: "rgba(255,255,255,0.95)", color: theme.accent, padding: "8px 22px", borderRadius: 8, fontSize: 12, fontWeight: 700 }}>
+        <div style={{ padding: `0 ${sz.pad}px ${sz.padY}px`, display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(255,255,255,0.18)", paddingTop: 12, margin: `0 ${sz.pad}px` }}>
+          <div style={{ background: "rgba(255,255,255,0.95)", color: theme.accent, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>
             {cta || "Register now"}
           </div>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: ct, opacity: 0.6 }}>{brand}</span>
+          <span style={{ fontSize: sz.brandSz, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: ct, opacity: 0.6 }}>{brand}</span>
         </div>
       </div>
     );
   }
 
-  // ── MINIMAL LAYOUT ──
+  // ── MINIMAL ──
   if (layout === "minimal") {
     return (
-      <div style={{ width: SW, height: SH, background: theme.card, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", justifyContent: "center", boxSizing: "border-box", padding: "40px 44px" }}>
+      <div style={{ width: SW, height: SH, background: theme.card, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", justifyContent: "center", boxSizing: "border-box", padding: `${sz.padY}px ${sz.pad + 8}px` }}>
         <div style={{ position: "absolute", top: 0, left: 0, width: 5, height: SH, background: theme.accent }} />
 
-        {eventDate && <div style={{ fontSize: 11, color: theme.muted, marginBottom: 12, fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>{eventDate}</div>}
+        {eventDate && <div style={{ fontSize: sz.dateSz, color: theme.muted, marginBottom: 8, fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>{eventDate}</div>}
 
-        <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: eventTitle?.length > 35 ? 28 : 38, fontWeight: 400, lineHeight: 1.15, color: theme.text, margin: "0 0 8px", fontStyle: "italic" }}>
+        <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: tSz, fontWeight: 400, lineHeight: 1.15, color: theme.text, margin: `0 0 ${sessionTitle ? 4 : 12}px`, fontStyle: "italic" }}>
           {eventTitle || "Event Title"}
         </h2>
-        {sessionTitle && <div style={{ fontSize: 13, color: theme.muted, marginBottom: 20, fontWeight: 500 }}>{sessionTitle}</div>}
+        {sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginBottom: 12, fontWeight: 500 }}>{sessionTitle}</div>}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 28 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
           {speakers.filter((s) => s?.name).map((speaker, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <div style={{ width: Math.min(photoSz, 64), height: Math.min(photoSz, 64), borderRadius: photoRadius, background: theme.soft, border: `2px solid ${theme.accent}`, overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: Math.min(sz.photoSz, 56), height: Math.min(sz.photoSz, 56), borderRadius: photoRadius, background: theme.soft, border: `2px solid ${theme.accent}`, overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {speaker.photo ? <img src={speaker.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
-                  <div style={{ fontSize: 20, color: theme.accent, opacity: 0.3 }}>{speaker.name?.charAt(0)?.toUpperCase() || "?"}</div>}
+                  <div style={{ fontSize: 18, color: theme.accent, opacity: 0.3 }}>{speaker.name?.charAt(0)?.toUpperCase() || "?"}</div>}
               </div>
               <div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: theme.text }}>{speaker.name}</div>
-                <div style={{ fontSize: 12, color: theme.muted }}>{[speaker.title, speaker.company].filter(Boolean).join(" · ")}</div>
+                <div style={{ fontSize: sz.nameSz * 0.85, fontWeight: 700, color: theme.text }}>{speaker.name}</div>
+                <div style={{ fontSize: sz.companySz, color: theme.muted }}>{[speaker.title, speaker.company].filter(Boolean).join(" · ")}</div>
               </div>
             </div>
           ))}
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ background: ctaColor, color: ctaTextColor, padding: "9px 22px", borderRadius: 8, fontSize: 12, fontWeight: 700 }}>
+          <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>
             {cta || "Register now"}
           </div>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: theme.accent, opacity: 0.7 }}>{brand}</span>
+          <span style={{ fontSize: sz.brandSz, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: theme.accent, opacity: 0.7 }}>{brand}</span>
         </div>
       </div>
     );
   }
 
-  // ── CLASSIC LAYOUT (default) ──
+  // ── CLASSIC (default) ──
   return (
     <div style={{ width: SW, height: SH, background: theme.card, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
-      <div style={{ position: "absolute", top: 0, left: 0, width: SW, height: 6, background: theme.accent }} />
+      <div style={{ position: "absolute", top: 0, left: 0, width: SW, height: sz.barH, background: theme.accent }} />
       <div style={{ position: "absolute", top: -80, right: -80, width: 300, height: 300, borderRadius: "50%", background: theme.accent, opacity: 0.06 }} />
-      <div style={{ position: "absolute", bottom: -60, left: -40, width: 220, height: 220, borderRadius: "50%", border: `2px solid ${theme.accent}`, opacity: 0.05 }} />
 
-      <div style={{ padding: "28px 36px 0", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div>
-          <div style={{ display: "inline-flex", alignItems: "center", background: theme.soft, border: `1px solid ${theme.border}`, borderRadius: 999, padding: "4px 14px", fontSize: 11, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: theme.accent }}>
-            {tagLabel || (count > 1 ? "Speakers" : "Speaker")}
-          </div>
+      {/* Header: tag + logo */}
+      <div style={{ padding: `${sz.padY}px ${sz.pad}px 0`, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
+        <div style={{ display: "inline-flex", alignItems: "center", background: theme.soft, border: `1px solid ${theme.border}`, borderRadius: 999, padding: `3px ${sz.pad * 0.4}px`, fontSize: sz.pillSz, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: theme.accent }}>
+          {tagLabel || (count > 1 ? "Speakers" : "Speaker")}
         </div>
-        {eventLogo ? (
-          <div style={{ background: logoDarkBg ? "#1a1a2e" : "transparent", borderRadius: logoDarkBg ? 6 : 0, padding: logoDarkBg ? "5px 10px" : 0 }}>
-            <img src={eventLogo} alt="" style={{ height: 32, maxWidth: 100, objectFit: "contain", display: "block" }} />
-          </div>
-        ) : (
-          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: theme.accent, opacity: 0.85 }}>{brand}</span>
-        )}
+        <LogoOrBrand eventLogo={eventLogo} logoDarkBg={logoDarkBg} brand={brand} theme={theme} logoH={sz.logoH} />
       </div>
 
-      <div style={{ padding: "16px 36px 0", maxHeight: SH * 0.3, overflow: "hidden" }}>
-        <div style={{ width: 50, height: 3, background: theme.accent, borderRadius: 2, marginBottom: 14 }} />
-        <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: eventTitle?.length > 40 ? 26 : eventTitle?.length > 25 ? 32 : 38, fontWeight: 400, lineHeight: 1.15, color: theme.text, margin: 0, fontStyle: "italic" }}>
+      {/* Title (capped height) */}
+      <div style={{ padding: `10px ${sz.pad}px 0`, maxHeight: SH * 0.28, overflow: "hidden", flexShrink: 0 }}>
+        <div style={{ width: sz.accentBarW, height: sz.accentBarH, background: theme.accent, borderRadius: 2, marginBottom: 10 }} />
+        <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: tSz, fontWeight: 400, lineHeight: 1.15, color: theme.text, margin: 0, fontStyle: "italic" }}>
           {eventTitle || "Event Title"}
         </h2>
-        {sessionTitle && <div style={{ fontSize: 13, color: theme.muted, marginTop: 8, fontWeight: 500 }}>{sessionTitle}</div>}
+        {sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginTop: 6, fontWeight: 500 }}>{sessionTitle}</div>}
       </div>
 
-      <div style={{ flex: 1, padding: "16px 36px", display: "flex", gap: count === 1 ? 0 : 16, alignItems: "flex-start", justifyContent: count === 1 ? "flex-start" : "center", paddingTop: 20 }}>
-        {speakers.filter((s) => s?.name).map((speaker, i) => (
-          <div key={i} style={{ display: "flex", flexDirection: count === 1 ? "row" : "column", alignItems: count === 1 ? "center" : "center", gap: count === 1 ? 18 : 8, flex: count === 1 ? undefined : 1, width: count === 1 ? undefined : 0 }}>
-            <div style={{ width: photoSz, height: photoSz, borderRadius: photoRadius, background: theme.soft, border: `3px solid ${theme.accent}`, overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {speaker.photo ? <img src={speaker.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
-                <div style={{ fontSize: count === 1 ? 36 : 28, color: theme.accent, opacity: 0.3, fontFamily: "'DM Serif Display',serif" }}>{speaker.name?.charAt(0)?.toUpperCase() || "?"}</div>}
-            </div>
-            <div style={{ textAlign: count === 1 ? "left" : "center", minHeight: 40 }}>
-              <div style={{ fontSize: count === 1 ? 18 : count === 2 ? 15 : 13, fontWeight: 700, color: theme.text, lineHeight: 1.25 }}>{speaker.name}</div>
-              {speaker.title && <div style={{ fontSize: count === 1 ? 13 : 11, color: theme.accent, fontWeight: 500, marginTop: 2, lineHeight: 1.3 }}>{speaker.title}</div>}
-              {speaker.company && <div style={{ fontSize: count === 1 ? 12 : 10, color: theme.muted, marginTop: 1, lineHeight: 1.3 }}>{speaker.company}</div>}
-            </div>
-          </div>
-        ))}
+      {/* Speakers */}
+      <div style={{ flex: 1, padding: `12px ${sz.pad}px`, display: "flex", alignItems: "flex-start", paddingTop: 14 }}>
+        <SpeakerPhotos speakers={speakers} count={count} photoSz={sz.photoSz} photoRadius={photoRadius} theme={theme} nameSz={sz.nameSz} roleSz={sz.roleSz} companySz={sz.companySz} photoGap={sz.photoGap} />
       </div>
 
-      <div style={{ padding: "0 36px 24px", borderTop: `1px solid ${theme.border}`, paddingTop: 16, margin: "0 36px" }}>
-        {eventDate && <div style={{ fontSize: 11, color: theme.muted, marginBottom: 10, fontWeight: 500 }}>{eventDate}</div>}
+      {/* Footer */}
+      <div style={{ padding: `0 ${sz.pad}px ${sz.padY * 0.7}px`, borderTop: `1px solid ${theme.border}`, paddingTop: 10, margin: `0 ${sz.pad}px`, flexShrink: 0 }}>
+        {eventDate && <div style={{ fontSize: sz.dateSz, color: theme.muted, marginBottom: 6, fontWeight: 500 }}>{eventDate}</div>}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ background: ctaColor, color: ctaTextColor, padding: "8px 22px", borderRadius: 8, fontSize: 12, fontWeight: 700 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>
               {cta || "Register now"}
             </div>
-            {regUrl && <span style={{ fontSize: 10, color: theme.muted, opacity: 0.7 }}>{regUrl.replace(/^https?:\/\//, "")}</span>}
+            {regUrl && <span style={{ fontSize: Math.max(8, sz.dateSz - 2), color: theme.muted, opacity: 0.7 }}>{regUrl.replace(/^https?:\/\//, "")}</span>}
           </div>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: theme.accent, opacity: 0.85 }}>{brand}</span>
+          <span style={{ fontSize: sz.brandSz, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: theme.accent, opacity: 0.85 }}>{brand}</span>
         </div>
       </div>
     </div>
