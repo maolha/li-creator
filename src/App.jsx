@@ -34,6 +34,7 @@ import {
   Globe,
   Sun,
   Moon,
+  ClipboardCopy,
 } from "lucide-react";
 
 import { getThemes, contrastText, makeCustomVariants } from "./utils/themes";
@@ -296,6 +297,26 @@ export default function App() {
       setError(`Failed to regenerate slide: ${e.message}`);
     }
     setRegeneratingSlide(null);
+  }
+
+  // Copy slide as image to clipboard
+  const [copiedSlide, setCopiedSlide] = useState(false);
+  async function copySlideToClipboard() {
+    if (!hiddenSlideRef.current) return;
+    try {
+      const dataUrl = await toPng(hiddenSlideRef.current, {
+        width: SS, height: SS, pixelRatio: 2, cacheBust: true,
+      });
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      await navigator.clipboard.write([
+        new ClipboardItem({ "image/png": blob }),
+      ]);
+      setCopiedSlide(true);
+      setTimeout(() => setCopiedSlide(false), 2000);
+    } catch {
+      setError("Copy failed. Your browser may not support clipboard image write.");
+    }
   }
 
   // PNG Export
@@ -905,21 +926,33 @@ export default function App() {
                   </div>
 
                   {/* Export buttons */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                  <button
+                    onClick={copySlideToClipboard}
+                    style={{
+                      ...exportBtnStyle(T),
+                      background: copiedSlide ? T.accent : "transparent",
+                      color: copiedSlide ? contrastText(T.accent) : T.text,
+                      borderColor: copiedSlide ? T.accent : T.border,
+                    }}
+                  >
+                    {copiedSlide ? <Check size={14} /> : <ClipboardCopy size={14} />}
+                    {copiedSlide ? "Copied to clipboard!" : "Copy slide to clipboard"}
+                  </button>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
                     <button onClick={exportCurrentPng} disabled={exportingPng} style={exportBtnStyle(T)}>
                       {exportingPng ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <ImageDown size={14} />}
-                      {exportingPng ? "Exporting..." : "PNG"}
+                      {exportingPng ? "..." : "PNG"}
                     </button>
                     <button onClick={exportAllPngsZip} disabled={exportingAll} style={exportBtnStyle(T)}>
                       {exportingAll ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Archive size={14} />}
-                      {exportingAll ? "Zipping..." : "All PNGs (ZIP)"}
+                      {exportingAll ? "..." : "ZIP All"}
+                    </button>
+                    <button onClick={downloadPDF} style={exportBtnStyle(T)}>
+                      <Download size={14} /> PDF
                     </button>
                   </div>
-                  <button onClick={downloadPDF} style={exportBtnStyle(T)}>
-                    <Download size={14} /> Download PDF
-                  </button>
                   <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.5, textAlign: "center" }}>
-                    PDF opens print dialog — select <strong style={{ color: T.text }}>Save as PDF</strong>. PNG exports at 2x resolution (1080x1080).
+                    Copy pastes directly into LinkedIn. PNG/PDF export at 2x resolution (1080x1080).
                   </p>
                 </>
               )}
