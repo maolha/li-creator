@@ -17,6 +17,8 @@ import {
 
 export default function SettingsPanel({ T, user, profile, onSave, apiKey, onApiKeySave }) {
   const [localProfile, setLocalProfile] = useState({
+    linkedinHeadline: "",
+    linkedinAbout: "",
     products: "",
     narratives: "",
     beliefs: "",
@@ -94,6 +96,31 @@ export default function SettingsPanel({ T, user, profile, onSave, apiKey, onApiK
           style={{ ...inputStyle(T), fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }}
         />
         <p style={hintStyle(T)}>Your key is encrypted and stored securely. Never shared.</p>
+      </Section>
+
+      {/* About Me */}
+      <Section T={T} icon={User} title="About Me">
+        <div>
+          <label style={labelStyle(T)}>LinkedIn Headline</label>
+          <input
+            type="text"
+            value={localProfile.linkedinHeadline}
+            onChange={(e) => updateField("linkedinHeadline", e.target.value)}
+            placeholder="e.g. CEO at PAIA | AI for Swiss Financial Services | Building the future of compliance"
+            style={inputStyle(T)}
+          />
+        </div>
+        <div>
+          <label style={labelStyle(T)}>LinkedIn About / Bio</label>
+          <textarea
+            value={localProfile.linkedinAbout}
+            onChange={(e) => updateField("linkedinAbout", e.target.value)}
+            placeholder="Paste your LinkedIn About section here. This helps the AI write in your voice, reference your experience, and match your personal brand."
+            rows={6}
+            style={textareaStyle(T)}
+          />
+        </div>
+        <p style={hintStyle(T)}>Copy from your LinkedIn profile. Used to personalize tone, reference your expertise, and keep content on-brand.</p>
       </Section>
 
       {/* User Context */}

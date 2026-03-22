@@ -292,12 +292,14 @@ export default function App() {
     const p = userProfile?.profile;
     if (p) {
       const parts = [];
+      if (p.linkedinHeadline?.trim()) parts.push(`AUTHOR HEADLINE: ${p.linkedinHeadline.trim()}`);
+      if (p.linkedinAbout?.trim()) parts.push(`AUTHOR BIO: ${p.linkedinAbout.trim()}`);
       if (p.products?.trim()) parts.push(`PRODUCTS/SERVICES: ${p.products.trim()}`);
       if (p.narratives?.trim()) parts.push(`KEY NARRATIVES: ${p.narratives.trim()}`);
       if (p.beliefs?.trim()) parts.push(`BELIEFS & VALUES: ${p.beliefs.trim()}`);
       if (p.goals?.trim()) parts.push(`CONTENT GOALS: ${p.goals.trim()}`);
       if (parts.length) {
-        userContext = `\n\nUSER CONTEXT (use this to personalize the content):\n${parts.join("\n")}`;
+        userContext = `\n\nUSER CONTEXT (use this to personalize content, match the author's voice, and reference their expertise naturally):\n${parts.join("\n")}`;
       }
     }
     return base + toneInstructions + audienceInstructions + userContext;
