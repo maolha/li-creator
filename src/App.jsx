@@ -58,7 +58,7 @@ import {
   TEXT_POST_PROMPT,
 } from "./utils/prompts";
 import { ScaledSlide, SlideInner } from "./components/SlideRenderer";
-import { ScaledSpeakerSlide, SpeakerSlideInner } from "./components/SpeakerSlide";
+import { ScaledSpeakerSlide, SpeakerSlideInner, SPEAKER_LAYOUTS } from "./components/SpeakerSlide";
 import { buildPdf } from "./utils/buildPdf";
 import { downloadSinglePng, downloadAllPngs } from "./utils/exportPng";
 import { themeFromAccent } from "./utils/colorExtractor";
@@ -1268,6 +1268,10 @@ Return the same JSON structure with just the post object updated.`;
                     <label style={{ ...labelStyle(T), marginBottom: 4 }}><Globe size={12} /> Event URL (for branding)</label>
                     <input type="text" value={speakerData.eventUrl || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, eventUrl: e.target.value }))} placeholder="https://event-website.com" style={inputStyle(T)} />
                   </div>
+                  <div>
+                    <label style={{ ...labelStyle(T), marginBottom: 4 }}>Session / Talk Title (optional)</label>
+                    <input type="text" value={speakerData.sessionTitle || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, sessionTitle: e.target.value }))} placeholder="e.g. The Future of AI in Banking" style={inputStyle(T)} />
+                  </div>
                 </div>
 
                 {/* Speakers */}
@@ -1496,6 +1500,73 @@ Return the same JSON structure with just the post object updated.`;
                     {copiedSlide ? <Check size={14} /> : <ClipboardCopy size={14} />}
                     {copiedSlide ? "Copied to clipboard!" : "Copy to clipboard"}
                   </button>
+                  {/* Style customization */}
+                  <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>Customize</span>
+                    {/* Layout */}
+                    <div style={{ display: "flex", gap: 6 }}>
+                      {Object.entries(SPEAKER_LAYOUTS).map(([id, label]) => (
+                        <button
+                          key={id}
+                          onClick={() => setSpeakerData((p) => ({ ...p, style: { ...p.style, layout: id } }))}
+                          style={{
+                            flex: 1, padding: "7px 4px", borderRadius: 8, fontSize: 11, fontWeight: 600,
+                            border: `1px solid ${(speakerData.style?.layout || "classic") === id ? T.accent : T.border}`,
+                            background: (speakerData.style?.layout || "classic") === id ? T.soft : "transparent",
+                            color: (speakerData.style?.layout || "classic") === id ? T.accent : T.muted,
+                            cursor: "pointer", fontFamily: "'Inter', sans-serif", textAlign: "center",
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    {/* CTA color + Photo shape */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                      <div>
+                        <label style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4, display: "block" }}>CTA Color</label>
+                        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                          <input
+                            type="color"
+                            value={speakerData.style?.ctaColor || T.accent}
+                            onChange={(e) => setSpeakerData((p) => ({ ...p, style: { ...p.style, ctaColor: e.target.value } }))}
+                            style={{ width: 32, height: 32, border: "none", borderRadius: 6, cursor: "pointer", padding: 0, background: "transparent" }}
+                          />
+                          <input
+                            type="text"
+                            value={speakerData.style?.ctaColor || T.accent}
+                            onChange={(e) => setSpeakerData((p) => ({ ...p, style: { ...p.style, ctaColor: e.target.value } }))}
+                            style={{ ...inputStyle(T), fontSize: 12, fontFamily: "'JetBrains Mono', monospace", flex: 1 }}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4, display: "block" }}>Photo Shape</label>
+                        <div style={{ display: "flex", gap: 4 }}>
+                          {[
+                            { id: "circle", label: "O" },
+                            { id: "rounded", label: "▢" },
+                            { id: "square", label: "□" },
+                          ].map((s) => (
+                            <button
+                              key={s.id}
+                              onClick={() => setSpeakerData((p) => ({ ...p, style: { ...p.style, photoShape: s.id } }))}
+                              style={{
+                                flex: 1, padding: "8px 0", borderRadius: 6, fontSize: 14,
+                                border: `1px solid ${(speakerData.style?.photoShape || "circle") === s.id ? T.accent : T.border}`,
+                                background: (speakerData.style?.photoShape || "circle") === s.id ? T.soft : "transparent",
+                                color: (speakerData.style?.photoShape || "circle") === s.id ? T.accent : T.muted,
+                                cursor: "pointer", textAlign: "center",
+                              }}
+                            >
+                              {s.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                     <button onClick={exportCurrentPng} disabled={exportingPng} style={exportBtnStyle(T)}>
                       {exportingPng ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <ImageDown size={14} />}
