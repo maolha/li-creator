@@ -138,12 +138,19 @@ export default function App() {
   const [activeTab, setActiveTab] = useState(() => loadState("activeTab", "slides"));
   const [tone, setTone] = useState(() => loadState("tone", "professional"));
   const [audience, setAudience] = useState(() => loadState("audience", "general"));
-  const [speakerData, setSpeakerData] = useState(() => loadState("speakerData", {
-    eventTitle: "",
-    eventDate: "",
-    cta: "",
-    speakers: [{ name: "", title: "", company: "", photo: null }],
-  }));
+  const [speakerData, setSpeakerData] = useState(() => {
+    const saved = loadState("speakerData", null);
+    const defaults = { eventTitle: "", eventDate: "", cta: "", eventUrl: "", speakers: [{ name: "", title: "", company: "", photo: null, photoUrl: "" }] };
+    if (!saved) return defaults;
+    // Ensure speakers array is valid
+    return {
+      ...defaults,
+      ...saved,
+      speakers: Array.isArray(saved.speakers) && saved.speakers.length > 0
+        ? saved.speakers.map((s) => ({ name: "", title: "", company: "", photo: null, photoUrl: "", ...s }))
+        : defaults.speakers,
+    };
+  });
 
   // Auth & user state
   const [user, setUser] = useState(null);
@@ -751,7 +758,7 @@ Return the same JSON structure with just the post object updated.`;
 
   const slide = slides?.[cur];
   const isSpeakerMode = contentType === "speaker";
-  const hasSpeakerContent = isSpeakerMode && speakerData.eventTitle?.trim() && speakerData.speakers.some((s) => s.name?.trim());
+  const hasSpeakerContent = isSpeakerMode && speakerData?.eventTitle?.trim() && Array.isArray(speakerData?.speakers) && speakerData.speakers.some((s) => s?.name?.trim());
   const hasContent = isSpeakerMode ? hasSpeakerContent : (input.trim() || files.length > 0);
   const hasSlides = slides?.length > 0;
   const hasOutput = hasSlides || post || (isSpeakerMode && hasSpeakerContent);
@@ -1219,11 +1226,11 @@ Return the same JSON structure with just the post object updated.`;
                 </div>
 
                 {/* Speakers */}
-                {speakerData.speakers.map((speaker, si) => (
+                {(speakerData.speakers || []).map((speaker, si) => (
                   <div key={si} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontSize: 12, fontWeight: 700, color: T.accent }}>Speaker {si + 1}</span>
-                      {speakerData.speakers.length > 1 && (
+                      {(speakerData.speakers || []).length > 1 && (
                         <button onClick={() => setSpeakerData((p) => ({ ...p, speakers: p.speakers.filter((_, j) => j !== si) }))} style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 0 }}>
                           <X size={14} />
                         </button>
@@ -1279,12 +1286,12 @@ Return the same JSON structure with just the post object updated.`;
                   </div>
                 ))}
 
-                {speakerData.speakers.length < 3 && (
+                {(speakerData.speakers || []).length < 3 && (
                   <button
                     onClick={() => setSpeakerData((p) => ({ ...p, speakers: [...p.speakers, { name: "", title: "", company: "", photo: null }] }))}
                     style={{ background: T.soft, border: `1px solid ${T.border}`, borderRadius: 10, padding: "10px", cursor: "pointer", color: T.accent, fontSize: 12, fontWeight: 600, fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}
                   >
-                    <UserCircle size={14} /> Add Speaker ({speakerData.speakers.length}/3)
+                    <UserCircle size={14} /> Add Speaker ({(speakerData.speakers || []).length}/3)
                   </button>
                 )}
               </div>

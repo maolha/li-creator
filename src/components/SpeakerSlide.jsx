@@ -3,9 +3,10 @@ import { contrastText } from "../utils/themes";
 const SS = 540;
 
 export function SpeakerSlideInner({ data, T, brand }) {
-  const { eventTitle, eventDate, cta, speakers, eventLogo } = data;
+  const { eventTitle, eventDate, cta, eventLogo } = data || {};
+  const speakers = Array.isArray(data?.speakers) ? data.speakers : [];
   const ct = contrastText(T.accent);
-  const count = speakers.filter((s) => s.name).length || 1;
+  const count = speakers.filter((s) => s?.name).length || 1;
 
   return (
     <div
@@ -71,7 +72,7 @@ export function SpeakerSlideInner({ data, T, brand }) {
         alignItems: "center",
         justifyContent: count === 1 ? "flex-start" : "center",
       }}>
-        {speakers.filter((s) => s.name).map((speaker, i) => (
+        {speakers.filter((s) => s?.name).map((speaker, i) => (
           <div key={i} style={{
             display: "flex",
             flexDirection: count === 1 ? "row" : "column",
