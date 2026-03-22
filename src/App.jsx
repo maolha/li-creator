@@ -41,6 +41,9 @@ import {
   LogIn,
   LogOut,
   History,
+  Save,
+  CopyPlus,
+  Hash,
 } from "lucide-react";
 
 import { getThemes, contrastText, makeCustomVariants } from "./utils/themes";
@@ -1505,7 +1508,47 @@ Return the same JSON structure with just the post object updated.`;
                         placeholder="tag1, tag2, tag3"
                         style={{ ...inputStyle(T), fontSize: 13, color: T.accent }}
                       />
-                      <p style={{ fontSize: 10, color: T.muted, marginTop: 4, opacity: 0.7 }}>Separate with commas</p>
+                      {/* Hashtag group picker */}
+                      {userProfile?.profile?.hashtagGroups?.length > 0 && (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 8 }}>
+                          {userProfile.profile.hashtagGroups.map((group, gi) => (
+                            <button
+                              key={gi}
+                              onClick={() => {
+                                const existing = post.hashtags.map((h) => h.replace(/^#/, ""));
+                                const merged = [...new Set([...existing, ...group.tags])];
+                                updatePostField("hashtags", merged);
+                              }}
+                              style={{
+                                background: T.soft,
+                                border: `1px solid ${T.border}`,
+                                borderRadius: 8,
+                                padding: "5px 10px",
+                                fontSize: 11,
+                                fontWeight: 600,
+                                color: T.accent,
+                                cursor: "pointer",
+                                fontFamily: "'DM Sans', sans-serif",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 4,
+                                transition: "all 0.2s",
+                              }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = T.accent; e.currentTarget.style.color = contrastText(T.accent); }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = T.soft; e.currentTarget.style.color = T.accent; }}
+                              title={group.tags.map((t) => `#${t}`).join(" ")}
+                            >
+                              <Hash size={11} />
+                              {group.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      <p style={{ fontSize: 10, color: T.muted, marginTop: 4, opacity: 0.7 }}>
+                        {userProfile?.profile?.hashtagGroups?.length > 0
+                          ? "Click a group to add its tags. Edit manually above."
+                          : "Separate with commas. Save groups in Settings."}
+                      </p>
                     </div>
                   </div>
 
