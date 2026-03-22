@@ -766,16 +766,20 @@ Return the same JSON structure with just the post object updated.`;
     if (!user || savingToLibrary) return;
     setSavingToLibrary(true);
     try {
+      // Save custom theme definition if using one
+      const customThemeDef = customThemes[theme] || null;
       await saveCreation(user.uid, {
         title: title || speakerData?.eventTitle || "Untitled",
         slides: slides || [],
         post: post || null,
         contentType,
         theme,
+        brandMode,
         brand,
         tone,
         audience,
         speakerData: isSpeakerMode ? speakerData : undefined,
+        customThemeDef,
       });
       const updated = await getCreations(user.uid);
       setCreations(updated);
@@ -789,16 +793,19 @@ Return the same JSON structure with just the post object updated.`;
 
   async function saveAsCopy() {
     if (!user) return;
+    const customThemeDef = customThemes[theme] || null;
     await saveCreation(user.uid, {
       title: (title || speakerData?.eventTitle || "Untitled") + " (copy)",
       slides: slides || [],
       post: post || null,
       contentType,
       theme,
+      brandMode,
       brand,
       tone,
       audience,
       speakerData: isSpeakerMode ? speakerData : undefined,
+      customThemeDef,
     });
     const updated = await getCreations(user.uid);
     setCreations(updated);
@@ -1023,10 +1030,15 @@ Return the same JSON structure with just the post object updated.`;
             creations={creations}
             loading={loadingHistory}
             onLoad={(c) => {
+              // Restore custom theme if saved with creation
+              if (c.customThemeDef && c.theme) {
+                setCustomThemes((prev) => ({ ...prev, [c.theme]: c.customThemeDef }));
+              }
               setSlides(c.slides?.length ? c.slides : null);
               setTitle(c.title || "");
               setPost(c.post || null);
               if (c.contentType) setContentType(c.contentType);
+              if (c.brandMode) setBrandMode(c.brandMode);
               if (c.theme) setTheme(c.theme);
               if (c.brand) setBrand(c.brand);
               if (c.tone) setTone(c.tone);
