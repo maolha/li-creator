@@ -173,9 +173,9 @@ export default function App() {
   const hiddenSlideRef = useRef();
 
   // App shell background (fixed dark/light)
-  const appBg = brandMode === "dark" ? "#08090D" : "#F5F4F0";
-  const appCard = brandMode === "dark" ? "#0F1117" : "#FFFFFF";
-  const appText = brandMode === "dark" ? "#F0F0F8" : "#1A1A2E";
+  // App shell uses A (app theme) for bg/text
+  const appBg = A.bg;
+  const appText = A.text;
 
   // Output preset (accent colors for slides + UI accents)
   const builtInPresets = getThemes(brandMode);
@@ -783,7 +783,7 @@ Return the same JSON structure with just the post object updated.`;
         minHeight: "100vh",
         background: appBg,
         color: appText,
-        fontFamily: "'DM Sans', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         transition: "background 0.4s, color 0.4s",
       }}
     >
@@ -799,8 +799,9 @@ Return the same JSON structure with just the post object updated.`;
       {/* HEADER */}
       <header
         style={{
-          borderBottom: `1px solid ${T.border}`,
-          background: `${appCard}CC`,
+          borderBottom: `1px solid ${A.border}`,
+          background: `${A.card}99`,
+          boxShadow: "0 20px 40px rgba(229,226,225,0.06)",
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
           position: "sticky",
@@ -825,22 +826,22 @@ Return the same JSON structure with just the post object updated.`;
                 width: 36,
                 height: 36,
                 borderRadius: 10,
-                background: T.gradient || T.accent,
+                background: A.gradient,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: 18,
-                color: ct,
+                color: "#fff",
                 fontWeight: 700,
               }}
             >
               &#9670;
             </div>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.2 }}>
+              <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: 18, fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.2 }}>
                 ContentForge
               </div>
-              <div style={{ fontSize: 11, color: T.muted, lineHeight: 1.2 }}>
+              <div style={{ fontSize: 11, color: A.muted, lineHeight: 1.2 }}>
                 LinkedIn Content Studio
               </div>
             </div>
@@ -917,7 +918,7 @@ Return the same JSON structure with just the post object updated.`;
               />
               <button
                 onClick={() => { saveApiKey(apiKey); setShowApiInput(false); }}
-                style={{ background: T.accent, color: ct, border: "none", borderRadius: 8, padding: "10px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
+                style={{ background: T.accent, color: ct, border: "none", borderRadius: 8, padding: "10px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter', sans-serif" }}
               >
                 Save
               </button>
@@ -992,8 +993,8 @@ Return the same JSON structure with just the post object updated.`;
             {/* Hero */}
             {!hasOutput && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 8 }}>
-                <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px, 5vw, 38px)", fontWeight: 400, lineHeight: 1.15, marginBottom: 8, fontStyle: "italic" }}>
-                  Create content that<span style={{ color: T.accent }}> stops the scroll</span>
+                <h1 style={{ fontFamily: "'Manrope', sans-serif", fontSize: "clamp(28px, 5vw, 38px)", fontWeight: 800, lineHeight: 1.15, marginBottom: 8, letterSpacing: "-0.02em" }}>
+                  Create content that<span className="text-gradient-ai" style={{ background: "linear-gradient(135deg, #0077B5, #571BC1)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}> stops the scroll</span>
                 </h1>
                 <p style={{ color: T.muted, fontSize: 15, lineHeight: 1.6, maxWidth: 480 }}>
                   Transform any text, article, or document into stunning LinkedIn carousels, quote cards, stat cards, and post copy with AI. Ready to publish in seconds.
@@ -1123,7 +1124,7 @@ Return the same JSON structure with just the post object updated.`;
                   disabled={extractingBrand || !brandUrl.trim()}
                   style={{
                     background: T.accent, color: contrastText(T.accent), border: "none", borderRadius: 10,
-                    padding: "0 14px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                    padding: "0 14px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter', sans-serif",
                     opacity: extractingBrand || !brandUrl.trim() ? 0.4 : 1, whiteSpace: "nowrap",
                     display: "flex", alignItems: "center", gap: 5,
                   }}
@@ -1267,7 +1268,7 @@ Return the same JSON structure with just the post object updated.`;
                 {speakerData.speakers.length < 3 && (
                   <button
                     onClick={() => setSpeakerData((p) => ({ ...p, speakers: [...p.speakers, { name: "", title: "", company: "", photo: null }] }))}
-                    style={{ background: T.soft, border: `1px solid ${T.border}`, borderRadius: 10, padding: "10px", cursor: "pointer", color: T.accent, fontSize: 12, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}
+                    style={{ background: T.soft, border: `1px solid ${T.border}`, borderRadius: 10, padding: "10px", cursor: "pointer", color: T.accent, fontSize: 12, fontWeight: 600, fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}
                   >
                     <UserCircle size={14} /> Add Speaker ({speakerData.speakers.length}/3)
                   </button>
@@ -1288,7 +1289,7 @@ Return the same JSON structure with just the post object updated.`;
                 rows={hasOutput ? 5 : 8}
                 style={{
                   width: "100%", background: T.card, color: T.text, border: `1px solid ${T.border}`,
-                  borderRadius: 12, padding: 14, fontFamily: "'DM Sans', sans-serif", fontSize: 14,
+                  borderRadius: 12, padding: 14, fontFamily: "'Inter', sans-serif", fontSize: 14,
                   lineHeight: 1.65, resize: "vertical", transition: "border-color 0.2s",
                 }}
                 onFocus={(e) => (e.target.style.borderColor = T.accent)}
@@ -1311,7 +1312,7 @@ Return the same JSON structure with just the post object updated.`;
                 background: loading ? T.card : T.gradient || T.accent,
                 color: loading ? T.muted : contrastText(T.accent),
                 border: loading ? `1px solid ${T.border}` : "none",
-                borderRadius: 14, padding: "16px 24px", fontFamily: "'DM Sans', sans-serif",
+                borderRadius: 14, padding: "16px 24px", fontFamily: "'Inter', sans-serif",
                 fontSize: 15, fontWeight: 700, cursor: loading || !hasContent ? "not-allowed" : "pointer",
                 width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
                 opacity: !hasContent ? 0.4 : 1, transition: "all 0.3s", letterSpacing: "-0.01em",
@@ -1361,7 +1362,7 @@ Return the same JSON structure with just the post object updated.`;
                         flex: 1, padding: "10px 14px", borderRadius: 9, border: "none",
                         background: activeTab === tab.id ? T.soft : "transparent",
                         color: activeTab === tab.id ? T.accent : T.muted,
-                        fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, cursor: "pointer",
+                        fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, cursor: "pointer",
                         display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transition: "all 0.2s",
                       }}
                     >
@@ -1507,7 +1508,7 @@ Return the same JSON structure with just the post object updated.`;
                         style={{
                           padding: "6px 12px", borderRadius: 8, border: `1px solid ${i === cur ? T.accent : T.border}`,
                           background: i === cur ? T.soft : "transparent", color: i === cur ? T.accent : T.muted,
-                          fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "'DM Sans', sans-serif",
+                          fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "'Inter', sans-serif",
                           position: "relative",
                         }}
                       >
@@ -1521,7 +1522,7 @@ Return the same JSON structure with just the post object updated.`;
                       title="Regenerate this slide"
                       style={{
                         padding: "6px 10px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.soft,
-                        color: T.accent, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                        color: T.accent, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter', sans-serif",
                         display: "flex", alignItems: "center", gap: 4, whiteSpace: "nowrap", opacity: regeneratingSlide !== null ? 0.4 : 1,
                       }}
                     >
@@ -1605,7 +1606,7 @@ Return the same JSON structure with just the post object updated.`;
                           style={{
                             background: T.accent, color: contrastText(T.accent), border: "none", borderRadius: 10,
                             padding: "0 14px", fontSize: 12, fontWeight: 600, cursor: "pointer",
-                            fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap",
+                            fontFamily: "'Inter', sans-serif", whiteSpace: "nowrap",
                             opacity: rewritingSlide ? 0.5 : 1, display: "flex", alignItems: "center", gap: 5,
                           }}
                         >
@@ -1633,7 +1634,7 @@ Return the same JSON structure with just the post object updated.`;
                         background: copied ? T.accent : T.soft, border: `1px solid ${copied ? T.accent : T.border}`,
                         color: copied ? contrastText(T.accent) : T.accent, borderRadius: 8, padding: "7px 14px",
                         fontSize: 12, cursor: "pointer", fontWeight: 600, display: "flex", alignItems: "center", gap: 5,
-                        fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
+                        fontFamily: "'Inter', sans-serif", transition: "all 0.2s",
                       }}
                     >
                       {copied ? <Check size={13} /> : <Copy size={13} />}
@@ -1657,7 +1658,7 @@ Return the same JSON structure with just the post object updated.`;
                       style={{
                         background: T.accent, color: contrastText(T.accent), border: "none", borderRadius: 10,
                         padding: "0 14px", fontSize: 12, fontWeight: 600, cursor: "pointer",
-                        fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap",
+                        fontFamily: "'Inter', sans-serif", whiteSpace: "nowrap",
                         opacity: rewritingPost ? 0.5 : 1, display: "flex", alignItems: "center", gap: 5,
                       }}
                     >
@@ -1734,7 +1735,7 @@ Return the same JSON structure with just the post object updated.`;
                                 fontWeight: 600,
                                 color: T.accent,
                                 cursor: "pointer",
-                                fontFamily: "'DM Sans', sans-serif",
+                                fontFamily: "'Inter', sans-serif",
                                 display: "flex",
                                 alignItems: "center",
                                 gap: 4,
@@ -1823,7 +1824,7 @@ function labelStyle(T) {
 }
 
 function inputStyle(T) {
-  return { background: T.card, color: T.text, border: `1px solid ${T.border}`, borderRadius: 10, padding: "10px 13px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, width: "100%", transition: "border-color 0.2s" };
+  return { background: T.card, color: T.text, border: `1px solid ${T.border}`, borderRadius: 10, padding: "10px 13px", fontFamily: "'Inter', sans-serif", fontSize: 14, width: "100%", transition: "border-color 0.2s" };
 }
 
 function selectStyle(T) {
@@ -1842,7 +1843,7 @@ function navBtnStyle(T, side) {
 function exportBtnStyle(T) {
   return {
     width: "100%", background: "transparent", color: T.text, border: `1px solid ${T.border}`, borderRadius: 12,
-    padding: "12px 16px", fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, cursor: "pointer",
+    padding: "12px 16px", fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, cursor: "pointer",
     display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.2s",
   };
 }
@@ -1854,7 +1855,7 @@ function postLabelStyle(T) {
 function postEditStyle(T, bold = false) {
   return {
     width: "100%", background: "transparent", color: T.text, border: "none", borderRadius: 0,
-    padding: 0, fontFamily: "'DM Sans', sans-serif", fontSize: 14, lineHeight: 1.7, resize: "vertical",
+    padding: 0, fontFamily: "'Inter', sans-serif", fontSize: 14, lineHeight: 1.7, resize: "vertical",
     fontWeight: bold ? 600 : 400,
   };
 }
@@ -1869,7 +1870,7 @@ function headerBtnStyle(T, primary) {
     fontWeight: 600,
     color: primary ? (contrastText(T.accent)) : T.muted,
     cursor: "pointer",
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: "'Inter', sans-serif",
     display: "flex",
     alignItems: "center",
     gap: 5,
@@ -1890,7 +1891,7 @@ function NavBtn({ T, active, onClick, children }) {
         fontWeight: 600,
         color: active ? T.accent : T.muted,
         cursor: "pointer",
-        fontFamily: "'DM Sans', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         display: "flex",
         alignItems: "center",
         gap: 5,

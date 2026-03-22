@@ -82,7 +82,7 @@ export default function SettingsPanel({ T, user, profile, onSave, apiKey, onApiK
       animate={{ opacity: 1, y: 0 }}
       style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 640, margin: "0 auto", width: "100%" }}
     >
-      <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 24, fontWeight: 400, fontStyle: "italic" }}>
+      <h2 style={{ fontFamily: "'Manrope', sans-serif", fontSize: 28, fontWeight: 800, letterSpacing: "-0.02em" }}>
         Settings
       </h2>
 
@@ -289,7 +289,7 @@ export default function SettingsPanel({ T, user, profile, onSave, apiKey, onApiK
           border: "none",
           borderRadius: 14,
           padding: "16px 24px",
-          fontFamily: "'DM Sans', sans-serif",
+          fontFamily: "'Inter', sans-serif",
           fontSize: 15,
           fontWeight: 700,
           cursor: saving ? "not-allowed" : "pointer",
@@ -352,7 +352,7 @@ function labelStyle(T) {
   return { display: "block", fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: T.muted, marginBottom: 4 };
 }
 function inputStyle(T) {
-  return { background: T.bg, color: T.text, border: `1px solid ${T.border}`, borderRadius: 10, padding: "10px 13px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, width: "100%" };
+  return { background: T.bg, color: T.text, border: `1px solid ${T.border}`, borderRadius: 10, padding: "10px 13px", fontFamily: "'Inter', sans-serif", fontSize: 14, width: "100%" };
 }
 function textareaStyle(T) {
   return { ...inputStyle(T), resize: "vertical", lineHeight: 1.6 };

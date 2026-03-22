@@ -46,7 +46,7 @@ export default function HistoryPanel({ T, creations, onLoad, onDelete, loading }
       animate={{ opacity: 1, y: 0 }}
       style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 640, margin: "0 auto", width: "100%" }}
     >
-      <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 24, fontWeight: 400, fontStyle: "italic", marginBottom: 4 }}>
+      <h2 style={{ fontFamily: "'Manrope', sans-serif", fontSize: 28, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 4 }}>
         Content Library
       </h2>
       <p style={{ fontSize: 13, color: T.muted, marginBottom: 8 }}>

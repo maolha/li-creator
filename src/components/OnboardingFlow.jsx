@@ -49,7 +49,7 @@ export default function OnboardingFlow({ T, user, onComplete }) {
   return (
     <div style={{
       minHeight: "100vh", background: "#08090D", color: "#F0F0F8",
-      fontFamily: "'DM Sans', sans-serif", display: "flex", flexDirection: "column",
+      fontFamily: "'Inter', sans-serif", display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center", padding: "24px",
     }}>
       <div style={{ maxWidth: 520, width: "100%" }}>
@@ -63,7 +63,7 @@ export default function OnboardingFlow({ T, user, onComplete }) {
           }}>
             &#9670;
           </div>
-          <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, fontWeight: 400, fontStyle: "italic", marginBottom: 4 }}>
+          <h1 style={{ fontFamily: "'Manrope', sans-serif", fontSize: 28, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 4 }}>
             Welcome, {user?.displayName?.split(" ")[0] || "there"}
           </h1>
           <p style={{ fontSize: 13, color: "#7878A0" }}>
@@ -195,7 +195,7 @@ const inputStyle = {
   border: "1px solid rgba(107,138,255,0.15)",
   borderRadius: 10,
   padding: "11px 14px",
-  fontFamily: "'DM Sans', sans-serif",
+  fontFamily: "'Inter', sans-serif",
   fontSize: 14,
   width: "100%",
 };
@@ -227,7 +227,7 @@ const primaryBtnStyle = {
   fontSize: 14,
   fontWeight: 600,
   cursor: "pointer",
-  fontFamily: "'DM Sans', sans-serif",
+  fontFamily: "'Inter', sans-serif",
   display: "flex",
   alignItems: "center",
   gap: 6,
@@ -242,7 +242,7 @@ const secondaryBtnStyle = {
   fontSize: 13,
   fontWeight: 600,
   cursor: "pointer",
-  fontFamily: "'DM Sans', sans-serif",
+  fontFamily: "'Inter', sans-serif",
   display: "flex",
   alignItems: "center",
   gap: 5,
