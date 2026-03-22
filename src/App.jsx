@@ -534,6 +534,42 @@ Return the same JSON structure with just the post object updated.`;
     setPost((prev) => ({ ...prev, [field]: value }));
   }
 
+  // Ctrl+B to toggle **bold** on selected text in post textareas
+  function handleBoldShortcut(e, field) {
+    if ((e.ctrlKey || e.metaKey) && e.key === "b") {
+      e.preventDefault();
+      const ta = e.target;
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      if (start === end) return; // no selection
+      const val = ta.value;
+      const selected = val.slice(start, end);
+
+      // Toggle: if already wrapped in **, remove them; otherwise add them
+      const before = val.slice(0, start);
+      const after = val.slice(end);
+      const alreadyBold = before.endsWith("**") && after.startsWith("**");
+
+      let newVal, newStart, newEnd;
+      if (alreadyBold) {
+        newVal = before.slice(0, -2) + selected + after.slice(2);
+        newStart = start - 2;
+        newEnd = end - 2;
+      } else {
+        newVal = before + "**" + selected + "**" + after;
+        newStart = start + 2;
+        newEnd = end + 2;
+      }
+
+      updatePostField(field, newVal);
+      // Restore selection after React re-render
+      requestAnimationFrame(() => {
+        ta.selectionStart = newStart;
+        ta.selectionEnd = newEnd;
+      });
+    }
+  }
+
   // Raw post text with **bold** markers (for preview and char count)
   function postTextRaw() {
     if (!post) return "";
@@ -1254,6 +1290,7 @@ Return the same JSON structure with just the post object updated.`;
                       <textarea
                         value={post.hook}
                         onChange={(e) => updatePostField("hook", e.target.value)}
+                        onKeyDown={(e) => handleBoldShortcut(e, "hook")}
                         rows={2}
                         style={postEditStyle(T, true)}
                       />
@@ -1264,6 +1301,7 @@ Return the same JSON structure with just the post object updated.`;
                       <textarea
                         value={post.body}
                         onChange={(e) => updatePostField("body", e.target.value)}
+                        onKeyDown={(e) => handleBoldShortcut(e, "body")}
                         rows={5}
                         style={postEditStyle(T)}
                       />
@@ -1274,6 +1312,7 @@ Return the same JSON structure with just the post object updated.`;
                       <textarea
                         value={post.cta}
                         onChange={(e) => updatePostField("cta", e.target.value)}
+                        onKeyDown={(e) => handleBoldShortcut(e, "cta")}
                         rows={2}
                         style={postEditStyle(T, true)}
                       />
