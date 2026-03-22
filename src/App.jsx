@@ -37,6 +37,10 @@ import {
   ClipboardCopy,
   Mic,
   Users,
+  Settings,
+  LogIn,
+  LogOut,
+  History,
 } from "lucide-react";
 
 import { getThemes, contrastText, makeCustomVariants } from "./utils/themes";
@@ -54,6 +58,20 @@ import { downloadSinglePng, downloadAllPngs } from "./utils/exportPng";
 import { themeFromAccent } from "./utils/colorExtractor";
 import { saveApiKey, loadApiKey } from "./utils/secureStorage";
 import { formatForLinkedIn, renderBoldPreview } from "./utils/linkedinFormat";
+import {
+  signInWithGoogle,
+  logOut,
+  onAuthChange,
+  getUserProfile,
+  updateUserProfile,
+  saveApiKeyToFirebase,
+  getApiKeyFromFirebase,
+  saveCreation,
+  getCreations,
+  deleteCreation,
+} from "./utils/firebase";
+import SettingsPanel from "./components/SettingsPanel";
+import HistoryPanel from "./components/HistoryPanel";
 
 const SS = 540;
 
@@ -112,6 +130,13 @@ export default function App() {
   const [tone, setTone] = useState(() => loadState("tone", "professional"));
   const [audience, setAudience] = useState(() => loadState("audience", "general"));
 
+  // Auth & user state
+  const [user, setUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [creations, setCreations] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [page, setPage] = useState("create"); // "create" | "settings" | "history"
+
   // Ephemeral state (reset on refresh is fine)
   const [drag, setDrag] = useState(false);
   const [loading, setLoad] = useState(false);
@@ -141,8 +166,40 @@ export default function App() {
   const T = allThemes[theme] || builtInThemes["Midnight Pro"];
   const ct = contrastText(T.accent);
 
-  // Load encrypted API key on mount
-  useEffect(() => { loadApiKey().then((k) => { if (k) setApiKey(k); }); }, []);
+  // Auth listener
+  useEffect(() => {
+    const unsub = onAuthChange(async (u) => {
+      setUser(u);
+      if (u) {
+        const profile = await getUserProfile(u.uid);
+        setUserProfile(profile);
+        // Load API key from Firebase if available, otherwise from local
+        const fbKey = await getApiKeyFromFirebase(u.uid);
+        if (fbKey) {
+          setApiKey(fbKey);
+        } else {
+          loadApiKey().then((k) => { if (k) setApiKey(k); });
+        }
+        // Apply defaults from profile
+        if (profile?.profile) {
+          if (profile.profile.defaultBrand) setBrand(profile.profile.defaultBrand);
+          if (profile.profile.defaultTone) setTone(profile.profile.defaultTone);
+          if (profile.profile.defaultAudience) setAudience(profile.profile.defaultAudience);
+        }
+      } else {
+        setUserProfile(null);
+        loadApiKey().then((k) => { if (k) setApiKey(k); });
+      }
+    });
+    return unsub;
+  }, []);
+
+  // Load creation history when user logs in
+  useEffect(() => {
+    if (!user) { setCreations([]); return; }
+    setLoadingHistory(true);
+    getCreations(user.uid).then((c) => { setCreations(c); setLoadingHistory(false); });
+  }, [user]);
 
   // Persist all content state to localStorage
   useEffect(() => { saveState("input", input); }, [input]);
@@ -230,7 +287,20 @@ export default function App() {
       audience === "finance" ? "finance and banking professionals. Focus on risk, compliance, market trends, and financial innovation. Use precise, authoritative language." :
       `${audience} professionals.`
     }` : "";
-    return base + toneInstructions + audienceInstructions;
+    // Inject user context from profile
+    let userContext = "";
+    const p = userProfile?.profile;
+    if (p) {
+      const parts = [];
+      if (p.products?.trim()) parts.push(`PRODUCTS/SERVICES: ${p.products.trim()}`);
+      if (p.narratives?.trim()) parts.push(`KEY NARRATIVES: ${p.narratives.trim()}`);
+      if (p.beliefs?.trim()) parts.push(`BELIEFS & VALUES: ${p.beliefs.trim()}`);
+      if (p.goals?.trim()) parts.push(`CONTENT GOALS: ${p.goals.trim()}`);
+      if (parts.length) {
+        userContext = `\n\nUSER CONTEXT (use this to personalize the content):\n${parts.join("\n")}`;
+      }
+    }
+    return base + toneInstructions + audienceInstructions + userContext;
   }
 
   function getGenerateText(type) {
@@ -310,6 +380,25 @@ export default function App() {
       setPost(p.post || null);
       if (contentType === "text-post") setActiveTab("post");
       else setActiveTab("slides");
+
+      // Auto-save to Firebase if logged in
+      if (user) {
+        try {
+          await saveCreation(user.uid, {
+            title: p.title,
+            slides: p.slides || [],
+            post: p.post || null,
+            contentType,
+            theme,
+            brand,
+            tone,
+            audience,
+          });
+          // Refresh history
+          const updated = await getCreations(user.uid);
+          setCreations(updated);
+        } catch {}
+      }
     } catch (e) {
       setError(e.message || "Generation failed. Please try again.");
     }
@@ -675,26 +764,55 @@ Return the same JSON structure with just the post object updated.`;
               </div>
             </div>
           </div>
-          <button
-            onClick={() => setShowApiInput(!showApiInput)}
-            style={{
-              background: apiKey ? T.soft : `${T.accent}22`,
-              border: `1px solid ${apiKey ? T.border : T.accent}`,
-              borderRadius: 8,
-              padding: "7px 12px",
-              fontSize: 12,
-              fontWeight: 600,
-              color: apiKey ? T.muted : T.accent,
-              cursor: "pointer",
-              fontFamily: "'DM Sans', sans-serif",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <Zap size={13} />
-            {apiKey ? "API Key Set" : "Add API Key"}
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {/* Nav buttons */}
+            {user && (
+              <>
+                <NavBtn T={T} active={page === "create"} onClick={() => setPage("create")}>
+                  <Sparkles size={13} /> Create
+                </NavBtn>
+                <NavBtn T={T} active={page === "history"} onClick={() => setPage("history")}>
+                  <History size={13} /> Library
+                </NavBtn>
+                <NavBtn T={T} active={page === "settings"} onClick={() => setPage("settings")}>
+                  <Settings size={13} />
+                </NavBtn>
+              </>
+            )}
+            {!user && !apiKey && (
+              <button
+                onClick={() => setShowApiInput(!showApiInput)}
+                style={headerBtnStyle(T, false)}
+              >
+                <Zap size={13} /> API Key
+              </button>
+            )}
+            {/* Auth */}
+            {user ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {user.photoURL && (
+                  <img
+                    src={user.photoURL}
+                    alt=""
+                    style={{ width: 28, height: 28, borderRadius: "50%", border: `2px solid ${T.border}` }}
+                    referrerPolicy="no-referrer"
+                  />
+                )}
+                <button onClick={logOut} style={headerBtnStyle(T, false)} title="Sign out">
+                  <LogOut size={13} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={async () => {
+                  try { await signInWithGoogle(); } catch (e) { setError(e.message); }
+                }}
+                style={headerBtnStyle(T, true)}
+              >
+                <LogIn size={13} /> Sign in
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -729,7 +847,57 @@ Return the same JSON structure with just the post object updated.`;
 
       {/* MAIN */}
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px 20px 80px" }}>
-        <div
+
+        {/* Settings Page */}
+        {page === "settings" && user && (
+          <SettingsPanel
+            T={T}
+            user={user}
+            profile={userProfile?.profile}
+            apiKey={apiKey}
+            onSave={async (profileData) => {
+              await updateUserProfile(user.uid, { profile: profileData });
+              setUserProfile((prev) => ({ ...prev, profile: profileData }));
+              if (profileData.defaultBrand) setBrand(profileData.defaultBrand);
+              if (profileData.defaultTone) setTone(profileData.defaultTone);
+              if (profileData.defaultAudience) setAudience(profileData.defaultAudience);
+            }}
+            onApiKeySave={async (key) => {
+              setApiKey(key);
+              saveApiKey(key);
+              if (user) await saveApiKeyToFirebase(user.uid, key);
+            }}
+          />
+        )}
+
+        {/* History Page */}
+        {page === "history" && user && (
+          <HistoryPanel
+            T={T}
+            creations={creations}
+            loading={loadingHistory}
+            onLoad={(c) => {
+              setSlides(c.slides?.length ? c.slides : null);
+              setTitle(c.title || "");
+              setPost(c.post || null);
+              if (c.contentType) setContentType(c.contentType);
+              if (c.theme) setTheme(c.theme);
+              if (c.brand) setBrand(c.brand);
+              if (c.tone) setTone(c.tone);
+              if (c.audience) setAudience(c.audience);
+              setCur(0);
+              setActiveTab(c.slides?.length ? "slides" : "post");
+              setPage("create");
+            }}
+            onDelete={async (id) => {
+              await deleteCreation(user.uid, id);
+              setCreations((prev) => prev.filter((c) => c.id !== id));
+            }}
+          />
+        )}
+
+        {/* Create Page */}
+        {page === "create" && <div
           style={{
             display: "grid",
             gridTemplateColumns: hasOutput ? "minmax(0,420px) minmax(0,1fr)" : "minmax(0,600px)",
@@ -1379,7 +1547,7 @@ Return the same JSON structure with just the post object updated.`;
               )}
             </motion.div>
           )}
-        </div>
+        </div>}
       </div>
 
       <style>{`
@@ -1433,4 +1601,47 @@ function postEditStyle(T, bold = false) {
     padding: 0, fontFamily: "'DM Sans', sans-serif", fontSize: 14, lineHeight: 1.7, resize: "vertical",
     fontWeight: bold ? 600 : 400,
   };
+}
+
+function headerBtnStyle(T, primary) {
+  return {
+    background: primary ? T.accent : T.soft,
+    border: `1px solid ${primary ? T.accent : T.border}`,
+    borderRadius: 8,
+    padding: "7px 12px",
+    fontSize: 12,
+    fontWeight: 600,
+    color: primary ? (contrastText(T.accent)) : T.muted,
+    cursor: "pointer",
+    fontFamily: "'DM Sans', sans-serif",
+    display: "flex",
+    alignItems: "center",
+    gap: 5,
+    transition: "all 0.2s",
+  };
+}
+
+function NavBtn({ T, active, onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        background: active ? T.soft : "transparent",
+        border: `1px solid ${active ? T.accent : "transparent"}`,
+        borderRadius: 8,
+        padding: "7px 10px",
+        fontSize: 12,
+        fontWeight: 600,
+        color: active ? T.accent : T.muted,
+        cursor: "pointer",
+        fontFamily: "'DM Sans', sans-serif",
+        display: "flex",
+        alignItems: "center",
+        gap: 5,
+        transition: "all 0.2s",
+      }}
+    >
+      {children}
+    </button>
+  );
 }
