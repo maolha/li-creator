@@ -44,6 +44,7 @@ import {
   Save,
   CopyPlus,
   Hash,
+  UserCircle,
 } from "lucide-react";
 
 import { getThemes, contrastText, makeCustomVariants } from "./utils/themes";
@@ -56,6 +57,7 @@ import {
   TEXT_POST_PROMPT,
 } from "./utils/prompts";
 import { ScaledSlide, SlideInner } from "./components/SlideRenderer";
+import { ScaledSpeakerSlide, SpeakerSlideInner } from "./components/SpeakerSlide";
 import { buildPdf } from "./utils/buildPdf";
 import { downloadSinglePng, downloadAllPngs } from "./utils/exportPng";
 import { themeFromAccent } from "./utils/colorExtractor";
@@ -112,6 +114,7 @@ const CONTENT_TYPES = [
   { id: "quote-card", label: "Quote Card", icon: Quote, desc: "Single quote" },
   { id: "stat-card", label: "Stat Card", icon: BarChart3, desc: "Single stat" },
   { id: "text-post", label: "Text Post", icon: AlignLeft, desc: "Copy only" },
+  { id: "speaker", label: "Speaker", icon: UserCircle, desc: "Event visual" },
 ];
 
 export default function App() {
@@ -132,6 +135,12 @@ export default function App() {
   const [activeTab, setActiveTab] = useState(() => loadState("activeTab", "slides"));
   const [tone, setTone] = useState(() => loadState("tone", "professional"));
   const [audience, setAudience] = useState(() => loadState("audience", "general"));
+  const [speakerData, setSpeakerData] = useState(() => loadState("speakerData", {
+    eventTitle: "",
+    eventDate: "",
+    cta: "",
+    speakers: [{ name: "", title: "", company: "", photo: null }],
+  }));
 
   // Auth & user state
   const [user, setUser] = useState(null);
@@ -226,6 +235,7 @@ export default function App() {
   useEffect(() => { saveState("activeTab", activeTab); }, [activeTab]);
   useEffect(() => { saveState("tone", tone); }, [tone]);
   useEffect(() => { saveState("audience", audience); }, [audience]);
+  useEffect(() => { saveState("speakerData", speakerData); }, [speakerData]);
 
   // Responsive card size
   useEffect(() => {
@@ -701,10 +711,11 @@ Return the same JSON structure with just the post object updated.`;
   }
 
   const slide = slides?.[cur];
-  const hasContent = input.trim() || files.length > 0;
+  const hasSpeakerContent = contentType === "speaker" && speakerData.eventTitle && speakerData.speakers.some((s) => s.name);
+  const hasContent = input.trim() || files.length > 0 || hasSpeakerContent;
   const hasSlides = slides?.length > 0;
-  const hasOutput = hasSlides || post;
-  const showSlideControls = hasSlides && contentType !== "text-post";
+  const hasOutput = hasSlides || post || hasSpeakerContent;
+  const showSlideControls = hasSlides && contentType !== "text-post" && contentType !== "speaker";
 
   return (
     <div
@@ -1108,8 +1119,104 @@ Return the same JSON structure with just the post object updated.`;
               </div>
             )}
 
+            {/* Speaker Inputs */}
+            {contentType === "speaker" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div>
+                    <label style={{ ...labelStyle(T), marginBottom: 4 }}>Event Title</label>
+                    <input type="text" value={speakerData.eventTitle} onChange={(e) => setSpeakerData((p) => ({ ...p, eventTitle: e.target.value }))} placeholder="e.g. AI in Finance Summit 2026" style={inputStyle(T)} />
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <div>
+                      <label style={{ ...labelStyle(T), marginBottom: 4 }}>Date</label>
+                      <input type="text" value={speakerData.eventDate || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, eventDate: e.target.value }))} placeholder="March 28, 2026" style={inputStyle(T)} />
+                    </div>
+                    <div>
+                      <label style={{ ...labelStyle(T), marginBottom: 4 }}>CTA</label>
+                      <input type="text" value={speakerData.cta || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, cta: e.target.value }))} placeholder="Register now" style={inputStyle(T)} />
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ ...labelStyle(T), marginBottom: 4 }}><Globe size={12} /> Event URL (for branding)</label>
+                    <input type="text" value={speakerData.eventUrl || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, eventUrl: e.target.value }))} placeholder="https://event-website.com" style={inputStyle(T)} />
+                  </div>
+                </div>
+
+                {/* Speakers */}
+                {speakerData.speakers.map((speaker, si) => (
+                  <div key={si} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: T.accent }}>Speaker {si + 1}</span>
+                      {speakerData.speakers.length > 1 && (
+                        <button onClick={() => setSpeakerData((p) => ({ ...p, speakers: p.speakers.filter((_, j) => j !== si) }))} style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 0 }}>
+                          <X size={14} />
+                        </button>
+                      )}
+                    </div>
+                    <input type="text" value={speaker.name} onChange={(e) => { const s = [...speakerData.speakers]; s[si] = { ...s[si], name: e.target.value }; setSpeakerData((p) => ({ ...p, speakers: s })); }} placeholder="Full name" style={inputStyle(T)} />
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                      <input type="text" value={speaker.title} onChange={(e) => { const s = [...speakerData.speakers]; s[si] = { ...s[si], title: e.target.value }; setSpeakerData((p) => ({ ...p, speakers: s })); }} placeholder="Title / Role" style={inputStyle(T)} />
+                      <input type="text" value={speaker.company} onChange={(e) => { const s = [...speakerData.speakers]; s[si] = { ...s[si], company: e.target.value }; setSpeakerData((p) => ({ ...p, speakers: s })); }} placeholder="Company" style={inputStyle(T)} />
+                    </div>
+                    <div>
+                      <label style={{ ...labelStyle(T), marginBottom: 4 }}>Photo (URL or upload)</label>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <input
+                          type="text"
+                          value={speaker.photoUrl || ""}
+                          onChange={(e) => {
+                            const s = [...speakerData.speakers];
+                            s[si] = { ...s[si], photoUrl: e.target.value, photo: e.target.value || s[si].photo };
+                            setSpeakerData((p) => ({ ...p, speakers: s }));
+                          }}
+                          placeholder="https://... or paste image URL"
+                          style={{ ...inputStyle(T), flex: 1, fontSize: 12 }}
+                        />
+                        <label style={{ background: T.soft, border: `1px solid ${T.border}`, borderRadius: 10, padding: "0 12px", cursor: "pointer", display: "flex", alignItems: "center", color: T.muted, fontSize: 11, fontWeight: 600, whiteSpace: "nowrap" }}>
+                          <Upload size={12} style={{ marginRight: 4 }} /> File
+                          <input
+                            type="file"
+                            accept="image/*"
+                            style={{ display: "none" }}
+                            onChange={async (e) => {
+                              const file = e.target.files[0];
+                              if (!file) return;
+                              const reader = new FileReader();
+                              reader.onload = () => {
+                                const s = [...speakerData.speakers];
+                                s[si] = { ...s[si], photo: reader.result, photoUrl: "" };
+                                setSpeakerData((p) => ({ ...p, speakers: s }));
+                              };
+                              reader.readAsDataURL(file);
+                            }}
+                          />
+                        </label>
+                      </div>
+                      {speaker.photo && (
+                        <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 8 }}>
+                          <img src={speaker.photo} alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", border: `2px solid ${T.accent}` }} />
+                          <span style={{ fontSize: 11, color: T.muted }}>Photo set</span>
+                          <button onClick={() => { const s = [...speakerData.speakers]; s[si] = { ...s[si], photo: null, photoUrl: "" }; setSpeakerData((p) => ({ ...p, speakers: s })); }} style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 0, fontSize: 11 }}>Remove</button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {speakerData.speakers.length < 3 && (
+                  <button
+                    onClick={() => setSpeakerData((p) => ({ ...p, speakers: [...p.speakers, { name: "", title: "", company: "", photo: null }] }))}
+                    style={{ background: T.soft, border: `1px solid ${T.border}`, borderRadius: 10, padding: "10px", cursor: "pointer", color: T.accent, fontSize: 12, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}
+                  >
+                    <UserCircle size={14} /> Add Speaker ({speakerData.speakers.length}/3)
+                  </button>
+                )}
+              </div>
+            )}
+
             {/* Text Input */}
-            <div>
+            {contentType !== "speaker" && <div>
               <label style={labelStyle(T)}>
                 <PenLine size={12} /> Source Text
                 {files.length > 0 && <span style={{ opacity: 0.5, fontWeight: 400, textTransform: "none", letterSpacing: 0 }}> (optional with files)</span>}
@@ -1132,7 +1239,7 @@ Return the same JSON structure with just the post object updated.`;
                   <span style={{ fontSize: 11, color: T.muted, opacity: 0.6 }}>{input.length.toLocaleString()} chars</span>
                 </div>
               )}
-            </div>
+            </div>}
 
             {/* Generate */}
             <motion.button
@@ -1216,6 +1323,45 @@ Return the same JSON structure with just the post object updated.`;
                     </span>
                   )}
                 </div>
+              )}
+
+              {/* ── SPEAKER PREVIEW ── */}
+              {contentType === "speaker" && hasSpeakerContent && (
+                <>
+                  <ScaledSpeakerSlide data={speakerData} T={T} brand={brand} size={cardPx} />
+                  {/* Export */}
+                  <div ref={slideContainerRef}>
+                    <div style={{ position: "fixed", left: -9999, top: 0, zIndex: -1 }}>
+                      <div ref={hiddenSlideRef} style={{ width: 540, height: 540 }}>
+                        <SpeakerSlideInner data={speakerData} T={T} brand={brand} />
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={copySlideToClipboard}
+                    style={{
+                      ...exportBtnStyle(T),
+                      background: copiedSlide ? T.accent : "transparent",
+                      color: copiedSlide ? contrastText(T.accent) : T.text,
+                      borderColor: copiedSlide ? T.accent : T.border,
+                    }}
+                  >
+                    {copiedSlide ? <Check size={14} /> : <ClipboardCopy size={14} />}
+                    {copiedSlide ? "Copied to clipboard!" : "Copy to clipboard"}
+                  </button>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    <button onClick={exportCurrentPng} disabled={exportingPng} style={exportBtnStyle(T)}>
+                      {exportingPng ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <ImageDown size={14} />}
+                      {exportingPng ? "..." : "Download PNG"}
+                    </button>
+                    {user && (
+                      <button onClick={saveToLibrary} disabled={savingToLibrary} style={exportBtnStyle(T)}>
+                        {savingToLibrary ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Save size={14} />}
+                        {savedToLibrary ? "Saved!" : "Save to Library"}
+                      </button>
+                    )}
+                  </div>
+                </>
               )}
 
               {/* ── SLIDES TAB ── */}
