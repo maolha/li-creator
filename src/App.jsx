@@ -53,6 +53,17 @@ import { saveApiKey, loadApiKey } from "./utils/secureStorage";
 
 const SS = 540;
 
+// Persist helpers
+function loadState(key, fallback) {
+  try {
+    const v = localStorage.getItem(`cf_${key}`);
+    return v !== null ? JSON.parse(v) : fallback;
+  } catch { return fallback; }
+}
+function saveState(key, value) {
+  try { localStorage.setItem(`cf_${key}`, JSON.stringify(value)); } catch {}
+}
+
 const CONTENT_TYPES = [
   { id: "carousel", label: "Carousel", icon: Layers, desc: "Multi-slide deck" },
   { id: "quote-card", label: "Quote Card", icon: Quote, desc: "Single quote" },
@@ -61,34 +72,35 @@ const CONTENT_TYPES = [
 ];
 
 export default function App() {
-  const [input, setInput] = useState("");
-  const [source, setSource] = useState("");
-  const [files, setFiles] = useState([]);
+  // Persisted state (survives F5)
+  const [input, setInput] = useState(() => loadState("input", ""));
+  const [source, setSource] = useState(() => loadState("source", ""));
+  const [files, setFiles] = useState(() => loadState("files", []));
+  const [sc, setSc] = useState(() => loadState("sc", 7));
+  const [theme, setTheme] = useState(() => loadState("theme", "Midnight Pro"));
+  const [brand, setBrand] = useState(() => loadState("brand", "PAIA"));
+  const [slides, setSlides] = useState(() => loadState("slides", null));
+  const [title, setTitle] = useState(() => loadState("title", ""));
+  const [post, setPost] = useState(() => loadState("post", null));
+  const [cur, setCur] = useState(() => loadState("cur", 0));
+  const [contentType, setContentType] = useState(() => loadState("contentType", "carousel"));
+  const [customThemes, setCustomThemes] = useState(() => loadState("custom_themes", {}));
+  const [brandMode, setBrandMode] = useState(() => loadState("brandMode", "dark"));
+  const [activeTab, setActiveTab] = useState(() => loadState("activeTab", "slides"));
+
+  // Ephemeral state (reset on refresh is fine)
   const [drag, setDrag] = useState(false);
-  const [sc, setSc] = useState(7);
-  const [theme, setTheme] = useState("Midnight Pro");
-  const [brand, setBrand] = useState("PAIA");
-  const [slides, setSlides] = useState(null);
-  const [title, setTitle] = useState("");
-  const [post, setPost] = useState(null);
-  const [cur, setCur] = useState(0);
   const [loading, setLoad] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [cardPx, setCardPx] = useState(480);
-  const [activeTab, setActiveTab] = useState("slides");
   const [apiKey, setApiKey] = useState("");
   const [showApiInput, setShowApiInput] = useState(false);
-  const [contentType, setContentType] = useState("carousel");
   const [regeneratingSlide, setRegeneratingSlide] = useState(null);
   const [exportingPng, setExportingPng] = useState(false);
   const [exportingAll, setExportingAll] = useState(false);
-  const [customThemes, setCustomThemes] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("cf_custom_themes") || "{}"); } catch { return {}; }
-  });
-  const [brandUrl, setBrandUrl] = useState("");
   const [extractingBrand, setExtractingBrand] = useState(false);
-  const [brandMode, setBrandMode] = useState("dark");
+  const [brandUrl, setBrandUrl] = useState("");
 
   const fileRef = useRef();
   const rightRef = useRef();
@@ -108,8 +120,21 @@ export default function App() {
   // Load encrypted API key on mount
   useEffect(() => { loadApiKey().then((k) => { if (k) setApiKey(k); }); }, []);
 
-  // Persist API key encrypted
-  useEffect(() => { localStorage.setItem("cf_custom_themes", JSON.stringify(customThemes)); }, [customThemes]);
+  // Persist all content state to localStorage
+  useEffect(() => { saveState("input", input); }, [input]);
+  useEffect(() => { saveState("source", source); }, [source]);
+  useEffect(() => { saveState("files", files); }, [files]);
+  useEffect(() => { saveState("sc", sc); }, [sc]);
+  useEffect(() => { saveState("theme", theme); }, [theme]);
+  useEffect(() => { saveState("brand", brand); }, [brand]);
+  useEffect(() => { saveState("slides", slides); }, [slides]);
+  useEffect(() => { saveState("title", title); }, [title]);
+  useEffect(() => { saveState("post", post); }, [post]);
+  useEffect(() => { saveState("cur", cur); }, [cur]);
+  useEffect(() => { saveState("contentType", contentType); }, [contentType]);
+  useEffect(() => { saveState("custom_themes", customThemes); }, [customThemes]);
+  useEffect(() => { saveState("brandMode", brandMode); }, [brandMode]);
+  useEffect(() => { saveState("activeTab", activeTab); }, [activeTab]);
 
   // Responsive card size
   useEffect(() => {
