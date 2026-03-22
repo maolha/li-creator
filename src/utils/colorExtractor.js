@@ -1,78 +1,35 @@
-// Generate a full theme from a single accent color
-export function themeFromAccent(accent, mode = "dark") {
-  const rgb = hexToRgb(accent);
-  if (!rgb) return null;
+import { makeCustomVariants } from "./themes";
 
-  const lum = luminance(rgb);
-  const isDarkAccent = lum < 0.4;
-
-  if (mode === "dark") {
-    return {
-      bg: "#08090D",
-      card: "#0F1117",
-      accent,
-      soft: `rgba(${rgb.r},${rgb.g},${rgb.b},0.10)`,
-      text: "#F0F0F8",
-      muted: "#7878A0",
-      border: `rgba(${rgb.r},${rgb.g},${rgb.b},0.15)`,
-      gradient: `linear-gradient(135deg, ${accent}, ${shiftHue(accent, 30)})`,
-    };
-  }
-
-  return {
-    bg: "#F6F5F2",
-    card: "#FFFFFF",
-    accent,
-    soft: `rgba(${rgb.r},${rgb.g},${rgb.b},0.07)`,
-    text: isDarkAccent ? accent : "#1A1A2E",
-    muted: "#888899",
-    border: `rgba(${rgb.r},${rgb.g},${rgb.b},0.12)`,
-    gradient: `linear-gradient(135deg, ${accent}, ${shiftHue(accent, 30)})`,
-  };
+// Generate dark and light theme variants from a single accent color
+export function themeFromAccent(accent) {
+  if (!accent.match(/^#[0-9a-fA-F]{3,6}$/)) return null;
+  return makeCustomVariants(accent);
 }
 
-function hexToRgb(hex) {
-  const h = hex.replace("#", "");
-  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
-  const num = parseInt(full, 16);
-  if (isNaN(num)) return null;
-  return {
-    r: (num >> 16) & 255,
-    g: (num >> 8) & 255,
-    b: num & 255,
-  };
-}
-
-function luminance({ r, g, b }) {
-  return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-}
-
-function shiftHue(hex, degrees) {
-  const rgb = hexToRgb(hex);
-  if (!rgb) return hex;
-
-  let { r, g, b } = rgb;
-  r /= 255;
-  g /= 255;
-  b /= 255;
+export function shiftHue(hex, degrees) {
+  let h2 = hex.replace("#", "");
+  if (h2.length === 3) h2 = h2[0] + h2[0] + h2[1] + h2[1] + h2[2] + h2[2];
+  const num = parseInt(h2, 16);
+  if (isNaN(num)) return hex;
+  let r = ((num >> 16) & 255) / 255;
+  let g = ((num >> 8) & 255) / 255;
+  let b = (num & 255) / 255;
 
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
-  let h,
-    s,
-    l = (max + min) / 2;
+  let hue, s, l = (max + min) / 2;
 
   if (max === min) {
-    h = s = 0;
+    hue = s = 0;
   } else {
     const d = max - min;
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
-    else if (max === g) h = ((b - r) / d + 2) / 6;
-    else h = ((r - g) / d + 4) / 6;
+    if (max === r) hue = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+    else if (max === g) hue = ((b - r) / d + 2) / 6;
+    else hue = ((r - g) / d + 4) / 6;
   }
 
-  h = ((h * 360 + degrees) % 360) / 360;
+  hue = ((hue * 360 + degrees) % 360) / 360;
 
   function hue2rgb(p, q, t) {
     if (t < 0) t += 1;
@@ -89,16 +46,12 @@ function shiftHue(hex, degrees) {
   } else {
     const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
     const p = 2 * l - q;
-    rr = hue2rgb(p, q, h + 1 / 3);
-    gg = hue2rgb(p, q, h);
-    bb = hue2rgb(p, q, h - 1 / 3);
+    rr = hue2rgb(p, q, hue + 1 / 3);
+    gg = hue2rgb(p, q, hue);
+    bb = hue2rgb(p, q, hue - 1 / 3);
   }
 
   return `#${[rr, gg, bb]
-    .map((v) =>
-      Math.round(v * 255)
-        .toString(16)
-        .padStart(2, "0")
-    )
+    .map((v) => Math.round(v * 255).toString(16).padStart(2, "0"))
     .join("")}`;
 }

@@ -36,7 +36,7 @@ import {
   Moon,
 } from "lucide-react";
 
-import { THEMES, contrastText } from "./utils/themes";
+import { getThemes, contrastText, makeCustomVariants } from "./utils/themes";
 import { ACCEPTED_FILE_TYPES, toBase64 } from "./utils/constants";
 import {
   CAROUSEL_PROMPT,
@@ -95,8 +95,14 @@ export default function App() {
   const slideContainerRef = useRef();
   const hiddenSlideRef = useRef();
 
-  const allThemes = { ...THEMES, ...customThemes };
-  const T = allThemes[theme] || THEMES["Midnight Pro"];
+  const builtInThemes = getThemes(brandMode);
+  // customThemes stores { name: { dark: {...}, light: {...} } }
+  const customResolved = {};
+  for (const [name, val] of Object.entries(customThemes)) {
+    customResolved[name] = val[brandMode] || val.dark || val;
+  }
+  const allThemes = { ...builtInThemes, ...customResolved };
+  const T = allThemes[theme] || builtInThemes["Midnight Pro"];
   const ct = contrastText(T.accent);
 
   // Load encrypted API key on mount
@@ -339,14 +345,13 @@ export default function App() {
       if (data.colors?.length > 0) {
         const accent = data.themeColor || data.colors[0];
         const domain = new URL(url).hostname.replace("www.", "");
-        const themeName = `${domain}`;
-        const newTheme = themeFromAccent(accent, brandMode);
-        if (newTheme) {
-          setCustomThemes((prev) => ({ ...prev, [themeName]: newTheme }));
-          setTheme(themeName);
+        const variants = themeFromAccent(accent);
+        if (variants) {
+          setCustomThemes((prev) => ({ ...prev, [domain]: variants }));
+          setTheme(domain);
         }
       } else {
-        setError("No brand colors found. Try entering the accent color manually.");
+        setError("No brand colors found. Try entering a hex code instead.");
       }
     } catch (e) {
       setError(e.message || "Brand extraction failed.");
@@ -354,12 +359,22 @@ export default function App() {
     setExtractingBrand(false);
   }
 
-  function addCustomThemeFromColor(hex) {
-    if (!hex.match(/^#[0-9a-fA-F]{6}$/)) return;
+  function addCustomThemeFromColor(input) {
+    let hex = input.trim();
+    if (!hex.startsWith("#")) hex = `#${hex}`;
+    // Support 3 or 6 digit hex
+    if (!hex.match(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/)) {
+      setError("Enter a valid hex color like #4F8EF7 or #F00");
+      return;
+    }
+    // Normalize 3-digit to 6-digit
+    if (hex.length === 4) {
+      hex = `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
+    }
     const name = `Custom ${hex}`;
-    const newTheme = themeFromAccent(hex, brandMode);
-    if (newTheme) {
-      setCustomThemes((prev) => ({ ...prev, [name]: newTheme }));
+    const variants = themeFromAccent(hex);
+    if (variants) {
+      setCustomThemes((prev) => ({ ...prev, [name]: variants }));
       setTheme(name);
     }
   }
@@ -664,7 +679,7 @@ export default function App() {
                   }}
                 >
                   {extractingBrand ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Globe size={13} />}
-                  {extractingBrand ? "..." : "Extract"}
+                  {extractingBrand ? "..." : "Apply"}
                 </button>
               </div>
               <p style={{ fontSize: 10, color: T.muted, marginTop: 4, opacity: 0.7 }}>
