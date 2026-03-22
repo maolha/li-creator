@@ -58,7 +58,7 @@ function Bar({ brand, i, n, light, T }) {
           opacity: light ? 0.45 : 0.6,
         }}
       >
-        {i + 1} / {n}
+        {n > 1 ? `${i + 1} / ${n}` : ""}
       </span>
     </div>
   );
@@ -140,7 +140,7 @@ export function SlideInner({ s, brand, i, n, T }) {
             {brand}
           </span>
           <span style={{ fontSize: 12, color: T.muted }}>
-            {i + 1} / {n}
+            {n > 1 ? `${i + 1} / ${n}` : ""}
           </span>
         </div>
         <div style={{ paddingLeft: 9 }}>
@@ -362,7 +362,7 @@ export function SlideInner({ s, brand, i, n, T }) {
             &ldquo;
           </div>
           <span style={{ fontSize: 12, color: T.muted, paddingTop: 8 }}>
-            {i + 1} / {n}
+            {n > 1 ? `${i + 1} / ${n}` : ""}
           </span>
         </div>
         <div
@@ -476,7 +476,7 @@ export function SlideInner({ s, brand, i, n, T }) {
         >
           <Pill tag={s.tag} type={type} light T={T} />
           <span style={{ fontSize: 12, color: ct, opacity: 0.45 }}>
-            {i + 1} / {n}
+            {n > 1 ? `${i + 1} / ${n}` : ""}
           </span>
         </div>
         <div

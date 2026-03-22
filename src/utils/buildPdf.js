@@ -10,7 +10,7 @@ export function buildPdf(slides, brand, T) {
   const bar = (brand, i, n, light = false) =>
     `<div style="display:flex;justify-content:space-between;align-items:center;border-top:1pt solid ${light ? "rgba(255,255,255,0.18)" : bo};padding-top:5.5mm;margin-top:auto;flex-shrink:0">
       <span style="font-size:8pt;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:${light ? ct : a};opacity:${light ? 0.65 : 0.85}">${brand}</span>
-      <span style="font-size:8pt;color:${light ? ct : mu};opacity:${light ? 0.45 : 0.6}">${i + 1} / ${n}</span>
+      <span style="font-size:8pt;color:${light ? ct : mu};opacity:${light ? 0.45 : 0.6}">${n > 1 ? `${i + 1} / ${n}` : ""}</span>
     </div>`;
 
   const pages = slides
@@ -28,7 +28,7 @@ export function buildPdf(slides, brand, T) {
   <div style="position:absolute;top:0;left:0;width:2.5mm;height:190mm;background:${a}"></div>
   <div style="padding-left:3.5mm;display:flex;justify-content:space-between;align-items:center;margin-bottom:auto">
     <span style="font-size:8pt;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:${a}">${brand}</span>
-    <span style="font-size:8pt;color:${mu}">${i + 1} / ${n}</span>
+    <span style="font-size:8pt;color:${mu}">${n > 1 ? `${i + 1} / ${n}` : ""}</span>
   </div>
   <div style="padding-left:3.5mm">
     ${pill(s.tag, type)}
@@ -63,7 +63,7 @@ export function buildPdf(slides, brand, T) {
         h = `<div style="width:190mm;height:190mm;background:${c};overflow:hidden;display:flex;flex-direction:column;padding:14mm 18mm;box-sizing:border-box">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-shrink:0">
     <div style="font-family:'DM Serif Display',serif;font-size:130pt;line-height:.78;color:${a};opacity:.17;margin-left:-3.5mm;margin-top:-3mm">&ldquo;</div>
-    <span style="font-size:8pt;color:${mu};padding-top:3mm">${i + 1} / ${n}</span>
+    <span style="font-size:8pt;color:${mu};padding-top:3mm">${n > 1 ? `${i + 1} / ${n}` : ""}</span>
   </div>
   <div style="flex:1;display:flex;flex-direction:column;justify-content:center;margin-top:-9mm">
     <h2 style="font-family:'DM Serif Display',serif;font-size:${fs};font-weight:400;line-height:1.33;color:${tx};font-style:italic;margin:0 0 7mm">${s.headline}</h2>
@@ -82,7 +82,7 @@ export function buildPdf(slides, brand, T) {
   <div style="position:absolute;bottom:-21mm;left:-14mm;width:88mm;height:88mm;border-radius:50%;background:rgba(0,0,0,0.05)"></div>
   <div style="display:flex;justify-content:space-between;align-items:center;position:relative;flex-shrink:0">
     ${pill(s.tag, type, true)}
-    <span style="font-size:8pt;color:${ct};opacity:.45">${i + 1} / ${n}</span>
+    <span style="font-size:8pt;color:${ct};opacity:.45">${n > 1 ? `${i + 1} / ${n}` : ""}</span>
   </div>
   <div style="flex:1;display:flex;flex-direction:column;justify-content:center;position:relative">
     <div style="font-size:54pt;line-height:1;color:${ct};opacity:.55;margin-bottom:6mm;font-family:'DM Serif Display',serif">&#9670;</div>
