@@ -77,6 +77,8 @@ import {
 } from "./utils/firebase";
 import SettingsPanel from "./components/SettingsPanel";
 import HistoryPanel from "./components/HistoryPanel";
+import LandingPage from "./components/LandingPage";
+import OnboardingFlow from "./components/OnboardingFlow";
 
 const SS = 540;
 
@@ -145,6 +147,8 @@ export default function App() {
   // Auth & user state
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [creations, setCreations] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [page, setPage] = useState("create"); // "create" | "settings" | "history"
@@ -190,6 +194,10 @@ export default function App() {
       if (u) {
         const profile = await getUserProfile(u.uid);
         setUserProfile(profile);
+        // Check if user needs onboarding (no profile data yet)
+        const p = profile?.profile;
+        const isNew = !p || (!p.linkedinHeadline && !p.products && !p.goals);
+        setNeedsOnboarding(isNew);
         // Load API key from Firebase if available, otherwise from local
         const fbKey = await getApiKeyFromFirebase(u.uid);
         if (fbKey) {
@@ -198,18 +206,48 @@ export default function App() {
           loadApiKey().then((k) => { if (k) setApiKey(k); });
         }
         // Apply defaults from profile
-        if (profile?.profile) {
-          if (profile.profile.defaultBrand) setBrand(profile.profile.defaultBrand);
-          if (profile.profile.defaultTone) setTone(profile.profile.defaultTone);
-          if (profile.profile.defaultAudience) setAudience(profile.profile.defaultAudience);
+        if (p) {
+          if (p.defaultBrand) setBrand(p.defaultBrand);
+          if (p.defaultTone) setTone(p.defaultTone);
+          if (p.defaultAudience) setAudience(p.defaultAudience);
         }
       } else {
         setUserProfile(null);
+        setNeedsOnboarding(false);
         loadApiKey().then((k) => { if (k) setApiKey(k); });
       }
+      setAuthLoading(false);
     });
     return unsub;
   }, []);
+
+  // Handle sign in from landing page
+  async function handleSignIn() {
+    try {
+      await signInWithGoogle();
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  // Handle onboarding completion
+  async function handleOnboardingComplete(data) {
+    if (!user) return;
+    // Save profile
+    await updateUserProfile(user.uid, { profile: data.profile });
+    setUserProfile((prev) => ({ ...prev, profile: data.profile }));
+    // Save API key
+    if (data.apiKey) {
+      setApiKey(data.apiKey);
+      saveApiKey(data.apiKey);
+      await saveApiKeyToFirebase(user.uid, data.apiKey);
+    }
+    // Apply defaults
+    if (data.profile.defaultBrand) setBrand(data.profile.defaultBrand);
+    if (data.profile.defaultTone) setTone(data.profile.defaultTone);
+    if (data.profile.defaultAudience) setAudience(data.profile.defaultAudience);
+    setNeedsOnboarding(false);
+  }
 
   // Load creation history when user logs in
   useEffect(() => {
@@ -717,6 +755,28 @@ Return the same JSON structure with just the post object updated.`;
   const hasOutput = hasSlides || post || hasSpeakerContent;
   const showSlideControls = hasSlides && contentType !== "text-post" && contentType !== "speaker";
 
+  // Loading state
+  if (authLoading) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#08090D", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
+          <Sparkles size={28} style={{ color: "#6B8AFF" }} />
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Landing page for unauthenticated users
+  if (!user) {
+    return <LandingPage onSignIn={handleSignIn} loading={false} />;
+  }
+
+  // Onboarding for new users
+  if (needsOnboarding) {
+    return <OnboardingFlow T={T} user={user} onComplete={handleOnboardingComplete} />;
+  }
+
+  // Main app
   return (
     <div
       style={{
