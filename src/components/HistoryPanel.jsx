@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, RotateCcw, Loader2, Calendar, Layers, Quote, BarChart3, AlignLeft } from "lucide-react";
+import { Trash2, RotateCcw, Loader2, Calendar, Layers, Quote, BarChart3, AlignLeft, UserCircle } from "lucide-react";
 
 const TYPE_ICONS = {
   carousel: Layers,
   "quote-card": Quote,
   "stat-card": BarChart3,
   "text-post": AlignLeft,
+  speaker: UserCircle,
 };
 
 export default function HistoryPanel({ T, creations, onLoad, onDelete, loading }) {
@@ -122,8 +123,11 @@ export default function HistoryPanel({ T, creations, onLoad, onDelete, loading }
                   )}
                   <span style={{ textTransform: "capitalize" }}>{c.contentType || "carousel"}</span>
                   {slideCount > 0 && <span>{slideCount} slides</span>}
+                  {c.contentType === "speaker" && c.speakerData?.speakers && (
+                    <span>{c.speakerData.speakers.filter((s) => s?.name).length} speaker{c.speakerData.speakers.filter((s) => s?.name).length !== 1 ? "s" : ""}</span>
+                  )}
                 </div>
-                {c.post?.hook && (
+                {(c.post?.hook || (c.contentType === "speaker" && c.speakerData?.eventTitle)) && (
                   <div
                     style={{
                       fontSize: 11,
@@ -135,7 +139,7 @@ export default function HistoryPanel({ T, creations, onLoad, onDelete, loading }
                       opacity: 0.7,
                     }}
                   >
-                    {c.post.hook.replace(/\*\*/g, "")}
+                    {c.post?.hook?.replace(/\*\*/g, "") || c.speakerData?.eventTitle || ""}
                   </div>
                 )}
               </div>

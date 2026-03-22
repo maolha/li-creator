@@ -1031,8 +1031,9 @@ Return the same JSON structure with just the post object updated.`;
               if (c.brand) setBrand(c.brand);
               if (c.tone) setTone(c.tone);
               if (c.audience) setAudience(c.audience);
+              if (c.speakerData) setSpeakerData(c.speakerData);
               setCur(0);
-              setActiveTab(c.slides?.length ? "slides" : "post");
+              setActiveTab(c.contentType === "speaker" ? "slides" : c.slides?.length ? "slides" : "post");
               setPage("create");
             }}
             onDelete={async (id) => {
