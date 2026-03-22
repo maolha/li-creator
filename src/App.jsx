@@ -1296,9 +1296,22 @@ Return the same JSON structure with just the post object updated.`;
                     </div>
                     {speakerData.eventLogo && (
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
-                        <img src={speakerData.eventLogo} alt="" style={{ height: 24, maxWidth: 80, objectFit: "contain", borderRadius: 4 }} />
-                        <span style={{ fontSize: 11, color: T.muted }}>Logo set</span>
-                        <button onClick={() => setSpeakerData((p) => ({ ...p, eventLogo: null, eventLogoUrl: "" }))} style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 0, fontSize: 11 }}>Remove</button>
+                        <div style={{ background: speakerData.logoDarkBg ? "#1a1a2e" : "transparent", borderRadius: 6, padding: speakerData.logoDarkBg ? "4px 8px" : 0 }}>
+                          <img src={speakerData.eventLogo} alt="" style={{ height: 24, maxWidth: 80, objectFit: "contain", borderRadius: 4, display: "block" }} />
+                        </div>
+                        <button
+                          onClick={() => setSpeakerData((p) => ({ ...p, logoDarkBg: !p.logoDarkBg }))}
+                          style={{
+                            background: speakerData.logoDarkBg ? T.accent : T.soft,
+                            border: `1px solid ${speakerData.logoDarkBg ? T.accent : T.border}`,
+                            borderRadius: 6, padding: "3px 8px", fontSize: 10, fontWeight: 600,
+                            color: speakerData.logoDarkBg ? contrastText(T.accent) : T.muted,
+                            cursor: "pointer", fontFamily: "'Inter', sans-serif",
+                          }}
+                        >
+                          Dark bg
+                        </button>
+                        <button onClick={() => setSpeakerData((p) => ({ ...p, eventLogo: null, eventLogoUrl: "", logoDarkBg: false }))} style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 0, fontSize: 11 }}>Remove</button>
                       </div>
                     )}
                   </div>

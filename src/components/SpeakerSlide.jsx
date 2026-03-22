@@ -22,7 +22,7 @@ const LAYOUTS = {
 export { LAYOUTS as SPEAKER_LAYOUTS, ASPECT_RATIOS as SPEAKER_ASPECTS };
 
 export function SpeakerSlideInner({ data, T, brand }) {
-  const { eventTitle, eventDate, cta, eventLogo, sessionTitle, regUrl, tagLabel } = data || {};
+  const { eventTitle, eventDate, cta, eventLogo, sessionTitle, regUrl, tagLabel, logoDarkBg } = data || {};
   const speakers = Array.isArray(data?.speakers) ? data.speakers : [];
   const style = data?.style || {};
   const layout = style.layout || "classic";
@@ -79,7 +79,9 @@ export function SpeakerSlideInner({ data, T, brand }) {
         <div style={{ position: "absolute", top: -100, right: -100, width: 350, height: 350, borderRadius: "50%", background: theme.accent, opacity: 0.05 }} />
 
         {eventLogo ? (
-          <img src={eventLogo} alt="" style={{ height: 28, maxWidth: 90, objectFit: "contain", marginBottom: 16 }} />
+          <div style={{ background: logoDarkBg ? "#1a1a2e" : "transparent", borderRadius: logoDarkBg ? 6 : 0, padding: logoDarkBg ? "5px 10px" : 0, marginBottom: 16 }}>
+            <img src={eventLogo} alt="" style={{ height: 28, maxWidth: 90, objectFit: "contain", display: "block" }} />
+          </div>
         ) : (
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: theme.accent, opacity: 0.7, marginBottom: 16 }}>{brand}</span>
         )}
@@ -213,13 +215,15 @@ export function SpeakerSlideInner({ data, T, brand }) {
           </div>
         </div>
         {eventLogo ? (
-          <img src={eventLogo} alt="" style={{ height: 32, maxWidth: 100, objectFit: "contain", borderRadius: 4 }} />
+          <div style={{ background: logoDarkBg ? "#1a1a2e" : "transparent", borderRadius: logoDarkBg ? 6 : 0, padding: logoDarkBg ? "5px 10px" : 0 }}>
+            <img src={eventLogo} alt="" style={{ height: 32, maxWidth: 100, objectFit: "contain", display: "block" }} />
+          </div>
         ) : (
           <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: theme.accent, opacity: 0.85 }}>{brand}</span>
         )}
       </div>
 
-      <div style={{ padding: "16px 36px 0" }}>
+      <div style={{ padding: "16px 36px 0", maxHeight: SH * 0.3, overflow: "hidden" }}>
         <div style={{ width: 50, height: 3, background: theme.accent, borderRadius: 2, marginBottom: 14 }} />
         <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: eventTitle?.length > 40 ? 26 : eventTitle?.length > 25 ? 32 : 38, fontWeight: 400, lineHeight: 1.15, color: theme.text, margin: 0, fontStyle: "italic" }}>
           {eventTitle || "Event Title"}
@@ -227,7 +231,7 @@ export function SpeakerSlideInner({ data, T, brand }) {
         {sessionTitle && <div style={{ fontSize: 13, color: theme.muted, marginTop: 8, fontWeight: 500 }}>{sessionTitle}</div>}
       </div>
 
-      <div style={{ flex: 1, padding: "20px 36px", display: "flex", gap: count === 1 ? 0 : 16, alignItems: "center", justifyContent: count === 1 ? "flex-start" : "center" }}>
+      <div style={{ flex: 1, padding: "16px 36px", display: "flex", gap: count === 1 ? 0 : 16, alignItems: "center", justifyContent: count === 1 ? "flex-start" : "center" }}>
         {speakers.filter((s) => s?.name).map((speaker, i) => (
           <div key={i} style={{ display: "flex", flexDirection: count === 1 ? "row" : "column", alignItems: "center", gap: count === 1 ? 18 : 8, flex: count === 1 ? undefined : 1 }}>
             <div style={{ width: photoSz, height: photoSz, borderRadius: photoRadius, background: theme.soft, border: `3px solid ${theme.accent}`, overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
