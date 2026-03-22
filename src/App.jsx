@@ -464,7 +464,7 @@ export default function App() {
                 fontWeight: 700,
               }}
             >
-              &#10022;
+              &#9670;
             </div>
             <div>
               <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.2 }}>
@@ -939,16 +939,34 @@ export default function App() {
                       <textarea value={slide.body || ""} onChange={(e) => updateSlideField(cur, "body", e.target.value)} rows={3} style={{ ...inputStyle(T), resize: "vertical", lineHeight: 1.6 }} />
                     </div>
                     {slide.type === "stat" && (
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                        <div>
-                          <label style={{ ...labelStyle(T), marginBottom: 4 }}>Stat</label>
-                          <input type="text" value={slide.stat || ""} onChange={(e) => updateSlideField(cur, "stat", e.target.value)} placeholder="73%" style={inputStyle(T)} />
+                      <>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                          <div>
+                            <label style={{ ...labelStyle(T), marginBottom: 4 }}>Stat</label>
+                            <input type="text" value={slide.stat || ""} onChange={(e) => updateSlideField(cur, "stat", e.target.value)} placeholder="73%" style={inputStyle(T)} />
+                          </div>
+                          <div>
+                            <label style={{ ...labelStyle(T), marginBottom: 4 }}>Stat Label</label>
+                            <input type="text" value={slide.statLabel || ""} onChange={(e) => updateSlideField(cur, "statLabel", e.target.value)} placeholder="Adoption rate" style={inputStyle(T)} />
+                          </div>
                         </div>
                         <div>
-                          <label style={{ ...labelStyle(T), marginBottom: 4 }}>Stat Label</label>
-                          <input type="text" value={slide.statLabel || ""} onChange={(e) => updateSlideField(cur, "statLabel", e.target.value)} placeholder="Adoption rate" style={inputStyle(T)} />
+                          <label style={{ ...labelStyle(T), marginBottom: 4 }}>Stat Font Size</label>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <input
+                              type="range"
+                              min={40}
+                              max={140}
+                              value={slide.statFontSize || (slide.stat?.length > 5 ? 70 : slide.stat?.length > 3 ? 90 : 112)}
+                              onChange={(e) => updateSlideField(cur, "statFontSize", Number(e.target.value))}
+                              style={{ flex: 1, accentColor: T.accent }}
+                            />
+                            <span style={{ fontSize: 12, color: T.muted, fontFamily: "'JetBrains Mono', monospace", minWidth: 36, textAlign: "right" }}>
+                              {slide.statFontSize || (slide.stat?.length > 5 ? 70 : slide.stat?.length > 3 ? 90 : 112)}px
+                            </span>
+                          </div>
                         </div>
-                      </div>
+                      </>
                     )}
                     <div>
                       <label style={{ ...labelStyle(T), marginBottom: 4 }}>Tag</label>

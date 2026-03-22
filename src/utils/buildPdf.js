@@ -44,7 +44,7 @@ export function buildPdf(slides, brand, T) {
   <div style="width:78mm;flex-shrink:0;background:${a};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11mm 6mm;position:relative;overflow:hidden">
     <div style="position:absolute;top:-18mm;right:-18mm;width:60mm;height:60mm;border-radius:50%;background:rgba(255,255,255,0.08)"></div>
     <div style="position:absolute;bottom:-11mm;left:-11mm;width:46mm;height:46mm;border-radius:50%;background:rgba(0,0,0,0.07)"></div>
-    <div style="font-family:'DM Serif Display',serif;font-size:${sf};font-weight:400;color:${ct};line-height:1;text-align:center;position:relative;z-index:1;word-break:break-all">${sn}</div>
+    <div style="font-family:'DM Serif Display',serif;font-size:${sf};font-weight:400;color:${ct};line-height:1;text-align:center;position:relative;z-index:1;white-space:nowrap">${sn}</div>
     ${s.statLabel ? `<div style="font-size:8pt;font-weight:600;color:${ct};opacity:.7;margin-top:4mm;text-align:center;text-transform:uppercase;letter-spacing:.06em;position:relative;z-index:1">${s.statLabel}</div>` : ""}
   </div>
   <div style="flex:1;padding:15mm 15mm 14mm 13mm;display:flex;flex-direction:column;box-sizing:border-box">
@@ -85,7 +85,7 @@ export function buildPdf(slides, brand, T) {
     <span style="font-size:8pt;color:${ct};opacity:.45">${i + 1} / ${n}</span>
   </div>
   <div style="flex:1;display:flex;flex-direction:column;justify-content:center;position:relative">
-    <div style="font-size:54pt;line-height:1;color:${ct};opacity:.55;margin-bottom:6mm;font-family:'DM Serif Display',serif">&#10022;</div>
+    <div style="font-size:54pt;line-height:1;color:${ct};opacity:.55;margin-bottom:6mm;font-family:'DM Serif Display',serif">&#9670;</div>
     <h2 style="font-family:'DM Serif Display',serif;font-size:${fs};font-weight:400;line-height:1.12;color:${ct};margin:0 0 6mm">${s.headline}</h2>
     <p style="font-size:11pt;line-height:1.65;color:${ct};opacity:.78;margin:0">${s.body}</p>
   </div>

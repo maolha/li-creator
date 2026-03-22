@@ -184,7 +184,7 @@ export function SlideInner({ s, brand, i, n, T }) {
 
   if (type === "stat") {
     const sn = s.stat || "?";
-    const sf = sn.length > 5 ? 70 : sn.length > 3 ? 90 : 112;
+    const sf = s.statFontSize || (sn.length > 5 ? 70 : sn.length > 3 ? 90 : 112);
     return (
       <div
         style={{
@@ -240,7 +240,7 @@ export function SlideInner({ s, brand, i, n, T }) {
               color: ct,
               lineHeight: 1,
               textAlign: "center",
-              wordBreak: "break-all",
+              whiteSpace: "nowrap",
               position: "relative",
               zIndex: 1,
             }}
@@ -498,7 +498,7 @@ export function SlideInner({ s, brand, i, n, T }) {
               fontFamily: "'DM Serif Display',serif",
             }}
           >
-            &#10022;
+            &#9670;
           </div>
           <h2
             style={{

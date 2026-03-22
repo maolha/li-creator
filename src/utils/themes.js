@@ -63,12 +63,23 @@ export const THEMES = {
 
 export function contrastText(hex) {
   try {
-    const [r, g, b] = [hex.slice(1, 3), hex.slice(3, 5), hex.slice(5, 7)].map(
-      (x) => parseInt(x, 16)
-    );
-    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.45
-      ? "#111111"
-      : "#F5F5F5";
+    // Handle shorthand hex
+    let h = hex.replace("#", "");
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    if (isNaN(r) || isNaN(g) || isNaN(b)) return "#F5F5F5";
+    // WCAG relative luminance
+    const srgb = [r, g, b].map((v) => {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    const L = 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+    // Contrast ratio against white vs black — pick whichever is higher
+    const contrastWhite = (1.05) / (L + 0.05);
+    const contrastBlack = (L + 0.05) / 0.05;
+    return contrastWhite > contrastBlack ? "#FFFFFF" : "#111111";
   } catch {
     return "#F5F5F5";
   }
