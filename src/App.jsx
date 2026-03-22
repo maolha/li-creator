@@ -749,11 +749,22 @@ Return the same JSON structure with just the post object updated.`;
   }
 
   const slide = slides?.[cur];
-  const hasSpeakerContent = contentType === "speaker" && speakerData.eventTitle && speakerData.speakers.some((s) => s.name);
-  const hasContent = input.trim() || files.length > 0 || hasSpeakerContent;
+  const isSpeakerMode = contentType === "speaker";
+  const hasSpeakerContent = isSpeakerMode && speakerData.eventTitle?.trim() && speakerData.speakers.some((s) => s.name?.trim());
+  const hasContent = isSpeakerMode ? hasSpeakerContent : (input.trim() || files.length > 0);
   const hasSlides = slides?.length > 0;
-  const hasOutput = hasSlides || post || hasSpeakerContent;
-  const showSlideControls = hasSlides && contentType !== "text-post" && contentType !== "speaker";
+  const hasOutput = hasSlides || post || (isSpeakerMode && hasSpeakerContent);
+  const showSlideControls = hasSlides && contentType !== "text-post" && !isSpeakerMode;
+
+  // Generate button tooltip for missing fields
+  function getMissingFieldsHint() {
+    if (isSpeakerMode) return ""; // no generate button for speaker
+    if (loading) return "";
+    const missing = [];
+    if (!apiKey) missing.push("API key");
+    if (!input.trim() && !files.length) missing.push("source text or files");
+    return missing.length ? `Missing: ${missing.join(", ")}` : "";
+  }
 
   // Loading state
   if (authLoading) {
@@ -1138,14 +1149,16 @@ Return the same JSON structure with just the post object updated.`;
               </p>
             </div>
 
-            {/* Source */}
-            <div>
-              <label style={labelStyle(T)}><MessageSquare size={12} /> Source (first comment)</label>
-              <input type="text" value={source} onChange={(e) => setSource(e.target.value)} placeholder="e.g. CIO.com — 6 Innovation Curves" style={inputStyle(T)} />
-            </div>
+            {/* Source — not for speaker mode */}
+            {!isSpeakerMode && (
+              <div>
+                <label style={labelStyle(T)}><MessageSquare size={12} /> Source (first comment)</label>
+                <input type="text" value={source} onChange={(e) => setSource(e.target.value)} placeholder="e.g. CIO.com — 6 Innovation Curves" style={inputStyle(T)} />
+              </div>
+            )}
 
             {/* File Upload */}
-            {contentType !== "text-post" && (
+            {contentType !== "text-post" && !isSpeakerMode && (
               <div>
                 <label style={labelStyle(T)}><Upload size={12} /> Upload Files <span style={{ opacity: 0.5, fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(max 4)</span></label>
                 <div
@@ -1303,27 +1316,38 @@ Return the same JSON structure with just the post object updated.`;
             </div>}
 
             {/* Generate */}
-            <motion.button
-              whileHover={{ scale: 1.01, y: -1 }}
-              whileTap={{ scale: 0.99 }}
-              onClick={generate}
-              disabled={loading || !hasContent}
-              style={{
-                background: loading ? T.card : T.gradient || T.accent,
-                color: loading ? T.muted : contrastText(T.accent),
-                border: loading ? `1px solid ${T.border}` : "none",
-                borderRadius: 14, padding: "16px 24px", fontFamily: "'Inter', sans-serif",
-                fontSize: 15, fontWeight: 700, cursor: loading || !hasContent ? "not-allowed" : "pointer",
-                width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                opacity: !hasContent ? 0.4 : 1, transition: "all 0.3s", letterSpacing: "-0.01em",
-              }}
-            >
-              {loading ? (
-                <><Loader2 size={18} style={{ animation: "spin 1s linear infinite" }} /> Crafting your content...</>
-              ) : (
-                <><Sparkles size={18} /> Generate {CONTENT_TYPES.find((c) => c.id === contentType)?.label} <ArrowRight size={16} style={{ opacity: 0.6 }} /></>
-              )}
-            </motion.button>
+            {/* Generate button — hidden for speaker mode (live preview) */}
+            {!isSpeakerMode && (
+              <div style={{ position: "relative" }}>
+                <motion.button
+                  whileHover={hasContent ? { scale: 1.01, y: -1 } : {}}
+                  whileTap={hasContent ? { scale: 0.99 } : {}}
+                  onClick={generate}
+                  disabled={loading || !hasContent}
+                  title={getMissingFieldsHint()}
+                  style={{
+                    background: loading ? T.card : T.gradient || T.accent,
+                    color: loading ? T.muted : contrastText(T.accent),
+                    border: loading ? `1px solid ${T.border}` : "none",
+                    borderRadius: 14, padding: "16px 24px", fontFamily: "'Inter', sans-serif",
+                    fontSize: 15, fontWeight: 700, cursor: loading || !hasContent ? "not-allowed" : "pointer",
+                    width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+                    opacity: !hasContent ? 0.4 : 1, transition: "all 0.3s", letterSpacing: "-0.01em",
+                  }}
+                >
+                  {loading ? (
+                    <><Loader2 size={18} style={{ animation: "spin 1s linear infinite" }} /> Crafting your content...</>
+                  ) : (
+                    <><Sparkles size={18} /> Generate {CONTENT_TYPES.find((c) => c.id === contentType)?.label} <ArrowRight size={16} style={{ opacity: 0.6 }} /></>
+                  )}
+                </motion.button>
+                {!hasContent && !loading && (
+                  <p style={{ fontSize: 11, color: T.muted, marginTop: 6, textAlign: "center", opacity: 0.7 }}>
+                    {!apiKey ? "Add your API key in Settings to generate content." : "Paste text or upload a file to get started."}
+                  </p>
+                )}
+              </div>
+            )}
 
             <AnimatePresence>
               {error && (
@@ -1346,34 +1370,43 @@ Return the same JSON structure with just the post object updated.`;
               transition={{ duration: 0.4 }}
               style={{ display: "flex", flexDirection: "column", gap: 16 }}
             >
-              {/* Tab bar */}
-              <div style={{ display: "flex", background: T.card, borderRadius: 12, padding: 4, border: `1px solid ${T.border}` }}>
-                {[
-                  showSlideControls && { id: "slides", icon: Eye, label: "Preview" },
-                  showSlideControls && { id: "edit", icon: PenLine, label: "Edit" },
-                  post && { id: "post", icon: MessageSquare, label: "Post Copy" },
-                ]
-                  .filter(Boolean)
-                  .map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      style={{
-                        flex: 1, padding: "10px 14px", borderRadius: 9, border: "none",
-                        background: activeTab === tab.id ? T.soft : "transparent",
-                        color: activeTab === tab.id ? T.accent : T.muted,
-                        fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, cursor: "pointer",
-                        display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transition: "all 0.2s",
-                      }}
-                    >
-                      <tab.icon size={14} />
-                      {tab.label}
-                    </button>
-                  ))}
-              </div>
+              {/* Tab bar — hidden for speaker mode */}
+              {!isSpeakerMode && (
+                <div style={{ display: "flex", background: T.card, borderRadius: 12, padding: 4, border: `1px solid ${T.border}` }}>
+                  {[
+                    showSlideControls && { id: "slides", icon: Eye, label: "Preview" },
+                    showSlideControls && { id: "edit", icon: PenLine, label: "Edit" },
+                    post && { id: "post", icon: MessageSquare, label: "Post Copy" },
+                  ]
+                    .filter(Boolean)
+                    .map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        style={{
+                          flex: 1, padding: "10px 14px", borderRadius: 9, border: "none",
+                          background: activeTab === tab.id ? T.soft : "transparent",
+                          color: activeTab === tab.id ? T.accent : T.muted,
+                          fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, cursor: "pointer",
+                          display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transition: "all 0.2s",
+                        }}
+                      >
+                        <tab.icon size={14} />
+                        {tab.label}
+                      </button>
+                    ))}
+                </div>
+              )}
 
-              {/* Title */}
-              {title && (
+              {/* Speaker mode header */}
+              {isSpeakerMode && hasSpeakerContent && (
+                <div style={{ fontSize: 12, color: T.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  Live Preview
+                </div>
+              )}
+
+              {/* Title — non-speaker modes */}
+              {!isSpeakerMode && title && (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span style={{ fontSize: 12, color: T.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "70%" }}>
                     {title}
