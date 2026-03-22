@@ -66,10 +66,10 @@ export function SpeakerSlideInner({ data, T, brand }) {
     ? (eventTitle?.length > 35 ? 24 : 32)
     : (eventTitle?.length > 40 ? 26 : eventTitle?.length > 25 ? 32 : 38);
   const photoSz = isWide
-    ? (count === 1 ? 64 : count === 2 ? 56 : 48)
+    ? (count === 1 ? 80 : count === 2 ? 72 : 60)
     : isTall
-    ? (count === 1 ? 80 : count === 2 ? 68 : 56)
-    : (count === 1 ? 90 : count === 2 ? 80 : 68);
+    ? (count === 1 ? 100 : count === 2 ? 88 : 72)
+    : (count === 1 ? 110 : count === 2 ? 96 : 80);
 
   // ── CENTERED LAYOUT ──
   if (layout === "centered") {
@@ -94,7 +94,7 @@ export function SpeakerSlideInner({ data, T, brand }) {
         <div style={{ display: "flex", gap: count === 1 ? 0 : 20, alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
           {speakers.filter((s) => s?.name).map((speaker, i) => (
             <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-              <div style={{ width: count === 1 ? 96 : count === 2 ? 80 : 64, height: count === 1 ? 96 : count === 2 ? 80 : 64, borderRadius: photoRadius, background: theme.soft, border: `3px solid ${theme.accent}`, overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: photoSz, height: photoSz, borderRadius: photoRadius, background: theme.soft, border: `3px solid ${theme.accent}`, overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {speaker.photo ? <img src={speaker.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
                   <div style={{ fontSize: 30, color: theme.accent, opacity: 0.3, fontFamily: "'DM Serif Display',serif" }}>{speaker.name?.charAt(0)?.toUpperCase() || "?"}</div>}
               </div>
@@ -137,7 +137,7 @@ export function SpeakerSlideInner({ data, T, brand }) {
           <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
             {speakers.filter((s) => s?.name).map((speaker, i) => (
               <div key={i} style={{ display: "flex", alignItems: count === 1 ? "center" : "center", flexDirection: count === 1 ? "row" : "column", gap: count === 1 ? 14 : 6 }}>
-                <div style={{ width: count === 1 ? 72 : 56, height: count === 1 ? 72 : 56, borderRadius: photoRadius, background: "rgba(255,255,255,0.1)", border: "2px solid rgba(255,255,255,0.3)", overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ width: photoSz, height: photoSz, borderRadius: photoRadius, background: "rgba(255,255,255,0.1)", border: "2px solid rgba(255,255,255,0.3)", overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {speaker.photo ? <img src={speaker.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
                     <div style={{ fontSize: 24, color: ct, opacity: 0.4, fontFamily: "'DM Serif Display',serif" }}>{speaker.name?.charAt(0)?.toUpperCase() || "?"}</div>}
                 </div>
@@ -177,7 +177,7 @@ export function SpeakerSlideInner({ data, T, brand }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 28 }}>
           {speakers.filter((s) => s?.name).map((speaker, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <div style={{ width: 48, height: 48, borderRadius: photoRadius, background: theme.soft, border: `2px solid ${theme.accent}`, overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: Math.min(photoSz, 64), height: Math.min(photoSz, 64), borderRadius: photoRadius, background: theme.soft, border: `2px solid ${theme.accent}`, overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {speaker.photo ? <img src={speaker.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
                   <div style={{ fontSize: 20, color: theme.accent, opacity: 0.3 }}>{speaker.name?.charAt(0)?.toUpperCase() || "?"}</div>}
               </div>
@@ -230,7 +230,7 @@ export function SpeakerSlideInner({ data, T, brand }) {
       <div style={{ flex: 1, padding: "20px 36px", display: "flex", gap: count === 1 ? 0 : 16, alignItems: "center", justifyContent: count === 1 ? "flex-start" : "center" }}>
         {speakers.filter((s) => s?.name).map((speaker, i) => (
           <div key={i} style={{ display: "flex", flexDirection: count === 1 ? "row" : "column", alignItems: "center", gap: count === 1 ? 18 : 8, flex: count === 1 ? undefined : 1 }}>
-            <div style={{ width: count === 1 ? 90 : count === 2 ? 80 : 68, height: count === 1 ? 90 : count === 2 ? 80 : 68, borderRadius: photoRadius, background: theme.soft, border: `3px solid ${theme.accent}`, overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: photoSz, height: photoSz, borderRadius: photoRadius, background: theme.soft, border: `3px solid ${theme.accent}`, overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
               {speaker.photo ? <img src={speaker.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
                 <div style={{ fontSize: count === 1 ? 36 : 28, color: theme.accent, opacity: 0.3, fontFamily: "'DM Serif Display',serif" }}>{speaker.name?.charAt(0)?.toUpperCase() || "?"}</div>}
             </div>
