@@ -93,14 +93,14 @@ export function SpeakerSlideInner({ data, T, brand }) {
 
         {eventDate && <div style={{ fontSize: 12, color: theme.muted, marginBottom: 20 }}>{eventDate}</div>}
 
-        <div style={{ display: "flex", gap: count === 1 ? 0 : 20, alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
+        <div style={{ display: "flex", gap: count === 1 ? 0 : 20, alignItems: "flex-start", justifyContent: "center", marginBottom: 24 }}>
           {speakers.filter((s) => s?.name).map((speaker, i) => (
-            <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+            <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, flex: count > 1 ? 1 : undefined, width: count > 1 ? 0 : undefined }}>
               <div style={{ width: photoSz, height: photoSz, borderRadius: photoRadius, background: theme.soft, border: `3px solid ${theme.accent}`, overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {speaker.photo ? <img src={speaker.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
                   <div style={{ fontSize: 30, color: theme.accent, opacity: 0.3, fontFamily: "'DM Serif Display',serif" }}>{speaker.name?.charAt(0)?.toUpperCase() || "?"}</div>}
               </div>
-              <div>
+              <div style={{ textAlign: "center", minHeight: 36 }}>
                 <div style={{ fontSize: count === 1 ? 16 : 13, fontWeight: 700, color: theme.text }}>{speaker.name}</div>
                 {speaker.title && <div style={{ fontSize: 11, color: theme.accent, fontWeight: 500, marginTop: 1 }}>{speaker.title}</div>}
                 {speaker.company && <div style={{ fontSize: 10, color: theme.muted, marginTop: 1 }}>{speaker.company}</div>}
@@ -136,14 +136,14 @@ export function SpeakerSlideInner({ data, T, brand }) {
           </h2>
           {sessionTitle && <div style={{ fontSize: 13, color: ct, opacity: 0.7, marginBottom: 20, fontWeight: 500 }}>{sessionTitle}</div>}
 
-          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
             {speakers.filter((s) => s?.name).map((speaker, i) => (
-              <div key={i} style={{ display: "flex", alignItems: count === 1 ? "center" : "center", flexDirection: count === 1 ? "row" : "column", gap: count === 1 ? 14 : 6 }}>
+              <div key={i} style={{ display: "flex", alignItems: count === 1 ? "center" : "center", flexDirection: count === 1 ? "row" : "column", gap: count === 1 ? 14 : 6, flex: count > 1 ? 1 : undefined, width: count > 1 ? 0 : undefined }}>
                 <div style={{ width: photoSz, height: photoSz, borderRadius: photoRadius, background: "rgba(255,255,255,0.1)", border: "2px solid rgba(255,255,255,0.3)", overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {speaker.photo ? <img src={speaker.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
                     <div style={{ fontSize: 24, color: ct, opacity: 0.4, fontFamily: "'DM Serif Display',serif" }}>{speaker.name?.charAt(0)?.toUpperCase() || "?"}</div>}
                 </div>
-                <div style={{ textAlign: count === 1 ? "left" : "center" }}>
+                <div style={{ textAlign: count === 1 ? "left" : "center", minHeight: 36 }}>
                   <div style={{ fontSize: count === 1 ? 16 : 12, fontWeight: 700, color: ct }}>{speaker.name}</div>
                   {speaker.title && <div style={{ fontSize: 11, color: ct, opacity: 0.7, marginTop: 1 }}>{speaker.title}</div>}
                   {speaker.company && <div style={{ fontSize: 10, color: ct, opacity: 0.5, marginTop: 1 }}>{speaker.company}</div>}
@@ -231,14 +231,14 @@ export function SpeakerSlideInner({ data, T, brand }) {
         {sessionTitle && <div style={{ fontSize: 13, color: theme.muted, marginTop: 8, fontWeight: 500 }}>{sessionTitle}</div>}
       </div>
 
-      <div style={{ flex: 1, padding: "16px 36px", display: "flex", gap: count === 1 ? 0 : 16, alignItems: "center", justifyContent: count === 1 ? "flex-start" : "center" }}>
+      <div style={{ flex: 1, padding: "16px 36px", display: "flex", gap: count === 1 ? 0 : 16, alignItems: "flex-start", justifyContent: count === 1 ? "flex-start" : "center", paddingTop: 20 }}>
         {speakers.filter((s) => s?.name).map((speaker, i) => (
-          <div key={i} style={{ display: "flex", flexDirection: count === 1 ? "row" : "column", alignItems: "center", gap: count === 1 ? 18 : 8, flex: count === 1 ? undefined : 1 }}>
+          <div key={i} style={{ display: "flex", flexDirection: count === 1 ? "row" : "column", alignItems: count === 1 ? "center" : "center", gap: count === 1 ? 18 : 8, flex: count === 1 ? undefined : 1, width: count === 1 ? undefined : 0 }}>
             <div style={{ width: photoSz, height: photoSz, borderRadius: photoRadius, background: theme.soft, border: `3px solid ${theme.accent}`, overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
               {speaker.photo ? <img src={speaker.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
                 <div style={{ fontSize: count === 1 ? 36 : 28, color: theme.accent, opacity: 0.3, fontFamily: "'DM Serif Display',serif" }}>{speaker.name?.charAt(0)?.toUpperCase() || "?"}</div>}
             </div>
-            <div style={{ textAlign: count === 1 ? "left" : "center" }}>
+            <div style={{ textAlign: count === 1 ? "left" : "center", minHeight: 40 }}>
               <div style={{ fontSize: count === 1 ? 18 : count === 2 ? 15 : 13, fontWeight: 700, color: theme.text, lineHeight: 1.25 }}>{speaker.name}</div>
               {speaker.title && <div style={{ fontSize: count === 1 ? 13 : 11, color: theme.accent, fontWeight: 500, marginTop: 2, lineHeight: 1.3 }}>{speaker.title}</div>}
               {speaker.company && <div style={{ fontSize: count === 1 ? 12 : 10, color: theme.muted, marginTop: 1, lineHeight: 1.3 }}>{speaker.company}</div>}
