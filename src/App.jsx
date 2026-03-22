@@ -48,6 +48,7 @@ import {
 } from "lucide-react";
 
 import { getThemes, contrastText, makeCustomVariants } from "./utils/themes";
+import { APP_THEMES } from "./utils/appTheme";
 import { ACCEPTED_FILE_TYPES, toBase64 } from "./utils/constants";
 import {
   CAROUSEL_PROMPT,
@@ -172,8 +173,8 @@ export default function App() {
   const slideContainerRef = useRef();
   const hiddenSlideRef = useRef();
 
-  // App shell background (fixed dark/light)
-  // App shell uses A (app theme) for bg/text
+  // App shell theme (fixed dark/light, independent of output preset)
+  const A = APP_THEMES[brandMode] || APP_THEMES.dark;
   const appBg = A.bg;
   const appText = A.text;
 
