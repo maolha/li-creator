@@ -1269,6 +1269,40 @@ Return the same JSON structure with just the post object updated.`;
                     <input type="text" value={speakerData.eventUrl || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, eventUrl: e.target.value }))} placeholder="https://event-website.com" style={inputStyle(T)} />
                   </div>
                   <div>
+                    <label style={{ ...labelStyle(T), marginBottom: 4 }}>Event Logo (URL or upload)</label>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <input
+                        type="text"
+                        value={speakerData.eventLogoUrl || ""}
+                        onChange={(e) => setSpeakerData((p) => ({ ...p, eventLogoUrl: e.target.value, eventLogo: e.target.value || p.eventLogo }))}
+                        placeholder="https://... logo image URL"
+                        style={{ ...inputStyle(T), flex: 1, fontSize: 12 }}
+                      />
+                      <label style={{ background: T.soft, border: `1px solid ${T.border}`, borderRadius: 10, padding: "0 12px", cursor: "pointer", display: "flex", alignItems: "center", color: T.muted, fontSize: 11, fontWeight: 600, whiteSpace: "nowrap", height: 38 }}>
+                        <Upload size={12} style={{ marginRight: 4 }} /> File
+                        <input
+                          type="file"
+                          accept="image/*"
+                          style={{ display: "none" }}
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            const reader = new FileReader();
+                            reader.onload = () => setSpeakerData((p) => ({ ...p, eventLogo: reader.result, eventLogoUrl: "" }));
+                            reader.readAsDataURL(file);
+                          }}
+                        />
+                      </label>
+                    </div>
+                    {speakerData.eventLogo && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
+                        <img src={speakerData.eventLogo} alt="" style={{ height: 24, maxWidth: 80, objectFit: "contain", borderRadius: 4 }} />
+                        <span style={{ fontSize: 11, color: T.muted }}>Logo set</span>
+                        <button onClick={() => setSpeakerData((p) => ({ ...p, eventLogo: null, eventLogoUrl: "" }))} style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 0, fontSize: 11 }}>Remove</button>
+                      </div>
+                    )}
+                  </div>
+                  <div>
                     <label style={{ ...labelStyle(T), marginBottom: 4 }}>Session / Talk Title (optional)</label>
                     <input type="text" value={speakerData.sessionTitle || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, sessionTitle: e.target.value }))} placeholder="e.g. The Future of AI in Banking" style={inputStyle(T)} />
                   </div>
@@ -1604,6 +1638,31 @@ Return the same JSON structure with just the post object updated.`;
                             }}
                           >
                             {a}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    {/* Background mode */}
+                    <div>
+                      <label style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4, display: "block" }}>Background</label>
+                      <div style={{ display: "flex", gap: 4 }}>
+                        {[
+                          { id: "dark", label: "Dark", icon: "🌙" },
+                          { id: "light", label: "Light", icon: "☀" },
+                          { id: "invert", label: "Invert", icon: "◑" },
+                        ].map((m) => (
+                          <button
+                            key={m.id}
+                            onClick={() => setSpeakerData((p) => ({ ...p, style: { ...p.style, bgMode: m.id } }))}
+                            style={{
+                              flex: 1, padding: "7px 4px", borderRadius: 6, fontSize: 11, fontWeight: 600,
+                              border: `1px solid ${(speakerData.style?.bgMode || "dark") === m.id ? T.accent : T.border}`,
+                              background: (speakerData.style?.bgMode || "dark") === m.id ? T.soft : "transparent",
+                              color: (speakerData.style?.bgMode || "dark") === m.id ? T.accent : T.muted,
+                              cursor: "pointer", textAlign: "center", fontFamily: "'Inter', sans-serif",
+                            }}
+                          >
+                            {m.icon} {m.label}
                           </button>
                         ))}
                       </div>
