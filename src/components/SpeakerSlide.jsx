@@ -16,7 +16,7 @@ const LAYOUTS = {
 export { LAYOUTS as SPEAKER_LAYOUTS, ASPECT_RATIOS as SPEAKER_ASPECTS };
 
 export function SpeakerSlideInner({ data, T, brand }) {
-  const { eventTitle, eventDate, cta, eventLogo, sessionTitle, regUrl } = data || {};
+  const { eventTitle, eventDate, cta, eventLogo, sessionTitle, regUrl, tagLabel } = data || {};
   const speakers = Array.isArray(data?.speakers) ? data.speakers : [];
   const style = data?.style || {};
   const layout = style.layout || "classic";
@@ -95,7 +95,7 @@ export function SpeakerSlideInner({ data, T, brand }) {
 
         <div style={{ padding: "32px 36px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "inline-flex", alignItems: "center", background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 999, padding: "4px 14px", fontSize: 11, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: "rgba(255,255,255,0.9)" }}>
-            Speaker{count > 1 ? "s" : ""}
+            {tagLabel || (count > 1 ? "Speakers" : "Speaker")}
           </div>
           {eventDate && <div style={{ fontSize: 12, color: ct, opacity: 0.6 }}>{eventDate}</div>}
         </div>
@@ -181,9 +181,8 @@ export function SpeakerSlideInner({ data, T, brand }) {
       <div style={{ padding: "28px 36px 0", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
           <div style={{ display: "inline-flex", alignItems: "center", background: T.soft, border: `1px solid ${T.border}`, borderRadius: 999, padding: "4px 14px", fontSize: 11, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: T.accent }}>
-            Speaker{count > 1 ? "s" : ""}
+            {tagLabel || (count > 1 ? "Speakers" : "Speaker")}
           </div>
-          {eventDate && <div style={{ fontSize: 12, color: T.muted, marginTop: 8, fontWeight: 500 }}>{eventDate}</div>}
         </div>
         {eventLogo ? (
           <img src={eventLogo} alt="" style={{ height: 32, maxWidth: 100, objectFit: "contain", borderRadius: 4 }} />
@@ -216,14 +215,17 @@ export function SpeakerSlideInner({ data, T, brand }) {
         ))}
       </div>
 
-      <div style={{ padding: "0 36px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid ${T.border}`, paddingTop: 16, margin: "0 36px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ background: ctaColor, color: ctaTextColor, padding: "8px 22px", borderRadius: 8, fontSize: 12, fontWeight: 700 }}>
-            {cta || "Register now"}
+      <div style={{ padding: "0 36px 24px", borderTop: `1px solid ${T.border}`, paddingTop: 16, margin: "0 36px" }}>
+        {eventDate && <div style={{ fontSize: 11, color: T.muted, marginBottom: 10, fontWeight: 500 }}>{eventDate}</div>}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ background: ctaColor, color: ctaTextColor, padding: "8px 22px", borderRadius: 8, fontSize: 12, fontWeight: 700 }}>
+              {cta || "Register now"}
+            </div>
+            {regUrl && <span style={{ fontSize: 10, color: T.muted, opacity: 0.7 }}>{regUrl.replace(/^https?:\/\//, "")}</span>}
           </div>
-          {regUrl && <span style={{ fontSize: 10, color: T.muted, opacity: 0.7 }}>{regUrl.replace(/^https?:\/\//, "")}</span>}
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: T.accent, opacity: 0.85 }}>{brand}</span>
         </div>
-        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: T.accent, opacity: 0.85 }}>{brand}</span>
       </div>
     </div>
   );

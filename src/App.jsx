@@ -1272,9 +1272,15 @@ Return the same JSON structure with just the post object updated.`;
                     <label style={{ ...labelStyle(T), marginBottom: 4 }}>Session / Talk Title (optional)</label>
                     <input type="text" value={speakerData.sessionTitle || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, sessionTitle: e.target.value }))} placeholder="e.g. The Future of AI in Banking" style={inputStyle(T)} />
                   </div>
-                  <div>
-                    <label style={{ ...labelStyle(T), marginBottom: 4 }}>Registration URL (shown on visual)</label>
-                    <input type="text" value={speakerData.regUrl || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, regUrl: e.target.value }))} placeholder="https://event.com/register" style={inputStyle(T)} />
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    <div>
+                      <label style={{ ...labelStyle(T), marginBottom: 4 }}>Registration URL</label>
+                      <input type="text" value={speakerData.regUrl || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, regUrl: e.target.value }))} placeholder="https://event.com/register" style={inputStyle(T)} />
+                    </div>
+                    <div>
+                      <label style={{ ...labelStyle(T), marginBottom: 4 }}>Tag Label</label>
+                      <input type="text" value={speakerData.tagLabel || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, tagLabel: e.target.value }))} placeholder="Speaker / Panelist / Keynote" style={inputStyle(T)} />
+                    </div>
                   </div>
                 </div>
 
