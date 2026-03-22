@@ -758,6 +758,51 @@ Return the same JSON structure with just the post object updated.`;
 
   const slide = slides?.[cur];
   const isSpeakerMode = contentType === "speaker";
+
+  // Save to Library
+  const [savingToLibrary, setSavingToLibrary] = useState(false);
+  const [savedToLibrary, setSavedToLibrary] = useState(false);
+  async function saveToLibrary() {
+    if (!user || savingToLibrary) return;
+    setSavingToLibrary(true);
+    try {
+      await saveCreation(user.uid, {
+        title: title || speakerData?.eventTitle || "Untitled",
+        slides: slides || [],
+        post: post || null,
+        contentType,
+        theme,
+        brand,
+        tone,
+        audience,
+        speakerData: isSpeakerMode ? speakerData : undefined,
+      });
+      const updated = await getCreations(user.uid);
+      setCreations(updated);
+      setSavedToLibrary(true);
+      setTimeout(() => setSavedToLibrary(false), 2500);
+    } catch (e) {
+      setError("Failed to save: " + e.message);
+    }
+    setSavingToLibrary(false);
+  }
+
+  async function saveAsCopy() {
+    if (!user) return;
+    await saveCreation(user.uid, {
+      title: (title || speakerData?.eventTitle || "Untitled") + " (copy)",
+      slides: slides || [],
+      post: post || null,
+      contentType,
+      theme,
+      brand,
+      tone,
+      audience,
+      speakerData: isSpeakerMode ? speakerData : undefined,
+    });
+    const updated = await getCreations(user.uid);
+    setCreations(updated);
+  }
   const hasSpeakerContent = isSpeakerMode && speakerData?.eventTitle?.trim() && Array.isArray(speakerData?.speakers) && speakerData.speakers.some((s) => s?.name?.trim());
   const hasContent = isSpeakerMode ? hasSpeakerContent : (input.trim() || files.length > 0);
   const hasSlides = slides?.length > 0;
