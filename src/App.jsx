@@ -58,7 +58,7 @@ import {
   TEXT_POST_PROMPT,
 } from "./utils/prompts";
 import { ScaledSlide, SlideInner } from "./components/SlideRenderer";
-import { ScaledSpeakerSlide, SpeakerSlideInner, SPEAKER_LAYOUTS } from "./components/SpeakerSlide";
+import { ScaledSpeakerSlide, SpeakerSlideInner, SPEAKER_LAYOUTS, SPEAKER_ASPECTS } from "./components/SpeakerSlide";
 import { buildPdf } from "./utils/buildPdf";
 import { downloadSinglePng, downloadAllPngs } from "./utils/exportPng";
 import { themeFromAccent } from "./utils/colorExtractor";
@@ -1272,6 +1272,10 @@ Return the same JSON structure with just the post object updated.`;
                     <label style={{ ...labelStyle(T), marginBottom: 4 }}>Session / Talk Title (optional)</label>
                     <input type="text" value={speakerData.sessionTitle || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, sessionTitle: e.target.value }))} placeholder="e.g. The Future of AI in Banking" style={inputStyle(T)} />
                   </div>
+                  <div>
+                    <label style={{ ...labelStyle(T), marginBottom: 4 }}>Registration URL (shown on visual)</label>
+                    <input type="text" value={speakerData.regUrl || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, regUrl: e.target.value }))} placeholder="https://event.com/register" style={inputStyle(T)} />
+                  </div>
                 </div>
 
                 {/* Speakers */}
@@ -1279,11 +1283,23 @@ Return the same JSON structure with just the post object updated.`;
                   <div key={si} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontSize: 12, fontWeight: 700, color: T.accent }}>Speaker {si + 1}</span>
-                      {(speakerData.speakers || []).length > 1 && (
-                        <button onClick={() => setSpeakerData((p) => ({ ...p, speakers: p.speakers.filter((_, j) => j !== si) }))} style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 0 }}>
-                          <X size={14} />
-                        </button>
-                      )}
+                      <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                        {si > 0 && (
+                          <button onClick={() => setSpeakerData((p) => { const s = [...p.speakers]; [s[si-1], s[si]] = [s[si], s[si-1]]; return { ...p, speakers: s }; })} style={{ background: "none", border: `1px solid ${T.border}`, borderRadius: 4, color: T.muted, cursor: "pointer", padding: "2px 5px", fontSize: 10 }} title="Move up">
+                            &#9650;
+                          </button>
+                        )}
+                        {si < (speakerData.speakers || []).length - 1 && (
+                          <button onClick={() => setSpeakerData((p) => { const s = [...p.speakers]; [s[si], s[si+1]] = [s[si+1], s[si]]; return { ...p, speakers: s }; })} style={{ background: "none", border: `1px solid ${T.border}`, borderRadius: 4, color: T.muted, cursor: "pointer", padding: "2px 5px", fontSize: 10 }} title="Move down">
+                            &#9660;
+                          </button>
+                        )}
+                        {(speakerData.speakers || []).length > 1 && (
+                          <button onClick={() => setSpeakerData((p) => ({ ...p, speakers: p.speakers.filter((_, j) => j !== si) }))} style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 0 }}>
+                            <X size={14} />
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <input type="text" value={speaker.name} onChange={(e) => { const s = [...speakerData.speakers]; s[si] = { ...s[si], name: e.target.value }; setSpeakerData((p) => ({ ...p, speakers: s })); }} placeholder="Full name" style={inputStyle(T)} />
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
@@ -1483,7 +1499,7 @@ Return the same JSON structure with just the post object updated.`;
                   {/* Export */}
                   <div ref={slideContainerRef}>
                     <div style={{ position: "fixed", left: -9999, top: 0, zIndex: -1 }}>
-                      <div ref={hiddenSlideRef} style={{ width: 540, height: 540 }}>
+                      <div ref={hiddenSlideRef} style={{ width: (SPEAKER_ASPECTS[speakerData?.style?.aspect] || SPEAKER_ASPECTS["1:1"]).w, height: (SPEAKER_ASPECTS[speakerData?.style?.aspect] || SPEAKER_ASPECTS["1:1"]).h }}>
                         <SpeakerSlideInner data={speakerData} T={T} brand={brand} />
                       </div>
                     </div>
@@ -1563,6 +1579,27 @@ Return the same JSON structure with just the post object updated.`;
                             </button>
                           ))}
                         </div>
+                      </div>
+                    </div>
+                    {/* Aspect ratio */}
+                    <div>
+                      <label style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4, display: "block" }}>Size</label>
+                      <div style={{ display: "flex", gap: 4 }}>
+                        {Object.keys(SPEAKER_ASPECTS).map((a) => (
+                          <button
+                            key={a}
+                            onClick={() => setSpeakerData((p) => ({ ...p, style: { ...p.style, aspect: a } }))}
+                            style={{
+                              flex: 1, padding: "7px 4px", borderRadius: 6, fontSize: 11, fontWeight: 600,
+                              border: `1px solid ${(speakerData.style?.aspect || "1:1") === a ? T.accent : T.border}`,
+                              background: (speakerData.style?.aspect || "1:1") === a ? T.soft : "transparent",
+                              color: (speakerData.style?.aspect || "1:1") === a ? T.accent : T.muted,
+                              cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", textAlign: "center",
+                            }}
+                          >
+                            {a}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </div>

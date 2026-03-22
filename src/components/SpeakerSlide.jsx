@@ -1,6 +1,10 @@
 import { contrastText } from "../utils/themes";
 
-const SS = 540;
+const ASPECT_RATIOS = {
+  "1:1": { w: 540, h: 540 },
+  "16:9": { w: 640, h: 360 },
+  "9:16": { w: 360, h: 640 },
+};
 
 const LAYOUTS = {
   classic: "Classic",
@@ -9,26 +13,41 @@ const LAYOUTS = {
   minimal: "Minimal",
 };
 
-export { LAYOUTS as SPEAKER_LAYOUTS };
+export { LAYOUTS as SPEAKER_LAYOUTS, ASPECT_RATIOS as SPEAKER_ASPECTS };
 
 export function SpeakerSlideInner({ data, T, brand }) {
-  const { eventTitle, eventDate, cta, eventLogo, sessionTitle } = data || {};
+  const { eventTitle, eventDate, cta, eventLogo, sessionTitle, regUrl } = data || {};
   const speakers = Array.isArray(data?.speakers) ? data.speakers : [];
   const style = data?.style || {};
   const layout = style.layout || "classic";
+  const aspect = style.aspect || "1:1";
+  const { w: SW, h: SH } = ASPECT_RATIOS[aspect] || ASPECT_RATIOS["1:1"];
   const ctaColor = style.ctaColor || T.accent;
   const ctaTextColor = contrastText(ctaColor);
   const ct = contrastText(T.accent);
   const count = speakers.filter((s) => s?.name).length || 1;
-  const photoShape = style.photoShape || "circle"; // circle | rounded | square
+  const photoShape = style.photoShape || "circle";
+  const isWide = aspect === "16:9";
+  const isTall = aspect === "9:16";
 
   const photoRadius = photoShape === "circle" ? "50%" : photoShape === "rounded" ? 12 : 0;
+  const pad = isWide ? "24px 32px" : isTall ? "28px 28px" : "28px 36px";
+  const titleSize = isWide
+    ? (eventTitle?.length > 35 ? 22 : 28)
+    : isTall
+    ? (eventTitle?.length > 35 ? 24 : 32)
+    : (eventTitle?.length > 40 ? 26 : eventTitle?.length > 25 ? 32 : 38);
+  const photoSz = isWide
+    ? (count === 1 ? 64 : count === 2 ? 56 : 48)
+    : isTall
+    ? (count === 1 ? 80 : count === 2 ? 68 : 56)
+    : (count === 1 ? 90 : count === 2 ? 80 : 68);
 
   // ── CENTERED LAYOUT ──
   if (layout === "centered") {
     return (
-      <div style={{ width: SS, height: SS, background: T.card, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxSizing: "border-box", textAlign: "center" }}>
-        <div style={{ position: "absolute", top: 0, left: 0, width: SS, height: 6, background: T.accent }} />
+      <div style={{ width: SW, height: SH, background: T.card, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxSizing: "border-box", textAlign: "center" }}>
+        <div style={{ position: "absolute", top: 0, left: 0, width: SW, height: 6, background: T.accent }} />
         <div style={{ position: "absolute", top: -100, right: -100, width: 350, height: 350, borderRadius: "50%", background: T.accent, opacity: 0.05 }} />
 
         {eventLogo ? (
@@ -70,7 +89,7 @@ export function SpeakerSlideInner({ data, T, brand }) {
   // ── BOLD BANNER LAYOUT ──
   if (layout === "bold") {
     return (
-      <div style={{ width: SS, height: SS, background: T.accent, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
+      <div style={{ width: SW, height: SH, background: T.accent, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
         <div style={{ position: "absolute", top: -80, right: -80, width: 300, height: 300, borderRadius: "50%", background: "rgba(255,255,255,0.07)" }} />
         <div style={{ position: "absolute", bottom: -60, left: -40, width: 250, height: 250, borderRadius: "50%", background: "rgba(0,0,0,0.05)" }} />
 
@@ -117,8 +136,8 @@ export function SpeakerSlideInner({ data, T, brand }) {
   // ── MINIMAL LAYOUT ──
   if (layout === "minimal") {
     return (
-      <div style={{ width: SS, height: SS, background: T.card, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", justifyContent: "center", boxSizing: "border-box", padding: "40px 44px" }}>
-        <div style={{ position: "absolute", top: 0, left: 0, width: 5, height: SS, background: T.accent }} />
+      <div style={{ width: SW, height: SH, background: T.card, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", justifyContent: "center", boxSizing: "border-box", padding: "40px 44px" }}>
+        <div style={{ position: "absolute", top: 0, left: 0, width: 5, height: SH, background: T.accent }} />
 
         {eventDate && <div style={{ fontSize: 11, color: T.muted, marginBottom: 12, fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>{eventDate}</div>}
 
@@ -154,8 +173,8 @@ export function SpeakerSlideInner({ data, T, brand }) {
 
   // ── CLASSIC LAYOUT (default) ──
   return (
-    <div style={{ width: SS, height: SS, background: T.card, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
-      <div style={{ position: "absolute", top: 0, left: 0, width: SS, height: 6, background: T.accent }} />
+    <div style={{ width: SW, height: SH, background: T.card, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
+      <div style={{ position: "absolute", top: 0, left: 0, width: SW, height: 6, background: T.accent }} />
       <div style={{ position: "absolute", top: -80, right: -80, width: 300, height: 300, borderRadius: "50%", background: T.accent, opacity: 0.06 }} />
       <div style={{ position: "absolute", bottom: -60, left: -40, width: 220, height: 220, borderRadius: "50%", border: `2px solid ${T.accent}`, opacity: 0.05 }} />
 
@@ -198,8 +217,11 @@ export function SpeakerSlideInner({ data, T, brand }) {
       </div>
 
       <div style={{ padding: "0 36px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid ${T.border}`, paddingTop: 16, margin: "0 36px" }}>
-        <div style={{ background: ctaColor, color: ctaTextColor, padding: "8px 22px", borderRadius: 8, fontSize: 12, fontWeight: 700 }}>
-          {cta || "Register now"}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ background: ctaColor, color: ctaTextColor, padding: "8px 22px", borderRadius: 8, fontSize: 12, fontWeight: 700 }}>
+            {cta || "Register now"}
+          </div>
+          {regUrl && <span style={{ fontSize: 10, color: T.muted, opacity: 0.7 }}>{regUrl.replace(/^https?:\/\//, "")}</span>}
         </div>
         <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: T.accent, opacity: 0.85 }}>{brand}</span>
       </div>
@@ -208,10 +230,13 @@ export function SpeakerSlideInner({ data, T, brand }) {
 }
 
 export function ScaledSpeakerSlide({ data, T, brand, size }) {
-  const sc = size / SS;
+  const aspect = data?.style?.aspect || "1:1";
+  const { w, h } = ASPECT_RATIOS[aspect] || ASPECT_RATIOS["1:1"];
+  const sc = size / w;
+  const scaledH = h * sc;
   return (
-    <div style={{ width: size, height: size, borderRadius: 16, overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)" }}>
-      <div style={{ width: SS, height: SS, transform: `scale(${sc})`, transformOrigin: "top left" }}>
+    <div style={{ width: size, height: scaledH, borderRadius: 16, overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)" }}>
+      <div style={{ width: w, height: h, transform: `scale(${sc})`, transformOrigin: "top left" }}>
         <SpeakerSlideInner data={data} T={T} brand={brand} />
       </div>
     </div>
