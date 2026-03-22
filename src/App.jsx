@@ -35,6 +35,8 @@ import {
   Sun,
   Moon,
   ClipboardCopy,
+  Mic,
+  Users,
 } from "lucide-react";
 
 import { getThemes, contrastText, makeCustomVariants } from "./utils/themes";
@@ -65,6 +67,24 @@ function saveState(key, value) {
   try { localStorage.setItem(`cf_${key}`, JSON.stringify(value)); } catch {}
 }
 
+const TONES = [
+  { id: "professional", label: "Professional" },
+  { id: "provocative", label: "Provocative" },
+  { id: "storytelling", label: "Storytelling" },
+  { id: "educational", label: "Educational" },
+  { id: "data-driven", label: "Data-driven" },
+];
+
+const AUDIENCES = [
+  { id: "general", label: "General" },
+  { id: "c-suite", label: "C-Suite / Execs" },
+  { id: "developers", label: "Developers" },
+  { id: "marketers", label: "Marketers" },
+  { id: "founders", label: "Founders / Startup" },
+  { id: "hr", label: "HR / People" },
+  { id: "finance", label: "Finance / Banking" },
+];
+
 const CONTENT_TYPES = [
   { id: "carousel", label: "Carousel", icon: Layers, desc: "Multi-slide deck" },
   { id: "quote-card", label: "Quote Card", icon: Quote, desc: "Single quote" },
@@ -88,6 +108,8 @@ export default function App() {
   const [customThemes, setCustomThemes] = useState(() => loadState("custom_themes", {}));
   const [brandMode, setBrandMode] = useState(() => loadState("brandMode", "dark"));
   const [activeTab, setActiveTab] = useState(() => loadState("activeTab", "slides"));
+  const [tone, setTone] = useState(() => loadState("tone", "professional"));
+  const [audience, setAudience] = useState(() => loadState("audience", "general"));
 
   // Ephemeral state (reset on refresh is fine)
   const [drag, setDrag] = useState(false);
@@ -136,6 +158,8 @@ export default function App() {
   useEffect(() => { saveState("custom_themes", customThemes); }, [customThemes]);
   useEffect(() => { saveState("brandMode", brandMode); }, [brandMode]);
   useEffect(() => { saveState("activeTab", activeTab); }, [activeTab]);
+  useEffect(() => { saveState("tone", tone); }, [tone]);
+  useEffect(() => { saveState("audience", audience); }, [audience]);
 
   // Responsive card size
   useEffect(() => {
@@ -182,12 +206,30 @@ export default function App() {
   }
 
   function getPromptForType(type) {
+    let base;
     switch (type) {
-      case "quote-card": return QUOTE_CARD_PROMPT;
-      case "stat-card": return STAT_CARD_PROMPT;
-      case "text-post": return TEXT_POST_PROMPT;
-      default: return CAROUSEL_PROMPT;
+      case "quote-card": base = QUOTE_CARD_PROMPT; break;
+      case "stat-card": base = STAT_CARD_PROMPT; break;
+      case "text-post": base = TEXT_POST_PROMPT; break;
+      default: base = CAROUSEL_PROMPT;
     }
+    const toneInstructions = tone !== "professional" ? `\n\nTONE: Write in a ${tone} tone. ${
+      tone === "provocative" ? "Challenge conventional thinking. Use bold, contrarian statements. Be edgy but credible." :
+      tone === "storytelling" ? "Use narrative structure. Open with a scene or anecdote. Make it personal and relatable." :
+      tone === "educational" ? "Teach clearly. Use frameworks, step-by-step breakdowns, and 'here is what most people miss' patterns." :
+      tone === "data-driven" ? "Lead with numbers and evidence. Cite specific stats. Use 'the data shows' framing." :
+      ""
+    }` : "";
+    const audienceInstructions = audience !== "general" ? `\n\nAUDIENCE: Write specifically for ${
+      audience === "c-suite" ? "C-suite executives and senior leaders. Use strategic language, focus on business impact, ROI, and competitive advantage. Skip technical details." :
+      audience === "developers" ? "software developers and engineers. Use technical language, code metaphors, and engineering frameworks. Be specific and practical." :
+      audience === "marketers" ? "marketing professionals. Focus on growth, engagement, conversion, and brand strategy. Use marketing frameworks." :
+      audience === "founders" ? "startup founders and entrepreneurs. Focus on scaling, fundraising, product-market fit, and founder lessons. Be real and battle-tested." :
+      audience === "hr" ? "HR and people leaders. Focus on culture, hiring, retention, DEI, and employee experience. Use empathetic, people-first language." :
+      audience === "finance" ? "finance and banking professionals. Focus on risk, compliance, market trends, and financial innovation. Use precise, authoritative language." :
+      `${audience} professionals.`
+    }` : "";
+    return base + toneInstructions + audienceInstructions;
   }
 
   function getGenerateText(type) {
@@ -666,6 +708,22 @@ export default function App() {
               )}
             </div>
 
+            {/* Tone + Audience */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div>
+                <label style={labelStyle(T)}><Mic size={12} /> Tone</label>
+                <select value={tone} onChange={(e) => setTone(e.target.value)} style={selectStyle(T)}>
+                  {TONES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle(T)}><Users size={12} /> Audience</label>
+                <select value={audience} onChange={(e) => setAudience(e.target.value)} style={selectStyle(T)}>
+                  {AUDIENCES.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+                </select>
+              </div>
+            </div>
+
             {/* Theme swatches */}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
               {Object.entries(allThemes).map(([name, t]) => (
@@ -1117,6 +1175,31 @@ export default function App() {
                       <p style={{ fontSize: 10, color: T.muted, marginTop: 4, opacity: 0.7 }}>Separate with commas</p>
                     </div>
                   </div>
+
+                  {/* Character counter */}
+                  {(() => {
+                    const len = postText().length;
+                    const over = len > 3000;
+                    return (
+                      <div style={{
+                        display: "flex", justifyContent: "space-between", alignItems: "center",
+                        padding: "8px 14px", borderRadius: 10,
+                        background: over ? "rgba(232,58,58,0.08)" : T.soft,
+                        border: `1px solid ${over ? "rgba(232,58,58,0.25)" : T.border}`,
+                      }}>
+                        <span style={{ fontSize: 12, color: over ? "#E85A3A" : T.muted }}>
+                          {over ? "Over LinkedIn's 3,000 character limit" : "Post length"}
+                        </span>
+                        <span style={{
+                          fontSize: 13, fontWeight: 700,
+                          fontFamily: "'JetBrains Mono', monospace",
+                          color: over ? "#E85A3A" : len > 2700 ? "#D4A853" : T.accent,
+                        }}>
+                          {len.toLocaleString()} / 3,000
+                        </span>
+                      </div>
+                    );
+                  })()}
 
                   {/* Full preview */}
                   <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: 16, whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.75, color: T.text, wordBreak: "break-word" }}>
