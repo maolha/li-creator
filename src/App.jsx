@@ -342,6 +342,60 @@ export default function App() {
     setRegeneratingSlide(null);
   }
 
+  // Rewrite slide with instructions
+  const [slideRewritePrompt, setSlideRewritePrompt] = useState("");
+  const [rewritingSlide, setRewritingSlide] = useState(false);
+  async function rewriteSlide(index) {
+    if (!apiKey || rewritingSlide) return;
+    setRewritingSlide(true);
+    try {
+      const s = slides[index];
+      const context = `Rewrite this LinkedIn carousel slide. Keep the same type "${s.type || "insight"}".
+Current headline: "${s.headline}"
+Current body: "${s.body}"
+${s.stat ? `Current stat: "${s.stat}"` : ""}
+${slideRewritePrompt.trim() ? `\nInstructions for rewrite: ${slideRewritePrompt}` : "Make it punchier, more engaging, and more surprising."}
+${input.trim() ? `\nOriginal source context:\n${input.slice(0, 500)}` : ""}`;
+      const result = await callApi(SINGLE_SLIDE_PROMPT, context);
+      setSlides((prev) => {
+        const updated = [...prev];
+        updated[index] = result;
+        return updated;
+      });
+      setSlideRewritePrompt("");
+    } catch (e) {
+      setError(`Rewrite failed: ${e.message}`);
+    }
+    setRewritingSlide(false);
+  }
+
+  // Rewrite post copy with instructions
+  const [postRewritePrompt, setPostRewritePrompt] = useState("");
+  const [rewritingPost, setRewritingPost] = useState(false);
+  async function rewritePost() {
+    if (!apiKey || !post || rewritingPost) return;
+    setRewritingPost(true);
+    try {
+      const prompt = getPromptForType(contentType);
+      const context = `Rewrite this LinkedIn post copy. Keep the same topic and structure.
+Current hook: "${post.hook}"
+Current body: "${post.body}"
+Current CTA: "${post.cta}"
+Current hashtags: ${post.hashtags.join(", ")}
+${postRewritePrompt.trim() ? `\nInstructions for rewrite: ${postRewritePrompt}` : "Make it more engaging, bolder, and more scroll-stopping."}
+${source.trim() ? `\nSource/reference: "${source}"` : ""}
+${input.trim() ? `\nOriginal source context:\n${input.slice(0, 500)}` : ""}
+
+Return the same JSON structure with just the post object updated.`;
+      const result = await callApi(prompt, context);
+      if (result.post) setPost(result.post);
+      setPostRewritePrompt("");
+    } catch (e) {
+      setError(`Rewrite failed: ${e.message}`);
+    }
+    setRewritingPost(false);
+  }
+
   // Copy slide as image to clipboard
   const [copiedSlide, setCopiedSlide] = useState(false);
   async function copySlideToClipboard() {
@@ -1110,6 +1164,39 @@ export default function App() {
                       <label style={{ ...labelStyle(T), marginBottom: 4 }}>Tag</label>
                       <input type="text" value={slide.tag || ""} onChange={(e) => updateSlideField(cur, "tag", e.target.value)} style={inputStyle(T)} />
                     </div>
+
+                    {/* Rewrite with instructions */}
+                    <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 12 }}>
+                      <label style={{ ...labelStyle(T), marginBottom: 4 }}>
+                        <RefreshCw size={12} /> AI Rewrite
+                      </label>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <input
+                          type="text"
+                          value={slideRewritePrompt}
+                          onChange={(e) => setSlideRewritePrompt(e.target.value)}
+                          placeholder="e.g. make it more provocative..."
+                          style={{ ...inputStyle(T), flex: 1, fontSize: 13 }}
+                          onKeyDown={(e) => { if (e.key === "Enter") rewriteSlide(cur); }}
+                        />
+                        <button
+                          onClick={() => rewriteSlide(cur)}
+                          disabled={rewritingSlide || !apiKey}
+                          style={{
+                            background: T.accent, color: contrastText(T.accent), border: "none", borderRadius: 10,
+                            padding: "0 14px", fontSize: 12, fontWeight: 600, cursor: "pointer",
+                            fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap",
+                            opacity: rewritingSlide ? 0.5 : 1, display: "flex", alignItems: "center", gap: 5,
+                          }}
+                        >
+                          {rewritingSlide ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <RefreshCw size={13} />}
+                          Rewrite
+                        </button>
+                      </div>
+                      <p style={{ fontSize: 10, color: T.muted, marginTop: 4, opacity: 0.7 }}>
+                        Leave empty for a general improvement, or describe what to change
+                      </p>
+                    </div>
                   </div>
                 </motion.div>
               )}
@@ -1132,6 +1219,31 @@ export default function App() {
                       {copied ? <Check size={13} /> : <Copy size={13} />}
                       {copied ? "Copied!" : "Copy All"}
                     </motion.button>
+                  </div>
+
+                  {/* Rewrite post */}
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input
+                      type="text"
+                      value={postRewritePrompt}
+                      onChange={(e) => setPostRewritePrompt(e.target.value)}
+                      placeholder="e.g. shorter, more personal, add a story..."
+                      style={{ ...inputStyle(T), flex: 1, fontSize: 13 }}
+                      onKeyDown={(e) => { if (e.key === "Enter") rewritePost(); }}
+                    />
+                    <button
+                      onClick={rewritePost}
+                      disabled={rewritingPost || !apiKey}
+                      style={{
+                        background: T.accent, color: contrastText(T.accent), border: "none", borderRadius: 10,
+                        padding: "0 14px", fontSize: 12, fontWeight: 600, cursor: "pointer",
+                        fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap",
+                        opacity: rewritingPost ? 0.5 : 1, display: "flex", alignItems: "center", gap: 5,
+                      }}
+                    >
+                      {rewritingPost ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <RefreshCw size={13} />}
+                      Rewrite
+                    </button>
                   </div>
 
                   {/* Editable structured post */}
