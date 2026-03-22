@@ -156,14 +156,19 @@ export default function App() {
   const slideContainerRef = useRef();
   const hiddenSlideRef = useRef();
 
-  const builtInThemes = getThemes(brandMode);
-  // customThemes stores { name: { dark: {...}, light: {...} } }
+  // App shell background (fixed dark/light)
+  const appBg = brandMode === "dark" ? "#08090D" : "#F5F4F0";
+  const appCard = brandMode === "dark" ? "#0F1117" : "#FFFFFF";
+  const appText = brandMode === "dark" ? "#F0F0F8" : "#1A1A2E";
+
+  // Output preset (accent colors for slides + UI accents)
+  const builtInPresets = getThemes(brandMode);
   const customResolved = {};
   for (const [name, val] of Object.entries(customThemes)) {
     customResolved[name] = val[brandMode] || val.dark || val;
   }
-  const allThemes = { ...builtInThemes, ...customResolved };
-  const T = allThemes[theme] || builtInThemes["Midnight Pro"];
+  const allPresets = { ...builtInPresets, ...customResolved };
+  const T = allPresets[theme] || builtInPresets["Midnight Pro"];
   const ct = contrastText(T.accent);
 
   // Auth listener
@@ -702,8 +707,8 @@ Return the same JSON structure with just the post object updated.`;
     <div
       style={{
         minHeight: "100vh",
-        background: T.bg,
-        color: T.text,
+        background: appBg,
+        color: appText,
         fontFamily: "'DM Sans', sans-serif",
         transition: "background 0.4s, color 0.4s",
       }}
@@ -721,7 +726,7 @@ Return the same JSON structure with just the post object updated.`;
       <header
         style={{
           borderBottom: `1px solid ${T.border}`,
-          background: `${T.card}CC`,
+          background: `${appCard}CC`,
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
           position: "sticky",
@@ -958,7 +963,7 @@ Return the same JSON structure with just the post object updated.`;
               <div>
                 <label style={labelStyle(T)}><Palette size={12} /> Theme</label>
                 <select value={theme} onChange={(e) => setTheme(e.target.value)} style={selectStyle(T)}>
-                  {Object.keys(allThemes).map((t) => <option key={t}>{t}</option>)}
+                  {Object.keys(allPresets).map((t) => <option key={t}>{t}</option>)}
                 </select>
               </div>
               <div>
@@ -993,7 +998,7 @@ Return the same JSON structure with just the post object updated.`;
 
             {/* Theme swatches */}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-              {Object.entries(allThemes).map(([name, t]) => (
+              {Object.entries(allPresets).map(([name, t]) => (
                 <button
                   key={name}
                   onClick={() => setTheme(name)}
