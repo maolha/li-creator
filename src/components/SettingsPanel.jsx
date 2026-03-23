@@ -65,21 +65,15 @@ export default function SettingsPanel({ T, user, profile, onSave, apiKey, onApiK
         <p style={hintStyle(T)}>Used to personalize tone and reference your expertise.</p>
       </Section>
 
-      {/* Products & Goals */}
-      <Section T={T} icon={Target} title="Products & Goals">
-        <div>
-          <label style={labelStyle(T)}>Products & Services</label>
-          <textarea value={localProfile.products || ""} onChange={(e) => updateField("products", e.target.value)} placeholder="What you sell or promote..." rows={2} style={textareaStyle(T)} />
-        </div>
-        <div>
-          <label style={labelStyle(T)}>Content Goals</label>
-          <textarea value={localProfile.goals || ""} onChange={(e) => updateField("goals", e.target.value)} placeholder="What your LinkedIn presence should achieve..." rows={2} style={textareaStyle(T)} />
-        </div>
+      {/* Content Goal */}
+      <Section T={T} icon={Target} title="Content Goal">
+        <textarea value={localProfile.goals || ""} onChange={(e) => updateField("goals", e.target.value)} placeholder="e.g. Thought leadership, inbound leads, brand awareness, community building..." rows={2} style={textareaStyle(T)} />
+        <p style={hintStyle(T)}>Your overall LinkedIn objective. Products, narratives, and AI instructions live per-brand below.</p>
       </Section>
 
       {/* Brands */}
       <Section T={T} icon={Briefcase} title="Brands">
-        <p style={hintStyle(T)}>Each brand bundles visual identity, content voice, and hashtags. Set one as default — it loads automatically when you create.</p>
+        <p style={hintStyle(T)}>Each brand bundles: colors, logos, fonts, products, voice, and hashtags. Set one as default.</p>
         <BrandEditor
           T={T}
           brands={localProfile.brands || []}

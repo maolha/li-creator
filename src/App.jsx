@@ -50,7 +50,7 @@ import {
 
 import { getThemes, contrastText, makeCustomVariants } from "./utils/themes";
 import { APP_THEMES } from "./utils/appTheme";
-import { brandDisplayName } from "./utils/brandSchema";
+import { brandDisplayName, brandAccent } from "./utils/brandSchema";
 import { ACCEPTED_FILE_TYPES, toBase64 } from "./utils/constants";
 import {
   CAROUSEL_PROMPT,
@@ -228,8 +228,8 @@ export default function App() {
             if (defaultBrand.voice?.tone) setTone(defaultBrand.voice.tone);
             if (defaultBrand.voice?.audience) setAudience(defaultBrand.voice.audience);
             // Generate theme from brand accent
-            if (defaultBrand.colors?.accent) {
-              const variants = makeCustomVariants(defaultBrand.colors.accent);
+            if (brandAccent(defaultBrand)) {
+              const variants = makeCustomVariants(brandAccent(defaultBrand));
               if (variants) {
                 const themeName = `brand-${defaultBrand.id}`;
                 setCustomThemes((prev) => ({ ...prev, [themeName]: variants }));
@@ -388,6 +388,7 @@ export default function App() {
     const ab = activeBrand;
     if (ab?.voice) {
       const bParts = [];
+      if (ab.voice.products?.trim()) bParts.push(`PRODUCTS/SERVICES: ${ab.voice.products.trim()}`);
       if (ab.voice.narratives?.trim()) bParts.push(`KEY NARRATIVES: ${ab.voice.narratives.trim()}`);
       if (ab.voice.beliefs?.trim()) bParts.push(`BELIEFS & VALUES: ${ab.voice.beliefs.trim()}`);
       if (bParts.length) {
@@ -1065,8 +1066,8 @@ Return the same JSON structure with just the post object updated.`;
                 setActiveBrand(defBrand);
                 if (defBrand.voice?.tone) setTone(defBrand.voice.tone);
                 if (defBrand.voice?.audience) setAudience(defBrand.voice.audience);
-                if (defBrand.colors?.accent) {
-                  const variants = makeCustomVariants(defBrand.colors.accent);
+                if (brandAccent(defBrand)) {
+                  const variants = makeCustomVariants(brandAccent(defBrand));
                   if (variants) {
                     const themeName = `brand-${defBrand.id}`;
                     setCustomThemes((prev) => ({ ...prev, [themeName]: variants }));
@@ -1196,8 +1197,8 @@ Return the same JSON structure with just the post object updated.`;
                       setActiveBrand(selected);
                       if (selected.voice?.tone) setTone(selected.voice.tone);
                       if (selected.voice?.audience) setAudience(selected.voice.audience);
-                      if (selected.colors?.accent) {
-                        const variants = makeCustomVariants(selected.colors.accent);
+                      if (brandAccent(selected)) {
+                        const variants = makeCustomVariants(brandAccent(selected));
                         if (variants) {
                           const themeName = `brand-${selected.id}`;
                           setCustomThemes((prev) => ({ ...prev, [themeName]: variants }));
