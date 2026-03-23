@@ -51,14 +51,12 @@ export async function signInWithGoogle() {
       photoURL: result.user.photoURL,
       createdAt: serverTimestamp(),
       profile: {
+        linkedinHeadline: "",
+        linkedinAbout: "",
         products: "",
-        narratives: "",
-        beliefs: "",
         goals: "",
-        defaultTone: "professional",
-        defaultAudience: "general",
-        defaultBrand: "",
-        hashtagGroups: [],
+        brands: [],
+        historyEnabled: true,
       },
       apiKey: "",
     });

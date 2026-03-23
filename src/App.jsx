@@ -50,6 +50,7 @@ import {
 
 import { getThemes, contrastText, makeCustomVariants } from "./utils/themes";
 import { APP_THEMES } from "./utils/appTheme";
+import { brandDisplayName } from "./utils/brandSchema";
 import { ACCEPTED_FILE_TYPES, toBase64 } from "./utils/constants";
 import {
   CAROUSEL_PROMPT,
@@ -129,7 +130,8 @@ export default function App() {
   const [files, setFiles] = useState(() => loadState("files", []));
   const [sc, setSc] = useState(() => loadState("sc", 7));
   const [theme, setTheme] = useState(() => loadState("theme", "Midnight Pro"));
-  const [brand, setBrand] = useState(() => loadState("brand", "PAIA"));
+  const [activeBrand, setActiveBrand] = useState(() => loadState("activeBrand", null));
+  const brand = brandDisplayName(activeBrand) || "PAIA";
   const [slides, setSlides] = useState(() => loadState("slides", null));
   const [title, setTitle] = useState(() => loadState("title", ""));
   const [post, setPost] = useState(() => loadState("post", null));
@@ -216,11 +218,23 @@ export default function App() {
         } else {
           loadApiKey().then((k) => { if (k) setApiKey(k); });
         }
-        // Apply defaults from profile
-        if (p) {
-          if (p.defaultBrand) setBrand(p.defaultBrand);
-          if (p.defaultTone) setTone(p.defaultTone);
-          if (p.defaultAudience) setAudience(p.defaultAudience);
+        // Apply default brand from profile
+        if (p?.brands?.length) {
+          const defaultBrand = p.brands.find((b) => b.isDefault) || p.brands[0];
+          if (defaultBrand && !activeBrand) {
+            setActiveBrand(defaultBrand);
+            if (defaultBrand.voice?.tone) setTone(defaultBrand.voice.tone);
+            if (defaultBrand.voice?.audience) setAudience(defaultBrand.voice.audience);
+            // Generate theme from brand accent
+            if (defaultBrand.colors?.accent) {
+              const variants = makeCustomVariants(defaultBrand.colors.accent);
+              if (variants) {
+                const themeName = `brand-${defaultBrand.id}`;
+                setCustomThemes((prev) => ({ ...prev, [themeName]: variants }));
+                setTheme(themeName);
+              }
+            }
+          }
         }
       } else {
         setUserProfile(null);
@@ -253,10 +267,8 @@ export default function App() {
       saveApiKey(data.apiKey);
       await saveApiKeyToFirebase(user.uid, data.apiKey);
     }
-    // Apply defaults
-    if (data.profile.defaultBrand) setBrand(data.profile.defaultBrand);
-    if (data.profile.defaultTone) setTone(data.profile.defaultTone);
-    if (data.profile.defaultAudience) setAudience(data.profile.defaultAudience);
+    // Apply defaults from onboarding
+    if (data.profile.defaultBrand) setActiveBrand({ name: data.profile.defaultBrand });
     setNeedsOnboarding(false);
   }
 
@@ -273,7 +285,7 @@ export default function App() {
   useEffect(() => { saveState("files", files); }, [files]);
   useEffect(() => { saveState("sc", sc); }, [sc]);
   useEffect(() => { saveState("theme", theme); }, [theme]);
-  useEffect(() => { saveState("brand", brand); }, [brand]);
+  useEffect(() => { saveState("activeBrand", activeBrand); }, [activeBrand]);
   useEffect(() => { saveState("slides", slides); }, [slides]);
   useEffect(() => { saveState("title", title); }, [title]);
   useEffect(() => { saveState("post", post); }, [post]);
@@ -363,14 +375,22 @@ export default function App() {
       if (p.linkedinHeadline?.trim()) parts.push(`AUTHOR HEADLINE: ${p.linkedinHeadline.trim()}`);
       if (p.linkedinAbout?.trim()) parts.push(`AUTHOR BIO: ${p.linkedinAbout.trim()}`);
       if (p.products?.trim()) parts.push(`PRODUCTS/SERVICES: ${p.products.trim()}`);
-      if (p.narratives?.trim()) parts.push(`KEY NARRATIVES: ${p.narratives.trim()}`);
-      if (p.beliefs?.trim()) parts.push(`BELIEFS & VALUES: ${p.beliefs.trim()}`);
       if (p.goals?.trim()) parts.push(`CONTENT GOALS: ${p.goals.trim()}`);
       if (parts.length) {
         userContext = `\n\nUSER CONTEXT (use this to personalize content, match the author's voice, and reference their expertise naturally):\n${parts.join("\n")}`;
       }
-      if (p.aiInstructions?.trim()) {
-        userContext += `\n\nCUSTOM INSTRUCTIONS (follow these strictly):\n${p.aiInstructions.trim()}`;
+    }
+    // Inject brand voice
+    const ab = activeBrand;
+    if (ab?.voice) {
+      const bParts = [];
+      if (ab.voice.narratives?.trim()) bParts.push(`KEY NARRATIVES: ${ab.voice.narratives.trim()}`);
+      if (ab.voice.beliefs?.trim()) bParts.push(`BELIEFS & VALUES: ${ab.voice.beliefs.trim()}`);
+      if (bParts.length) {
+        userContext += `\n\nBRAND VOICE for "${ab.name}":\n${bParts.join("\n")}`;
+      }
+      if (ab.voice.aiInstructions?.trim()) {
+        userContext += `\n\nCUSTOM INSTRUCTIONS (follow these strictly):\n${ab.voice.aiInstructions.trim()}`;
       }
     }
     return base + toneInstructions + audienceInstructions + userContext;
@@ -798,7 +818,8 @@ Return the same JSON structure with just the post object updated.`;
         contentType,
         theme,
         brandMode,
-        brand,
+        brand: activeBrand || { name: brand },
+        intensity,
         tone,
         audience,
         sc,
@@ -827,7 +848,8 @@ Return the same JSON structure with just the post object updated.`;
       contentType,
       theme,
       brandMode,
-      brand,
+      brand: activeBrand || { name: brand },
+      intensity,
       tone,
       audience,
       sc,
@@ -1029,9 +1051,21 @@ Return the same JSON structure with just the post object updated.`;
             onSave={async (profileData) => {
               await updateUserProfile(user.uid, { profile: profileData });
               setUserProfile((prev) => ({ ...prev, profile: profileData }));
-              if (profileData.defaultBrand) setBrand(profileData.defaultBrand);
-              if (profileData.defaultTone) setTone(profileData.defaultTone);
-              if (profileData.defaultAudience) setAudience(profileData.defaultAudience);
+              // Apply default brand if changed
+              const defBrand = profileData.brands?.find((b) => b.isDefault);
+              if (defBrand) {
+                setActiveBrand(defBrand);
+                if (defBrand.voice?.tone) setTone(defBrand.voice.tone);
+                if (defBrand.voice?.audience) setAudience(defBrand.voice.audience);
+                if (defBrand.colors?.accent) {
+                  const variants = makeCustomVariants(defBrand.colors.accent);
+                  if (variants) {
+                    const themeName = `brand-${defBrand.id}`;
+                    setCustomThemes((prev) => ({ ...prev, [themeName]: variants }));
+                    setTheme(themeName);
+                  }
+                }
+              }
             }}
             onApiKeySave={async (key) => {
               setApiKey(key);
@@ -1063,7 +1097,11 @@ Return the same JSON structure with just the post object updated.`;
               setContentType(c.contentType || "carousel");
               setBrandMode(c.brandMode || "dark");
               if (c.theme) setTheme(c.theme);
-              setBrand(c.brand || "PAIA");
+              // Restore brand (object or legacy string)
+              if (c.brand && typeof c.brand === "object") setActiveBrand(c.brand);
+              else if (c.brand) setActiveBrand({ name: c.brand });
+              else setActiveBrand(null);
+              setIntensity(c.intensity || "clean");
               setTone(c.tone || "professional");
               setAudience(c.audience || "general");
               setSc(c.sc || 7);
@@ -1135,6 +1173,39 @@ Return the same JSON structure with just the post object updated.`;
               </div>
             </div>
 
+            {/* Brand selector */}
+            {userProfile?.profile?.brands?.length > 0 && (
+              <div>
+                <label style={labelStyle(T)}>Brand</label>
+                <select
+                  value={activeBrand?.id || ""}
+                  onChange={(e) => {
+                    const brands = userProfile.profile.brands;
+                    const selected = brands.find((b) => b.id === e.target.value);
+                    if (selected) {
+                      setActiveBrand(selected);
+                      if (selected.voice?.tone) setTone(selected.voice.tone);
+                      if (selected.voice?.audience) setAudience(selected.voice.audience);
+                      if (selected.colors?.accent) {
+                        const variants = makeCustomVariants(selected.colors.accent);
+                        if (variants) {
+                          const themeName = `brand-${selected.id}`;
+                          setCustomThemes((prev) => ({ ...prev, [themeName]: variants }));
+                          setTheme(themeName);
+                        }
+                      }
+                    }
+                  }}
+                  style={selectStyle(T)}
+                >
+                  <option value="">No brand</option>
+                  {userProfile.profile.brands.map((b) => (
+                    <option key={b.id} value={b.id}>{b.name}{b.isDefault ? " (default)" : ""}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             {/* Settings row */}
             <div style={{ display: "grid", gridTemplateColumns: contentType === "carousel" ? "1fr 1fr 72px" : "1fr 1fr", gap: 10 }}>
               <div>
@@ -1144,8 +1215,8 @@ Return the same JSON structure with just the post object updated.`;
                 </select>
               </div>
               <div>
-                <label style={labelStyle(T)}><Type size={12} /> Brand</label>
-                <input type="text" value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="PAIA" style={inputStyle(T)} />
+                <label style={labelStyle(T)}><Type size={12} /> Brand Name</label>
+                <input type="text" value={brand} onChange={(e) => setActiveBrand((prev) => ({ ...(prev || {}), name: e.target.value }))} placeholder="PAIA" style={inputStyle(T)} />
               </div>
               {contentType === "carousel" && (
                 <div>
