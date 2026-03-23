@@ -778,6 +778,9 @@ Return the same JSON structure with just the post object updated.`;
         brand,
         tone,
         audience,
+        sc,
+        input: input || "",
+        source: source || "",
         speakerData: isSpeakerMode ? speakerData : undefined,
         customThemeDef,
       });
@@ -804,6 +807,9 @@ Return the same JSON structure with just the post object updated.`;
       brand,
       tone,
       audience,
+      sc,
+      input: input || "",
+      source: source || "",
       speakerData: isSpeakerMode ? speakerData : undefined,
       customThemeDef,
     });
@@ -1034,16 +1040,23 @@ Return the same JSON structure with just the post object updated.`;
               if (c.customThemeDef && c.theme) {
                 setCustomThemes((prev) => ({ ...prev, [c.theme]: c.customThemeDef }));
               }
+              // Clear left panel state
+              setInput(c.input || "");
+              setSource(c.source || "");
+              setFiles(c.files || []);
+              // Restore all settings
               setSlides(c.slides?.length ? c.slides : null);
               setTitle(c.title || "");
               setPost(c.post || null);
-              if (c.contentType) setContentType(c.contentType);
-              if (c.brandMode) setBrandMode(c.brandMode);
+              setContentType(c.contentType || "carousel");
+              setBrandMode(c.brandMode || "dark");
               if (c.theme) setTheme(c.theme);
-              if (c.brand) setBrand(c.brand);
-              if (c.tone) setTone(c.tone);
-              if (c.audience) setAudience(c.audience);
+              setBrand(c.brand || "PAIA");
+              setTone(c.tone || "professional");
+              setAudience(c.audience || "general");
+              setSc(c.sc || 7);
               if (c.speakerData) setSpeakerData(c.speakerData);
+              else setSpeakerData({ eventTitle: "", eventDate: "", cta: "", eventUrl: "", speakers: [{ name: "", title: "", company: "", photo: null, photoUrl: "" }] });
               setCur(0);
               setActiveTab(c.contentType === "speaker" ? "slides" : c.slides?.length ? "slides" : "post");
               setPage("create");
