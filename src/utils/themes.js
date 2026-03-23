@@ -16,12 +16,25 @@ function hexToRgb(hex) {
   return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
 }
 
+// Ensure a color has enough contrast against a background
+function ensureContrastAgainst(color, bg) {
+  // If color and bg would both need the same contrast text, they're too similar
+  const colorCt = contrastText(color);
+  const bgCt = contrastText(bg);
+  if (colorCt === bgCt) {
+    // Both dark or both light — flip the color
+    return bgCt === "#FFFFFF" ? "#FFFFFF" : "#111111";
+  }
+  return color;
+}
+
 function makeDark(accent, gradient) {
   const { r, g, b } = hexToRgb(accent);
+  const safeAccent = ensureContrastAgainst(accent, "#0F1117");
   return {
     bg: "#08090D",
     card: "#0F1117",
-    accent,
+    accent: safeAccent,
     soft: `rgba(${r},${g},${b},0.10)`,
     text: "#F0F0F8",
     muted: "#7878A0",
@@ -32,13 +45,13 @@ function makeDark(accent, gradient) {
 
 function makeLight(accent, gradient) {
   const { r, g, b } = hexToRgb(accent);
-  const lum = contrastText(accent) === "#FFFFFF"; // accent is dark
+  const safeAccent = ensureContrastAgainst(accent, "#FFFFFF");
   return {
     bg: "#F4F3EF",
     card: "#FFFFFF",
-    accent,
+    accent: safeAccent,
     soft: `rgba(${r},${g},${b},0.07)`,
-    text: lum ? accent : "#1A1A2E",
+    text: safeAccent === accent ? (contrastText(accent) === "#FFFFFF" ? accent : "#1A1A2E") : "#1A1A2E",
     muted: "#888899",
     border: `rgba(${r},${g},${b},0.12)`,
     gradient,

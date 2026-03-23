@@ -119,16 +119,43 @@ export function SpeakerSlideInner({ data, T, brand }) {
 
   const accentRgb = hexToRgbStr(T.accent);
   const accentCt = contrastText(T.accent);
-  const theme = bgMode === "light" ? {
-    ...T, card: "#FFFFFF", text: "#1A1A2E", muted: "#6B6B7B",
-    border: "rgba(26,26,46,0.10)", soft: `rgba(${accentRgb},0.07)`,
-  } : bgMode === "invert" ? {
-    ...T, card: T.accent, text: accentCt,
-    muted: accentCt === "#FFFFFF" ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.5)",
-    border: accentCt === "#FFFFFF" ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.12)",
-    soft: accentCt === "#FFFFFF" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)",
-    accent: accentCt,
-  } : T;
+  let theme;
+  if (bgMode === "light") {
+    theme = {
+      ...T, card: "#FFFFFF", text: "#1A1A2E", muted: "#6B6B7B",
+      border: "rgba(26,26,46,0.10)", soft: `rgba(${accentRgb},0.07)`,
+    };
+    // Ensure accent is readable on white
+    if (contrastText(theme.accent) === "#FFFFFF") {
+      // Accent is too dark? It's fine on white. But if accent IS white-ish, darken it
+    }
+  } else if (bgMode === "invert") {
+    theme = {
+      ...T, card: T.accent, text: accentCt,
+      muted: accentCt === "#FFFFFF" ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.5)",
+      border: accentCt === "#FFFFFF" ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.12)",
+      soft: accentCt === "#FFFFFF" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)",
+      accent: accentCt,
+    };
+  } else {
+    theme = { ...T };
+  }
+
+  // CONTRAST SAFETY: ensure text is always readable against card background
+  const cardCt = contrastText(theme.card);
+  if (theme.text === "#111111" && cardCt === "#FFFFFF") {
+    // Dark text on dark bg — force white
+    theme.text = "#FFFFFF";
+    theme.muted = "rgba(255,255,255,0.6)";
+  } else if (theme.text === "#FFFFFF" && cardCt === "#111111") {
+    // White text on light bg — force dark
+    theme.text = "#111111";
+    theme.muted = "rgba(0,0,0,0.5)";
+  }
+  // Ensure accent is visible on card
+  if (theme.accent === theme.card || (contrastText(theme.accent) === contrastText(theme.card) && theme.accent === theme.text)) {
+    theme.accent = cardCt; // flip accent to contrast
+  }
 
   const ctaColor = style.ctaColor || theme.accent;
   const ctaTextColor = contrastText(ctaColor);
