@@ -365,6 +365,9 @@ export default function App() {
       if (parts.length) {
         userContext = `\n\nUSER CONTEXT (use this to personalize content, match the author's voice, and reference their expertise naturally):\n${parts.join("\n")}`;
       }
+      if (p.aiInstructions?.trim()) {
+        userContext += `\n\nCUSTOM INSTRUCTIONS (follow these strictly):\n${p.aiInstructions.trim()}`;
+      }
     }
     return base + toneInstructions + audienceInstructions + userContext;
   }

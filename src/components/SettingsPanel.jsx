@@ -168,6 +168,18 @@ export default function SettingsPanel({ T, user, profile, onSave, apiKey, onApiK
         <p style={hintStyle(T)}>What you want your LinkedIn presence to achieve.</p>
       </Section>
 
+      {/* AI Instructions */}
+      <Section T={T} icon={BookOpen} title="AI Instructions">
+        <textarea
+          value={localProfile.aiInstructions || ""}
+          onChange={(e) => updateField("aiInstructions", e.target.value)}
+          placeholder={"e.g.\n- Always use active voice\n- Never use the word 'leverage'\n- Keep sentences under 20 words\n- Reference Swiss market specifically\n- Use 'we' not 'I' when talking about the company\n- Include a contrarian take in every post\n- End carousels with a question, not a statement"}
+          rows={6}
+          style={textareaStyle(T)}
+        />
+        <p style={hintStyle(T)}>Personal rules for the AI. These instructions are applied to every generation — tone, style, words to avoid, formatting preferences, etc.</p>
+      </Section>
+
       {/* Defaults */}
       <Section T={T} icon={User} title="Defaults">
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
