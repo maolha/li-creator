@@ -141,56 +141,101 @@ export default function LandingPage({ onSignIn }) {
         </motion.div>
       </section>
 
-      {/* SHOWCASE — visual grid with context */}
+      {/* FAKE LINKEDIN FEED — proves "stops the scroll" */}
       <section style={{ padding: "clamp(60px, 10vw, 100px) clamp(24px, 5vw, 64px)", position: "relative" }}>
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, #0a0c10, #0e1118, #0a0c10)" }} />
-        <div style={{ position: "relative", maxWidth: 1100, margin: "0 auto" }}>
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
+        <div style={{ position: "relative", maxWidth: 560, margin: "0 auto" }}>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} style={{ textAlign: "center", marginBottom: 48 }}>
             <h2 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 10 }}>
-              What you create
+              Spot the difference
             </h2>
-            <p style={{ fontSize: 15, color: "rgba(232,230,227,0.45)", marginBottom: 48 }}>
-              Every format designed to perform on LinkedIn.
+            <p style={{ fontSize: 15, color: "rgba(232,230,227,0.45)" }}>
+              Your content in a real feed. Scroll and see what stops you.
             </p>
           </motion.div>
 
-          {/* Slide examples — 2-column grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 32 }}>
-            {SHOWCASE.map((demo, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ delay: 0.1 * idx, duration: 0.5 }}
-                style={{ display: "flex", gap: 20, alignItems: "center" }}
-              >
-                <div style={{ flexShrink: 0 }}>
-                  <ScaledSlide s={demo.slide} brand="PAIA" i={demo.i} n={demo.n} T={demo.theme} size={160} intensity={demo.intensity} />
-                </div>
-                <div>
-                  <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 6, letterSpacing: "-0.01em" }}>{demo.label}</h3>
-                  <p style={{ fontSize: 13, color: "rgba(232,230,227,0.5)", lineHeight: 1.55, margin: 0 }}>{demo.desc}</p>
-                </div>
-              </motion.div>
-            ))}
+          {/* Feed container */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {/* Boring post 1 */}
+            <FeedPost
+              name="Alex Thompson"
+              title="Marketing Manager at TechCorp"
+              time="2h"
+              text="Excited to share that our team just completed the Q1 planning session. Looking forward to what's ahead! #teamwork #planning"
+              likes={12}
+              comments={3}
+              boring
+            />
 
-            {/* Speaker visual with fake data */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              style={{ display: "flex", gap: 20, alignItems: "center" }}
-            >
-              <div style={{ flexShrink: 0 }}>
-                <ScaledSpeakerSlide data={SPEAKER_DEMO} T={T_BLUE} brand="PAIA" size={160} />
-              </div>
-              <div>
-                <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 6, letterSpacing: "-0.01em" }}>Speaker Visuals</h3>
-                <p style={{ fontSize: 13, color: "rgba(232,230,227,0.5)", lineHeight: 1.55, margin: 0 }}>Event speaker cards with photos, titles, logos. Four layouts, custom colors, any aspect ratio.</p>
-              </div>
-            </motion.div>
+            {/* CONTENTFORGE: Carousel */}
+            <FeedPost
+              name="Sarah Chen"
+              title="Chief AI Officer at SwissBank AG"
+              time="4h"
+              text={"**AI is not replacing compliance officers.** It's giving them superpowers.\n\n🔒 73% of regulated firms now use AI for monitoring\n📊 Time-to-detect dropped from weeks to hours\n🏦 Swiss banks lead adoption in Europe\n\nThe question isn't whether to adopt. It's how fast.\n\n#AI #Compliance #SwissFinance"}
+              likes={847}
+              comments={124}
+              slide={SHOWCASE[0]}
+              featured
+            />
+
+            {/* Boring post 2 */}
+            <FeedPost
+              name="Jennifer Parker"
+              title="HR Director"
+              time="6h"
+              text="We're hiring! Looking for talented individuals to join our growing team. DM me for details. #hiring #jobs"
+              likes={8}
+              comments={2}
+              boring
+            />
+
+            {/* CONTENTFORGE: Stat Card */}
+            <FeedPost
+              name="Marc Weber"
+              title="Head of Innovation at FinTech Labs"
+              time="8h"
+              text={"**73% of enterprise AI projects fail in the first year.**\n\nNot because the technology doesn't work.\nBecause the implementation strategy was wrong.\n\nHere's what the 27% who succeed do differently:\n\n#AI #DataStrategy #Innovation"}
+              likes={1203}
+              comments={89}
+              slide={SHOWCASE[1]}
+              featured
+            />
+
+            {/* Boring post 3 */}
+            <FeedPost
+              name="David Liu"
+              title="Software Engineer"
+              time="12h"
+              text="Had a great day at the office today. Productive meetings and good coffee. Can't complain! 😊"
+              likes={15}
+              comments={1}
+              boring
+            />
+
+            {/* CONTENTFORGE: Quote Card */}
+            <FeedPost
+              name="Elena Rossi"
+              title="CEO at Alpine Ventures"
+              time="1d"
+              text={"**The best content doesn't sell. It starts conversations.**\n\nI've tested this across 200+ LinkedIn posts this year.\n\nThe ones that drove the most pipeline?\nZero product mentions. Pure insight.\n\n#ContentStrategy #B2B #ThoughtLeadership"}
+              likes={2041}
+              comments={216}
+              slide={SHOWCASE[2]}
+              featured
+            />
+
+            {/* CONTENTFORGE: Speaker */}
+            <FeedPost
+              name="Sarah Chen"
+              title="Chief AI Officer at SwissBank AG"
+              time="2d"
+              text={"Thrilled to announce I'll be speaking at the **AI in Finance Summit** alongside Marc Weber.\n\nWe'll be diving into the future of compliance automation.\n\n📅 March 28, 2026\n🎯 Limited seats available\n\n#AIFinance #Keynote #Compliance"}
+              likes={634}
+              comments={45}
+              speakerData={SPEAKER_DEMO}
+              featured
+            />
           </div>
         </div>
       </section>
@@ -255,5 +300,70 @@ export default function LandingPage({ onSignIn }) {
         </div>
       </footer>
     </div>
+  );
+}
+
+// Fake LinkedIn feed post component
+function FeedPost({ name, title, time, text, likes, comments, boring, featured, slide, speakerData }) {
+  const initials = name.split(" ").map((w) => w[0]).join("");
+  const avatarBg = boring ? "#2a2d35" : "linear-gradient(135deg, #0077B5, #571BC1)";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-30px" }}
+      transition={{ duration: 0.4 }}
+      style={{
+        background: featured ? "#12151c" : "#0f1115",
+        borderRadius: 12,
+        border: `1px solid ${featured ? "rgba(0,119,181,0.12)" : "rgba(255,255,255,0.04)"}`,
+        overflow: "hidden",
+        opacity: boring ? 0.5 : 1,
+        transition: "opacity 0.3s",
+      }}
+    >
+      {/* Header */}
+      <div style={{ padding: "14px 16px 0", display: "flex", gap: 10, alignItems: "center" }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: "50%", background: avatarBg,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 13, fontWeight: 700, color: "#fff", flexShrink: 0,
+        }}>
+          {initials}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#e8e6e3" }}>{name}</div>
+          <div style={{ fontSize: 11, color: "rgba(232,230,227,0.4)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</div>
+        </div>
+        <span style={{ fontSize: 10, color: "rgba(232,230,227,0.3)", flexShrink: 0 }}>{time}</span>
+      </div>
+
+      {/* Text */}
+      <div style={{ padding: "10px 16px", fontSize: 13, lineHeight: 1.6, color: boring ? "rgba(232,230,227,0.5)" : "rgba(232,230,227,0.8)", whiteSpace: "pre-line" }}>
+        {text.split("**").map((part, i) => i % 2 === 1 ? <strong key={i} style={{ fontWeight: 700, color: "#e8e6e3" }}>{part}</strong> : <span key={i}>{part}</span>)}
+      </div>
+
+      {/* Visual — the ContentForge slide */}
+      {slide && (
+        <div style={{ padding: "0 16px 4px", display: "flex", justifyContent: "center" }}>
+          <ScaledSlide s={slide.slide} brand="PAIA" i={slide.i} n={slide.n} T={slide.theme} size={Math.min(528, 520)} intensity={slide.intensity} />
+        </div>
+      )}
+      {speakerData && (
+        <div style={{ padding: "0 16px 4px", display: "flex", justifyContent: "center" }}>
+          <ScaledSpeakerSlide data={speakerData} T={T_BLUE} brand="PAIA" size={Math.min(528, 520)} />
+        </div>
+      )}
+
+      {/* Engagement bar */}
+      <div style={{ padding: "8px 16px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(255,255,255,0.04)", marginTop: 4 }}>
+        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+          <span style={{ fontSize: 12 }}>👍</span>
+          <span style={{ fontSize: 11, color: "rgba(232,230,227,0.4)" }}>{likes?.toLocaleString()}</span>
+        </div>
+        <span style={{ fontSize: 11, color: "rgba(232,230,227,0.3)" }}>{comments} comments</span>
+      </div>
+    </motion.div>
   );
 }
