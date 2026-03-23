@@ -1,6 +1,7 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { ScaledSlide } from "./SlideRenderer";
+import { LogoA, LogoB, LogoC, LogoD } from "./Logo";
 
 // Demo themes for showcasing
 const T_BLUE = { bg: "#08090D", card: "#0F1117", accent: "#0077B5", soft: "rgba(0,119,181,0.10)", text: "#F0F0F8", muted: "#7878A0", border: "rgba(0,119,181,0.15)", gradient: "linear-gradient(135deg, #0077B5, #571BC1)" };
@@ -70,7 +71,7 @@ export default function LandingPage({ onSignIn, loading }) {
       <header style={{ position: "fixed", top: 0, width: "100%", zIndex: 50, background: "rgba(10,12,16,0.7)", backdropFilter: "blur(24px)" }}>
         <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: 72, padding: "0 clamp(20px, 4vw, 48px)", maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: "linear-gradient(135deg, #0077B5, #571BC1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#fff", fontWeight: 800 }}>&#9670;</div>
+            <LogoA size={32} rounded={8} />
             <span style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-0.03em" }}>ContentForge</span>
           </div>
           <motion.button
@@ -136,10 +137,30 @@ export default function LandingPage({ onSignIn, loading }) {
             >
               {/* Brand as hero signal */}
               <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 32 }}>
-                <div style={{ width: 48, height: 48, borderRadius: 12, background: "linear-gradient(135deg, #0077B5, #571BC1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, color: "#fff", fontWeight: 800, boxShadow: "0 8px 24px rgba(0,119,181,0.3)" }}>&#9670;</div>
+                <LogoA size={48} rounded={12} />
                 <div>
                   <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.03em" }}>ContentForge</div>
                   <div style={{ fontSize: 12, color: "rgba(232,230,227,0.4)", letterSpacing: "0.06em", textTransform: "uppercase" }}>LinkedIn Content Studio</div>
+                </div>
+              </div>
+
+              {/* Logo variants — pick your favorite, then remove this block */}
+              <div style={{ display: "flex", gap: 16, marginBottom: 24, padding: "12px 16px", background: "rgba(255,255,255,0.03)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div style={{ textAlign: "center" }}>
+                  <LogoA size={44} rounded={10} />
+                  <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>A: Shared stroke</div>
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <LogoB size={44} rounded={10} />
+                  <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>B: Geometric</div>
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <LogoC size={44} rounded={10} />
+                  <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>C: Interlocking</div>
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <LogoD size={44} rounded={10} />
+                  <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>D: Slash</div>
                 </div>
               </div>
 
