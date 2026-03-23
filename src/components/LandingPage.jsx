@@ -18,7 +18,7 @@ export default function LandingPage({ onSignIn, loading }) {
 
       {/* ── NAV ── */}
       <header style={{ position: "fixed", top: 0, width: "100%", zIndex: 50, background: "rgba(10,12,16,0.7)", backdropFilter: "blur(24px)" }}>
-        <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: 72, padding: "0 clamp(20px, 4vw, 48px)", maxWidth: 1300, margin: "0 auto" }}>
+        <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: 72, padding: "0 clamp(20px, 4vw, 48px)", maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 8, background: "linear-gradient(135deg, #0077B5, #571BC1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#fff", fontWeight: 800 }}>&#9670;</div>
             <span style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-0.03em" }}>ContentForge</span>
@@ -42,7 +42,7 @@ export default function LandingPage({ onSignIn, loading }) {
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "30%", background: "linear-gradient(to top, #0a0c10, transparent)" }} />
 
         {/* Floating product mockups */}
-        <motion.div style={{ y: heroY, opacity: heroOpacity, position: "absolute", right: "5%", top: "18%", width: "clamp(260px, 35vw, 440px)" }}>
+        <motion.div style={{ y: heroY, opacity: heroOpacity, position: "absolute", right: "clamp(4%, 8vw, 12%)", top: "20%", width: "clamp(240px, 30vw, 400px)" }}>
           {/* Carousel mockup */}
           <motion.div
             animate={{ y: [0, -10, 0] }}
@@ -77,12 +77,12 @@ export default function LandingPage({ onSignIn, loading }) {
           style={{ y: heroY, opacity: heroOpacity }}
           initial={false}
         >
-          <div style={{ maxWidth: 1300, margin: "0 auto", padding: "0 clamp(20px, 4vw, 48px)", position: "relative", zIndex: 10 }}>
+          <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 clamp(24px, 5vw, 64px)", position: "relative", zIndex: 10 }}>
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              style={{ maxWidth: 580 }}
+              style={{ maxWidth: 540 }}
             >
               {/* Brand as hero signal */}
               <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 32 }}>
@@ -129,7 +129,7 @@ export default function LandingPage({ onSignIn, loading }) {
       {/* ── WHAT YOU CREATE ── */}
       <section style={{ padding: "clamp(60px, 10vw, 120px) clamp(20px, 4vw, 48px)", position: "relative" }}>
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, #0a0c10, #0e1118, #0a0c10)" }} />
-        <div style={{ maxWidth: 1300, margin: "0 auto", position: "relative" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", position: "relative" }}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -242,7 +242,7 @@ export default function LandingPage({ onSignIn, loading }) {
 
       {/* ── FOOTER ── */}
       <footer style={{ borderTop: "1px solid rgba(255,255,255,0.04)", padding: "32px clamp(20px, 4vw, 48px)" }}>
-        <div style={{ maxWidth: 1300, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "-0.02em" }}>ContentForge</span>
           <span style={{ fontSize: 12, color: "rgba(232,230,227,0.3)" }}>Your API key. Your data. Your content.</span>
         </div>
