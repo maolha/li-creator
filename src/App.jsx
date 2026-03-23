@@ -1707,6 +1707,38 @@ Return the same JSON structure with just the post object updated.`;
                         ))}
                       </div>
                     </div>
+                    {/* Element visibility */}
+                    <div>
+                      <label style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6, display: "block" }}>Show / Hide</label>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                        {[
+                          { id: "showTag", label: "Tag" },
+                          { id: "showDate", label: "Date" },
+                          { id: "showSession", label: "Session" },
+                          { id: "showCta", label: "CTA" },
+                          { id: "showBrand", label: "Brand" },
+                          { id: "showRegUrl", label: "URL" },
+                        ].map((el) => {
+                          const isOn = speakerData.style?.[el.id] !== false;
+                          return (
+                            <button
+                              key={el.id}
+                              onClick={() => setSpeakerData((p) => ({ ...p, style: { ...p.style, [el.id]: !isOn } }))}
+                              style={{
+                                padding: "4px 10px", borderRadius: 6, fontSize: 10, fontWeight: 600,
+                                border: `1px solid ${isOn ? T.accent : T.border}`,
+                                background: isOn ? T.soft : "transparent",
+                                color: isOn ? T.accent : T.muted,
+                                cursor: "pointer", fontFamily: "'Inter', sans-serif",
+                                opacity: isOn ? 1 : 0.5,
+                              }}
+                            >
+                              {el.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
 
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>

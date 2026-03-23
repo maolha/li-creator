@@ -8,6 +8,7 @@ function hexToRgbStr(hex) {
 
 const ASPECT_RATIOS = {
   "1:1": { w: 540, h: 540 },
+  "4:5": { w: 540, h: 675 },
   "16:9": { w: 640, h: 360 },
   "9:16": { w: 360, h: 640 },
 };
@@ -25,33 +26,56 @@ export { LAYOUTS as SPEAKER_LAYOUTS, ASPECT_RATIOS as SPEAKER_ASPECTS };
 function getSizes(aspect, count) {
   const isWide = aspect === "16:9";
   const isTall = aspect === "9:16";
+  const isFourFive = aspect === "4:5";
+  // 4:5 is taller than 1:1 — more room for bigger photos
+  const sz = {
+    "16:9": {
+      pad: 20, padY: 16,
+      titleSize: 22, titleSizeLong: 18, sessionSize: 10,
+      photoSz: count === 1 ? 72 : count === 2 ? 64 : 52,
+      nameSz: count === 1 ? 14 : 11,
+      roleSz: 9, companySz: 8, pillSz: 9,
+      ctaSz: 10, ctaPad: "6px 16px",
+      dateSz: 9, brandSz: 9,
+      barH: 4, accentBarW: 40, accentBarH: 2,
+      gap: 10, photoGap: 6, logoH: 22,
+    },
+    "9:16": {
+      pad: 22, padY: 24,
+      titleSize: 28, titleSizeLong: 22, sessionSize: 13,
+      photoSz: count === 1 ? 100 : count === 2 ? 88 : 72,
+      nameSz: count === 1 ? 18 : count === 2 ? 15 : 13,
+      roleSz: count === 1 ? 13 : 11, companySz: count === 1 ? 12 : 10, pillSz: 11,
+      ctaSz: 12, ctaPad: "8px 22px",
+      dateSz: 11, brandSz: 11,
+      barH: 6, accentBarW: 50, accentBarH: 3,
+      gap: 16, photoGap: 8, logoH: 26,
+    },
+    "4:5": {
+      pad: 32, padY: 26,
+      titleSize: 34, titleSizeLong: 26, sessionSize: 13,
+      photoSz: count === 1 ? 120 : count === 2 ? 104 : 88,
+      nameSz: count === 1 ? 18 : count === 2 ? 16 : 14,
+      roleSz: count === 1 ? 13 : 12, companySz: count === 1 ? 12 : 11, pillSz: 11,
+      ctaSz: 12, ctaPad: "9px 24px",
+      dateSz: 11, brandSz: 11,
+      barH: 6, accentBarW: 50, accentBarH: 3,
+      gap: 16, photoGap: 10, logoH: 32,
+    },
+    "1:1": {
+      pad: 36, padY: 28,
+      titleSize: 34, titleSizeLong: 26, sessionSize: 13,
+      photoSz: count === 1 ? 120 : count === 2 ? 100 : 84,
+      nameSz: count === 1 ? 18 : count === 2 ? 15 : 13,
+      roleSz: count === 1 ? 13 : 11, companySz: count === 1 ? 12 : 10, pillSz: 11,
+      ctaSz: 12, ctaPad: "8px 22px",
+      dateSz: 11, brandSz: 11,
+      barH: 6, accentBarW: 50, accentBarH: 3,
+      gap: 16, photoGap: 8, logoH: 32,
+    },
+  };
   return {
-    pad: isWide ? 20 : isTall ? 22 : 36,
-    padY: isWide ? 16 : isTall ? 24 : 28,
-    titleSize: isWide ? 22 : isTall ? 28 : 34,
-    titleSizeLong: isWide ? 18 : isTall ? 22 : 26,
-    sessionSize: isWide ? 10 : 13,
-    photoSz: isWide
-      ? (count === 1 ? 64 : count === 2 ? 56 : 48)
-      : isTall
-      ? (count === 1 ? 90 : count === 2 ? 76 : 64)
-      : (count === 1 ? 110 : count === 2 ? 96 : 80),
-    nameSz: isWide
-      ? (count === 1 ? 14 : 11)
-      : (count === 1 ? 18 : count === 2 ? 15 : 13),
-    roleSz: isWide ? 9 : (count === 1 ? 13 : 11),
-    companySz: isWide ? 8 : (count === 1 ? 12 : 10),
-    pillSz: isWide ? 9 : 11,
-    ctaSz: isWide ? 10 : 12,
-    ctaPad: isWide ? "6px 16px" : "8px 22px",
-    dateSz: isWide ? 9 : 11,
-    brandSz: isWide ? 9 : 11,
-    barH: isWide ? 4 : 6,
-    accentBarW: isWide ? 40 : 50,
-    accentBarH: isWide ? 2 : 3,
-    gap: isWide ? 10 : 16,
-    photoGap: isWide ? 6 : 8,
-    logoH: isWide ? 22 : isTall ? 26 : 32,
+    ...(sz[aspect] || sz["1:1"]),
   };
 }
 
@@ -165,6 +189,16 @@ export function SpeakerSlideInner({ data, T, brand }) {
   const sz = getSizes(aspect, count);
   const tSz = (eventTitle?.length || 0) > 35 ? sz.titleSizeLong : sz.titleSize;
 
+  // Element visibility (all default to true)
+  const show = {
+    tag: style.showTag !== false,
+    date: style.showDate !== false,
+    session: style.showSession !== false,
+    cta: style.showCta !== false,
+    brand: style.showBrand !== false,
+    regUrl: style.showRegUrl !== false,
+  };
+
   // ── CENTERED ──
   if (layout === "centered") {
     return (
@@ -176,15 +210,15 @@ export function SpeakerSlideInner({ data, T, brand }) {
         <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: tSz, fontWeight: 400, lineHeight: 1.15, color: theme.text, margin: `10px 0 ${sessionTitle ? 4 : 10}px`, fontStyle: "italic" }}>
           {eventTitle || "Event Title"}
         </h2>
-        {sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginBottom: 10, fontWeight: 500 }}>{sessionTitle}</div>}
-        {eventDate && <div style={{ fontSize: sz.dateSz, color: theme.muted, marginBottom: 12 }}>{eventDate}</div>}
+        {show.session && sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginBottom: 10, fontWeight: 500 }}>{sessionTitle}</div>}
+        {show.date && eventDate && <div style={{ fontSize: sz.dateSz, color: theme.muted, marginBottom: 12 }}>{eventDate}</div>}
 
         <div style={{ marginBottom: 14 }}>
           <SpeakerPhotos speakers={speakers} count={count} photoSz={sz.photoSz} photoRadius={photoRadius} theme={theme} nameSz={sz.nameSz} roleSz={sz.roleSz} companySz={sz.companySz} photoGap={sz.photoGap} />
         </div>
 
         <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>
-          {cta || "Register now"}
+          {show.cta ? (cta || "Register now") : ""}
         </div>
       </div>
     );
@@ -198,23 +232,23 @@ export function SpeakerSlideInner({ data, T, brand }) {
 
         <div style={{ padding: `${sz.padY}px ${sz.pad}px 0`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "inline-flex", alignItems: "center", background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 999, padding: `3px ${sz.pad * 0.4}px`, fontSize: sz.pillSz, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: "rgba(255,255,255,0.9)" }}>
-            {tagLabel || (count > 1 ? "Speakers" : "Speaker")}
+            {show.tag ? (tagLabel || (count > 1 ? "Speakers" : "Speaker")) : ""}
           </div>
-          {eventDate && <div style={{ fontSize: sz.dateSz, color: ct, opacity: 0.6 }}>{eventDate}</div>}
+          {show.date && eventDate && <div style={{ fontSize: sz.dateSz, color: ct, opacity: 0.6 }}>{eventDate}</div>}
         </div>
 
         <div style={{ flex: 1, padding: `${sz.padY * 0.5}px ${sz.pad}px`, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: tSz * 1.1, fontWeight: 400, lineHeight: 1.12, color: ct, margin: `0 0 ${sessionTitle ? 4 : 12}px`, fontStyle: "italic" }}>
             {eventTitle || "Event Title"}
           </h2>
-          {sessionTitle && <div style={{ fontSize: sz.sessionSize, color: ct, opacity: 0.7, marginBottom: 12, fontWeight: 500 }}>{sessionTitle}</div>}
+          {show.session && sessionTitle && <div style={{ fontSize: sz.sessionSize, color: ct, opacity: 0.7, marginBottom: 12, fontWeight: 500 }}>{sessionTitle}</div>}
 
           <SpeakerPhotos speakers={speakers} count={count} photoSz={sz.photoSz} photoRadius={photoRadius} theme={theme} nameSz={sz.nameSz} roleSz={sz.roleSz} companySz={sz.companySz} photoGap={sz.photoGap} ct={ct} />
         </div>
 
         <div style={{ padding: `0 ${sz.pad}px ${sz.padY}px`, display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(255,255,255,0.18)", paddingTop: 12, margin: `0 ${sz.pad}px` }}>
           <div style={{ background: "rgba(255,255,255,0.95)", color: theme.accent, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>
-            {cta || "Register now"}
+            {show.cta ? (cta || "Register now") : ""}
           </div>
           <span style={{ fontSize: sz.brandSz, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: ct, opacity: 0.6 }}>{brand}</span>
         </div>
@@ -228,12 +262,12 @@ export function SpeakerSlideInner({ data, T, brand }) {
       <div style={{ width: SW, height: SH, background: theme.card, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", justifyContent: "center", boxSizing: "border-box", padding: `${sz.padY}px ${sz.pad + 8}px` }}>
         <div style={{ position: "absolute", top: 0, left: 0, width: 5, height: SH, background: theme.accent }} />
 
-        {eventDate && <div style={{ fontSize: sz.dateSz, color: theme.muted, marginBottom: 8, fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>{eventDate}</div>}
+        {show.date && eventDate && <div style={{ fontSize: sz.dateSz, color: theme.muted, marginBottom: 8, fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>{eventDate}</div>}
 
         <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: tSz, fontWeight: 400, lineHeight: 1.15, color: theme.text, margin: `0 0 ${sessionTitle ? 4 : 12}px`, fontStyle: "italic" }}>
           {eventTitle || "Event Title"}
         </h2>
-        {sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginBottom: 12, fontWeight: 500 }}>{sessionTitle}</div>}
+        {show.session && sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginBottom: 12, fontWeight: 500 }}>{sessionTitle}</div>}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
           {speakers.filter((s) => s?.name).map((speaker, i) => (
@@ -252,7 +286,7 @@ export function SpeakerSlideInner({ data, T, brand }) {
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>
-            {cta || "Register now"}
+            {show.cta ? (cta || "Register now") : ""}
           </div>
           <span style={{ fontSize: sz.brandSz, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: theme.accent, opacity: 0.7 }}>{brand}</span>
         </div>
@@ -269,7 +303,7 @@ export function SpeakerSlideInner({ data, T, brand }) {
       {/* Header: tag + logo */}
       <div style={{ padding: `${sz.padY}px ${sz.pad}px 0`, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
         <div style={{ display: "inline-flex", alignItems: "center", background: theme.soft, border: `1px solid ${theme.border}`, borderRadius: 999, padding: `3px ${sz.pad * 0.4}px`, fontSize: sz.pillSz, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: theme.accent }}>
-          {tagLabel || (count > 1 ? "Speakers" : "Speaker")}
+          {show.tag ? (tagLabel || (count > 1 ? "Speakers" : "Speaker")) : ""}
         </div>
         <LogoOrBrand eventLogo={eventLogo} logoDarkBg={logoDarkBg} brand={brand} theme={theme} logoH={sz.logoH} />
       </div>
@@ -280,7 +314,7 @@ export function SpeakerSlideInner({ data, T, brand }) {
         <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: tSz, fontWeight: 400, lineHeight: 1.15, color: theme.text, margin: 0, fontStyle: "italic" }}>
           {eventTitle || "Event Title"}
         </h2>
-        {sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginTop: 6, fontWeight: 500 }}>{sessionTitle}</div>}
+        {show.session && sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginTop: 6, fontWeight: 500 }}>{sessionTitle}</div>}
       </div>
 
       {/* Speakers */}
@@ -290,13 +324,13 @@ export function SpeakerSlideInner({ data, T, brand }) {
 
       {/* Footer */}
       <div style={{ padding: `0 ${sz.pad}px ${sz.padY * 0.7}px`, borderTop: `1px solid ${theme.border}`, paddingTop: 10, margin: `0 ${sz.pad}px`, flexShrink: 0 }}>
-        {eventDate && <div style={{ fontSize: sz.dateSz, color: theme.muted, marginBottom: 6, fontWeight: 500 }}>{eventDate}</div>}
+        {show.date && eventDate && <div style={{ fontSize: sz.dateSz, color: theme.muted, marginBottom: 6, fontWeight: 500 }}>{eventDate}</div>}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>
-              {cta || "Register now"}
+              {show.cta ? (cta || "Register now") : ""}
             </div>
-            {regUrl && <span style={{ fontSize: Math.max(8, sz.dateSz - 2), color: theme.muted, opacity: 0.7 }}>{regUrl.replace(/^https?:\/\//, "")}</span>}
+            {show.regUrl && regUrl && <span style={{ fontSize: Math.max(8, sz.dateSz - 2), color: theme.muted, opacity: 0.7 }}>{regUrl.replace(/^https?:\/\//, "")}</span>}
           </div>
           <span style={{ fontSize: sz.brandSz, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: theme.accent, opacity: 0.85 }}>{brand}</span>
         </div>
