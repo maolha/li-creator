@@ -816,10 +816,11 @@ Return the same JSON structure with just the post object updated.`;
     const updated = await getCreations(user.uid);
     setCreations(updated);
   }
-  const hasSpeakerContent = isSpeakerMode && speakerData?.eventTitle?.trim() && Array.isArray(speakerData?.speakers) && speakerData.speakers.some((s) => s?.name?.trim());
+  const hasSpeakerContent = isSpeakerMode && !!(speakerData?.eventTitle?.trim());
+  const hasSpeakerSpeakers = hasSpeakerContent && Array.isArray(speakerData?.speakers) && speakerData.speakers.some((s) => !!(s?.name?.trim()));
   const hasContent = isSpeakerMode ? hasSpeakerContent : (input.trim() || files.length > 0);
   const hasSlides = slides?.length > 0;
-  const hasOutput = hasSlides || post || (isSpeakerMode && hasSpeakerContent);
+  const hasOutput = hasSlides || post || hasSpeakerContent;
   const showSlideControls = hasSlides && contentType !== "text-post" && !isSpeakerMode;
 
   // Generate button tooltip for missing fields
