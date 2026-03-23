@@ -133,7 +133,7 @@ function SpeakerPhotos({ speakers, count, photoSz, photoRadius, theme, nameSz, r
 }
 
 export function SpeakerSlideInner({ data, T, brand }) {
-  const { eventTitle, eventDate, cta, eventLogo, sessionTitle, regUrl, tagLabel, logoDarkBg } = data || {};
+  const { eventTitle, eventDate, cta, eventLogo, sessionTitle, regUrl, tagLabel, logoDarkBg, extraText } = data || {};
   const speakers = Array.isArray(data?.speakers) ? data.speakers : [];
   const style = data?.style || {};
   const layout = style.layout || "classic";
@@ -217,9 +217,9 @@ export function SpeakerSlideInner({ data, T, brand }) {
           <SpeakerPhotos speakers={speakers} count={count} photoSz={sz.photoSz} photoRadius={photoRadius} theme={theme} nameSz={sz.nameSz} roleSz={sz.roleSz} companySz={sz.companySz} photoGap={sz.photoGap} />
         </div>
 
-        <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>
-          {show.cta ? (cta || "Register now") : ""}
-        </div>
+        {extraText && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginBottom: 12, lineHeight: 1.4, maxWidth: "80%" }}>{extraText}</div>}
+
+        {show.cta && <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>{cta || "Register now"}</div>}
       </div>
     );
   }
@@ -244,13 +244,12 @@ export function SpeakerSlideInner({ data, T, brand }) {
           {show.session && sessionTitle && <div style={{ fontSize: sz.sessionSize, color: ct, opacity: 0.7, marginBottom: 12, fontWeight: 500 }}>{sessionTitle}</div>}
 
           <SpeakerPhotos speakers={speakers} count={count} photoSz={sz.photoSz} photoRadius={photoRadius} theme={theme} nameSz={sz.nameSz} roleSz={sz.roleSz} companySz={sz.companySz} photoGap={sz.photoGap} ct={ct} />
+          {extraText && <div style={{ fontSize: sz.sessionSize, color: ct, opacity: 0.6, marginTop: 10, lineHeight: 1.4 }}>{extraText}</div>}
         </div>
 
-        <div style={{ padding: `0 ${sz.pad}px ${sz.padY}px`, display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(255,255,255,0.18)", paddingTop: 12, margin: `0 ${sz.pad}px` }}>
-          <div style={{ background: "rgba(255,255,255,0.95)", color: theme.accent, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>
-            {show.cta ? (cta || "Register now") : ""}
-          </div>
-          <span style={{ fontSize: sz.brandSz, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: ct, opacity: 0.6 }}>{brand}</span>
+        <div style={{ padding: `0 ${sz.pad}px ${sz.padY * 0.7}px`, display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(255,255,255,0.18)", paddingTop: 10, margin: `0 ${sz.pad}px`, flexShrink: 0 }}>
+          {show.cta && <div style={{ background: "rgba(255,255,255,0.95)", color: theme.accent, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>{cta || "Register now"}</div>}
+          {show.brand && <span style={{ fontSize: sz.brandSz, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: ct, opacity: 0.6 }}>{brand}</span>}
         </div>
       </div>
     );
@@ -284,11 +283,11 @@ export function SpeakerSlideInner({ data, T, brand }) {
           ))}
         </div>
 
+        {extraText && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginBottom: 12, lineHeight: 1.4 }}>{extraText}</div>}
+
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>
-            {show.cta ? (cta || "Register now") : ""}
-          </div>
-          <span style={{ fontSize: sz.brandSz, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: theme.accent, opacity: 0.7 }}>{brand}</span>
+          {show.cta && <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>{cta || "Register now"}</div>}
+          {show.brand && <span style={{ fontSize: sz.brandSz, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: theme.accent, opacity: 0.7 }}>{brand}</span>}
         </div>
       </div>
     );
@@ -301,39 +300,41 @@ export function SpeakerSlideInner({ data, T, brand }) {
       <div style={{ position: "absolute", top: -80, right: -80, width: 300, height: 300, borderRadius: "50%", background: theme.accent, opacity: 0.06 }} />
 
       {/* Header: tag + logo */}
-      <div style={{ padding: `${sz.padY}px ${sz.pad}px 0`, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
-        <div style={{ display: "inline-flex", alignItems: "center", background: theme.soft, border: `1px solid ${theme.border}`, borderRadius: 999, padding: `3px ${sz.pad * 0.4}px`, fontSize: sz.pillSz, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: theme.accent }}>
-          {show.tag ? (tagLabel || (count > 1 ? "Speakers" : "Speaker")) : ""}
-        </div>
-        <LogoOrBrand eventLogo={eventLogo} logoDarkBg={logoDarkBg} brand={brand} theme={theme} logoH={sz.logoH} />
+      <div style={{ padding: `${sz.padY * 0.7}px ${sz.pad}px 0`, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
+        {show.tag && (
+          <div style={{ display: "inline-flex", alignItems: "center", background: theme.soft, border: `1px solid ${theme.border}`, borderRadius: 999, padding: `3px ${sz.pad * 0.4}px`, fontSize: sz.pillSz, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: theme.accent }}>
+            {tagLabel || (count > 1 ? "Speakers" : "Speaker")}
+          </div>
+        )}
+        {!show.tag && <div />}
+        {show.brand ? <LogoOrBrand eventLogo={eventLogo} logoDarkBg={logoDarkBg} brand={brand} theme={theme} logoH={sz.logoH} /> : eventLogo ? <LogoOrBrand eventLogo={eventLogo} logoDarkBg={logoDarkBg} brand="" theme={theme} logoH={sz.logoH} /> : null}
       </div>
 
-      {/* Title (capped height) */}
-      <div style={{ padding: `10px ${sz.pad}px 0`, maxHeight: SH * 0.28, overflow: "hidden", flexShrink: 0 }}>
-        <div style={{ width: sz.accentBarW, height: sz.accentBarH, background: theme.accent, borderRadius: 2, marginBottom: 10 }} />
+      {/* Title — takes only needed space */}
+      <div style={{ padding: `8px ${sz.pad}px 0`, flexShrink: 0 }}>
+        <div style={{ width: sz.accentBarW, height: sz.accentBarH, background: theme.accent, borderRadius: 2, marginBottom: 8 }} />
         <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: tSz, fontWeight: 400, lineHeight: 1.15, color: theme.text, margin: 0, fontStyle: "italic" }}>
           {eventTitle || "Event Title"}
         </h2>
-        {show.session && sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginTop: 6, fontWeight: 500 }}>{sessionTitle}</div>}
+        {show.session && sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginTop: 4, fontWeight: 500 }}>{sessionTitle}</div>}
       </div>
 
-      {/* Speakers */}
-      <div style={{ flex: 1, padding: `12px ${sz.pad}px`, display: "flex", alignItems: "flex-start", paddingTop: 14 }}>
+      {/* Speakers — fills available space */}
+      <div style={{ flex: 1, padding: `8px ${sz.pad}px`, display: "flex", alignItems: "flex-start", paddingTop: 10 }}>
         <SpeakerPhotos speakers={speakers} count={count} photoSz={sz.photoSz} photoRadius={photoRadius} theme={theme} nameSz={sz.nameSz} roleSz={sz.roleSz} companySz={sz.companySz} photoGap={sz.photoGap} />
       </div>
 
-      {/* Footer */}
-      <div style={{ padding: `0 ${sz.pad}px ${sz.padY * 0.7}px`, borderTop: `1px solid ${theme.border}`, paddingTop: 10, margin: `0 ${sz.pad}px`, flexShrink: 0 }}>
-        {show.date && eventDate && <div style={{ fontSize: sz.dateSz, color: theme.muted, marginBottom: 6, fontWeight: 500 }}>{eventDate}</div>}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>
-              {show.cta ? (cta || "Register now") : ""}
-            </div>
-            {show.regUrl && regUrl && <span style={{ fontSize: Math.max(8, sz.dateSz - 2), color: theme.muted, opacity: 0.7 }}>{regUrl.replace(/^https?:\/\//, "")}</span>}
-          </div>
-          <span style={{ fontSize: sz.brandSz, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: theme.accent, opacity: 0.85 }}>{brand}</span>
+      {/* Extra text */}
+      {extraText && <div style={{ padding: `0 ${sz.pad}px 6px`, fontSize: sz.sessionSize, color: theme.muted, lineHeight: 1.4, flexShrink: 0 }}>{extraText}</div>}
+
+      {/* Footer — compact single line */}
+      <div style={{ padding: `0 ${sz.pad}px ${sz.padY * 0.6}px`, borderTop: `1px solid ${theme.border}`, paddingTop: 8, margin: `0 ${sz.pad}px`, flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {show.cta && <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>{cta || "Register now"}</div>}
+          {show.date && eventDate && <span style={{ fontSize: sz.dateSz, color: theme.muted, fontWeight: 500 }}>{eventDate}</span>}
+          {show.regUrl && regUrl && <span style={{ fontSize: Math.max(8, sz.dateSz - 2), color: theme.muted, opacity: 0.7 }}>{regUrl.replace(/^https?:\/\//, "")}</span>}
         </div>
+        {show.brand && <span style={{ fontSize: sz.brandSz, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: theme.accent, opacity: 0.85 }}>{brand}</span>}
       </div>
     </div>
   );

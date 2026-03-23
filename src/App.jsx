@@ -1356,6 +1356,10 @@ Return the same JSON structure with just the post object updated.`;
                       <input type="text" value={speakerData.tagLabel || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, tagLabel: e.target.value }))} placeholder="Speaker / Panelist / Keynote" style={inputStyle(T)} />
                     </div>
                   </div>
+                  <div>
+                    <label style={{ ...labelStyle(T), marginBottom: 4 }}>Extra Text (shown below speakers)</label>
+                    <input type="text" value={speakerData.extraText || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, extraText: e.target.value }))} placeholder="e.g. Free entry · Limited seats · Online + In-person" style={inputStyle(T)} />
+                  </div>
                 </div>
 
                 {/* Speakers */}
