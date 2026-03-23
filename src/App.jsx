@@ -1958,7 +1958,7 @@ Return the same JSON structure with just the post object updated.`;
                   <div ref={slideContainerRef} style={{ position: "relative" }}>
                     <AnimatePresence mode="wait">
                       <motion.div key={cur} initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.2 }}>
-                        <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={cardPx} intensity={intensity} />
+                        <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={cardPx} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} />
                       </motion.div>
                     </AnimatePresence>
                     {cur > 0 && <button onClick={() => setCur((c) => c - 1)} style={navBtnStyle(T, "left")}><ChevronLeft size={20} /></button>}
@@ -2059,7 +2059,7 @@ Return the same JSON structure with just the post object updated.`;
 
                   {/* Mini preview */}
                   <div style={{ display: "flex", justifyContent: "center" }}>
-                    <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={Math.min(cardPx, 300)} intensity={intensity} />
+                    <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={Math.min(cardPx, 300)} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} />
                   </div>
 
                   {/* Edit fields */}

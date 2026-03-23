@@ -24,8 +24,8 @@ function Pill({ tag, type, variant, T }) {
       style={{
         display: "inline-flex",
         alignItems: "center",
-        background: isLight ? "rgba(255,255,255,0.15)" : isFilled ? T.accent : T.soft,
-        border: `1px solid ${isLight ? "rgba(255,255,255,0.22)" : isFilled ? T.accent : T.border}`,
+        background: isLight ? "rgba(255,255,255,0.15)" : isFilled ? theme.accent : T.soft,
+        border: `1px solid ${isLight ? "rgba(255,255,255,0.22)" : isFilled ? theme.accent : T.border}`,
         borderRadius: 999,
         padding: "5px 16px",
         fontSize: 13,
@@ -79,28 +79,28 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
     theme = { ...T, card: T.accent, text: invCt, muted: invCt === "#FFFFFF" ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)", border: invCt === "#FFFFFF" ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.12)", soft: invCt === "#FFFFFF" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)" };
   }
   // Override spec bg/colors if bgMode changes the background
-  const effectiveBg = bgMode === "default" ? spec.bg : theme.card;
-  const effectiveText = bgMode === "default" ? (spec.textColor || theme.text) : theme.text;
-  const effectiveBody = bgMode === "default" ? (spec.bodyColor || theme.muted) : theme.muted;
+  const effectiveBg = bgMode === "default" ? effectiveBg : theme.card;
+  const effectiveText = bgMode === "default" ? (effectiveText || theme.text) : theme.text;
+  const effectiveBody = bgMode === "default" ? (effectiveBody || theme.muted) : theme.muted;
 
   const ct = contrastText(theme.accent);
 
   /* COVER */
   if (type === "cover") {
     return (
-      <div style={{ width: SW, height: SH, background: spec.bg, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", padding: spec.padding, boxSizing: "border-box" }}>
+      <div style={{ width: SW, height: SH, background: effectiveBg, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", padding: spec.padding, boxSizing: "border-box" }}>
         <Decorations items={spec.decorations} />
         <div style={{ paddingLeft: spec.accentBarW > 0 ? spec.accentBarW + 2 : 0, display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "auto", position: "relative" }}>
-          <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: spec.textColor === ct ? ct : T.accent, opacity: spec.textColor === ct ? 0.8 : 1 }}>{brand}</span>
-          <span style={{ fontSize: 12, color: spec.textColor, opacity: 0.5 }}>{n > 1 ? `${i + 1} / ${n}` : ""}</span>
+          <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: effectiveText === ct ? ct : theme.accent, opacity: effectiveText === ct ? 0.8 : 1 }}>{brand}</span>
+          <span style={{ fontSize: 12, color: effectiveText, opacity: 0.5 }}>{n > 1 ? `${i + 1} / ${n}` : ""}</span>
         </div>
         <div style={{ paddingLeft: spec.accentBarW > 0 ? spec.accentBarW + 2 : 0, position: "relative" }}>
-          <Pill tag={s.tag} type={type} variant={spec.pillVariant} T={T} />
-          <div style={{ width: 64, height: 4, background: spec.textColor === ct ? ct : T.accent, borderRadius: 2, margin: "26px 0 22px", opacity: spec.textColor === ct ? 0.4 : 1 }} />
-          <h1 style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.headlineSize, fontWeight: 400, lineHeight: spec.headlineLH, color: spec.textColor, fontStyle: spec.headlineItalic ? "italic" : "normal", margin: "0 0 22px" }}>
+          <Pill tag={s.tag} type={type} variant={spec.pillVariant} T={theme} />
+          <div style={{ width: 64, height: 4, background: effectiveText === ct ? ct : theme.accent, borderRadius: 2, margin: "26px 0 22px", opacity: effectiveText === ct ? 0.4 : 1 }} />
+          <h1 style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.headlineSize, fontWeight: 400, lineHeight: spec.headlineLH, color: effectiveText, fontStyle: spec.headlineItalic ? "italic" : "normal", margin: "0 0 22px" }}>
             {s.headline}
           </h1>
-          <p style={{ fontSize: spec.bodySize, lineHeight: 1.65, color: spec.bodyColor, margin: 0, opacity: spec.bodyOpacity || 1 }}>{s.body}</p>
+          <p style={{ fontSize: spec.bodySize, lineHeight: 1.65, color: effectiveBody, margin: 0, opacity: spec.bodyOpacity || 1 }}>{s.body}</p>
         </div>
       </div>
     );
@@ -111,20 +111,20 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
     const sn = s.stat || "?";
     const sf = s.statFontSize || spec.statSize(sn.length);
     return (
-      <div style={{ width: SW, height: SH, background: T.card, overflow: "hidden", display: "flex", boxSizing: "border-box" }}>
+      <div style={{ width: SW, height: SH, background: theme.card, overflow: "hidden", display: "flex", boxSizing: "border-box" }}>
         <div style={{ width: spec.panelW, flexShrink: 0, background: spec.panelBg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 18px", position: "relative", overflow: "hidden" }}>
           <Decorations items={spec.decorations} />
           <div style={{ fontFamily: "'DM Serif Display',serif", fontSize: sf, fontWeight: 400, color: ct, lineHeight: 1, textAlign: "center", whiteSpace: "nowrap", position: "relative", zIndex: 1 }}>{sn}</div>
           {s.statLabel && <div style={{ fontSize: spec.labelSize, fontWeight: 600, color: ct, opacity: 0.7, marginTop: 14, textAlign: "center", textTransform: "uppercase", letterSpacing: spec.labelSpacing || "0.06em", position: "relative", zIndex: 1 }}>{s.statLabel}</div>}
         </div>
         <div style={{ flex: 1, padding: "44px 42px 40px 36px", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
-          <Pill tag={s.tag} type={type} variant="default" T={T} />
+          <Pill tag={s.tag} type={type} variant="default" T={theme} />
           <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "22px 0" }}>
-            <div style={{ width: 44, height: 4, background: T.accent, borderRadius: 2, marginBottom: 20 }} />
-            <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.headlineSize, fontWeight: 400, lineHeight: 1.25, color: T.text, margin: "0 0 16px" }}>{s.headline}</h2>
-            <p style={{ fontSize: spec.bodySize, lineHeight: 1.72, color: T.muted, margin: 0 }}>{s.body}</p>
+            <div style={{ width: 44, height: 4, background: theme.accent, borderRadius: 2, marginBottom: 20 }} />
+            <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.headlineSize, fontWeight: 400, lineHeight: 1.25, color: theme.text, margin: "0 0 16px" }}>{s.headline}</h2>
+            <p style={{ fontSize: spec.bodySize, lineHeight: 1.72, color: theme.muted, margin: 0 }}>{s.body}</p>
           </div>
-          <Bar brand={brand} i={i} n={n} T={T} />
+          <Bar brand={brand} i={i} n={n} T={theme} />
         </div>
       </div>
     );
@@ -132,9 +132,9 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
 
   /* QUOTE */
   if (type === "quote") {
-    const qBg = spec.bg;
-    const qText = spec.textColor;
-    const qBody = spec.bodyColor;
+    const qBg = effectiveBg;
+    const qText = effectiveText;
+    const qBody = effectiveBody;
     const isCentered = spec.centered;
     return (
       <div style={{ width: SW, height: SH, background: qBg, overflow: "hidden", display: "flex", flexDirection: "column", padding: spec.padding, boxSizing: "border-box", justifyContent: isCentered ? "center" : undefined, alignItems: isCentered ? "center" : undefined, textAlign: isCentered ? "center" : undefined, position: "relative" }}>
@@ -144,19 +144,19 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
           <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", fontFamily: "'DM Serif Display',serif", fontSize: spec.quoteMarkSize, lineHeight: 0.8, color: qText, opacity: spec.quoteMarkOpacity, userSelect: "none", pointerEvents: "none" }}>&ldquo;</div>
         ) : (
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
-            <div style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.quoteMarkSize, lineHeight: 0.78, color: spec.bg === T.card ? T.accent : qText, opacity: spec.quoteMarkOpacity, userSelect: "none", marginLeft: -10, marginTop: -8 }}>&ldquo;</div>
-            <span style={{ fontSize: 12, color: spec.bg === T.card ? T.muted : qText, paddingTop: 8, opacity: 0.6 }}>{n > 1 ? `${i + 1} / ${n}` : ""}</span>
+            <div style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.quoteMarkSize, lineHeight: 0.78, color: effectiveBg === theme.card ? theme.accent : qText, opacity: spec.quoteMarkOpacity, userSelect: "none", marginLeft: -10, marginTop: -8 }}>&ldquo;</div>
+            <span style={{ fontSize: 12, color: effectiveBg === theme.card ? theme.muted : qText, paddingTop: 8, opacity: 0.6 }}>{n > 1 ? `${i + 1} / ${n}` : ""}</span>
           </div>
         )}
         <div style={{ flex: isCentered ? undefined : 1, display: "flex", flexDirection: "column", justifyContent: "center", marginTop: isCentered ? 0 : -26, position: "relative", zIndex: 1 }}>
           <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.headlineSize, fontWeight: 400, lineHeight: spec.headlineLH, color: qText, fontStyle: "italic", margin: "0 0 20px" }}>{s.headline}</h2>
-          {spec.showAccentUnderline && <div style={{ width: "40%", height: 3, background: T.accent, borderRadius: 2, marginBottom: 16, marginLeft: isCentered ? "auto" : 0, marginRight: isCentered ? "auto" : undefined }} />}
+          {spec.showAccentUnderline && <div style={{ width: "40%", height: 3, background: theme.accent, borderRadius: 2, marginBottom: 16, marginLeft: isCentered ? "auto" : 0, marginRight: isCentered ? "auto" : undefined }} />}
           <p style={{ fontSize: 15, lineHeight: 1.72, color: qBody, margin: 0, opacity: spec.bodyOpacity || 1 }}>{s.body}</p>
         </div>
         {!isCentered && (
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid ${spec.bg === T.card ? T.border : "rgba(255,255,255,0.18)"}`, paddingTop: 20, flexShrink: 0 }}>
-            <Pill tag={s.tag} type={type} variant={spec.bg === T.card ? "default" : "light"} T={T} />
-            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: spec.bg === T.card ? T.accent : qText, opacity: 0.85 }}>{brand}</span>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid ${effectiveBg === theme.card ? theme.border : "rgba(255,255,255,0.18)"}`, paddingTop: 20, flexShrink: 0 }}>
+            <Pill tag={s.tag} type={type} variant={effectiveBg === theme.card ? "default" : "light"} T={theme} />
+            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: effectiveBg === theme.card ? theme.accent : qText, opacity: 0.85 }}>{brand}</span>
           </div>
         )}
         {isCentered && (
@@ -169,21 +169,21 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   /* CTA */
   if (type === "cta") {
     return (
-      <div style={{ width: SW, height: SH, background: spec.bg, overflow: "hidden", position: "relative", display: "flex", flexDirection: "column", padding: spec.padding, boxSizing: "border-box" }}>
+      <div style={{ width: SW, height: SH, background: effectiveBg, overflow: "hidden", position: "relative", display: "flex", flexDirection: "column", padding: spec.padding, boxSizing: "border-box" }}>
         <Decorations items={spec.decorations} />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", flexShrink: 0 }}>
-          <Pill tag={s.tag} type={type} variant="light" T={T} />
-          <span style={{ fontSize: 12, color: spec.textColor, opacity: 0.45 }}>{n > 1 ? `${i + 1} / ${n}` : ""}</span>
+          <Pill tag={s.tag} type={type} variant="light" T={theme} />
+          <span style={{ fontSize: 12, color: effectiveText, opacity: 0.45 }}>{n > 1 ? `${i + 1} / ${n}` : ""}</span>
         </div>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" }}>
           {spec.showIcon && (
-            <div style={{ fontSize: spec.iconSize, lineHeight: 1, color: spec.textColor, opacity: spec.iconOpacity, marginBottom: 20, fontFamily: "'DM Serif Display',serif" }}>&#9670;</div>
+            <div style={{ fontSize: spec.iconSize, lineHeight: 1, color: effectiveText, opacity: spec.iconOpacity, marginBottom: 20, fontFamily: "'DM Serif Display',serif" }}>&#9670;</div>
           )}
-          <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.headlineSize, fontWeight: 400, lineHeight: spec.headlineLH, color: spec.textColor, margin: "0 0 20px" }}>{s.headline}</h2>
-          <p style={{ fontSize: spec.bodySize, lineHeight: 1.65, color: spec.textColor, opacity: spec.bodyOpacity, margin: 0 }}>{s.body}</p>
+          <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.headlineSize, fontWeight: 400, lineHeight: spec.headlineLH, color: effectiveText, margin: "0 0 20px" }}>{s.headline}</h2>
+          <p style={{ fontSize: spec.bodySize, lineHeight: 1.65, color: effectiveText, opacity: spec.bodyOpacity, margin: 0 }}>{s.body}</p>
         </div>
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.18)", paddingTop: 20, position: "relative", flexShrink: 0 }}>
-          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: spec.textColor, opacity: 0.6 }}>{brand}</span>
+          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: effectiveText, opacity: 0.6 }}>{brand}</span>
         </div>
       </div>
     );
@@ -191,20 +191,20 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
 
   /* INSIGHT (default) */
   return (
-    <div style={{ width: SW, height: SH, background: spec.bg, overflow: "hidden", display: "flex", position: "relative", boxSizing: "border-box" }}>
+    <div style={{ width: SW, height: SH, background: effectiveBg, overflow: "hidden", display: "flex", position: "relative", boxSizing: "border-box" }}>
       <Decorations items={spec.decorations} />
       {/* Ghost number */}
-      <div style={{ position: "absolute", bottom: -14, right: -8, fontFamily: "'DM Serif Display',serif", fontSize: spec.ghostSize, fontWeight: 400, lineHeight: 1, color: T.accent, opacity: spec.ghostOpacity, userSelect: "none", letterSpacing: "-0.04em", pointerEvents: "none" }}>
+      <div style={{ position: "absolute", bottom: -14, right: -8, fontFamily: "'DM Serif Display',serif", fontSize: spec.ghostSize, fontWeight: 400, lineHeight: 1, color: theme.accent, opacity: spec.ghostOpacity, userSelect: "none", letterSpacing: "-0.04em", pointerEvents: "none" }}>
         {String(i + 1).padStart(2, "0")}
       </div>
       <div style={{ flex: 1, padding: spec.padding, display: "flex", flexDirection: "column", position: "relative", boxSizing: "border-box", marginLeft: spec.barW > 0 ? 0 : undefined }}>
-        <Pill tag={s.tag} type={type} variant={intensity === "dramatic" ? "light" : "default"} T={T} />
+        <Pill tag={s.tag} type={type} variant={intensity === "dramatic" ? "light" : "default"} T={theme} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "18px 0" }}>
-          <div style={{ width: spec.dividerW, height: spec.dividerH, background: T.accent, borderRadius: 2, marginBottom: 22 }} />
-          <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.headlineSize, fontWeight: 400, lineHeight: spec.headlineLH, color: spec.textColor, margin: "0 0 18px" }}>{s.headline}</h2>
-          <p style={{ fontSize: spec.bodySize, lineHeight: 1.72, color: spec.bodyColor, margin: 0, opacity: spec.bodyOpacity || 1 }}>{s.body}</p>
+          <div style={{ width: spec.dividerW, height: spec.dividerH, background: theme.accent, borderRadius: 2, marginBottom: 22 }} />
+          <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.headlineSize, fontWeight: 400, lineHeight: spec.headlineLH, color: effectiveText, margin: "0 0 18px" }}>{s.headline}</h2>
+          <p style={{ fontSize: spec.bodySize, lineHeight: 1.72, color: effectiveBody, margin: 0, opacity: spec.bodyOpacity || 1 }}>{s.body}</p>
         </div>
-        <Bar brand={brand} i={i} n={n} T={T} />
+        <Bar brand={brand} i={i} n={n} T={theme} />
       </div>
     </div>
   );
