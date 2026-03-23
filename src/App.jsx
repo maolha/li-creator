@@ -1184,14 +1184,18 @@ Return the same JSON structure with just the post object updated.`;
               </div>
             </div>
 
-            {/* Brand selector */}
-            {userProfile?.profile?.brands?.length > 0 && (
+            {/* Brand + Label */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               <div>
                 <label style={labelStyle(T)}>Brand</label>
                 <select
-                  value={activeBrand?.id || ""}
+                  value={activeBrand?.id || "_custom"}
                   onChange={(e) => {
-                    const brands = userProfile.profile.brands;
+                    if (e.target.value === "_custom") {
+                      setActiveBrand({ name: brand || "Custom" });
+                      return;
+                    }
+                    const brands = userProfile?.profile?.brands || [];
                     const selected = brands.find((b) => b.id === e.target.value);
                     if (selected) {
                       setActiveBrand(selected);
@@ -1209,25 +1213,25 @@ Return the same JSON structure with just the post object updated.`;
                   }}
                   style={selectStyle(T)}
                 >
-                  <option value="">No brand</option>
-                  {userProfile.profile.brands.map((b) => (
-                    <option key={b.id} value={b.id}>{b.name}{b.isDefault ? " (default)" : ""}</option>
+                  <option value="_custom">Custom</option>
+                  {(userProfile?.profile?.brands || []).map((b) => (
+                    <option key={b.id} value={b.id}>{b.name}{b.isDefault ? " ★" : ""}</option>
                   ))}
                 </select>
               </div>
-            )}
-
-            {/* Settings row */}
-            <div style={{ display: "grid", gridTemplateColumns: contentType === "carousel" ? "1fr 1fr 72px" : "1fr 1fr", gap: 10 }}>
               <div>
-                <label style={labelStyle(T)}><Palette size={12} /> Theme</label>
+                <label style={labelStyle(T)}><Type size={12} /> Label on visual</label>
+                <input type="text" value={brand} onChange={(e) => setActiveBrand((prev) => ({ ...(prev || {}), name: e.target.value }))} placeholder="Shown on slides" style={inputStyle(T)} />
+              </div>
+            </div>
+
+            {/* Theme + Slides */}
+            <div style={{ display: "grid", gridTemplateColumns: contentType === "carousel" ? "1fr 72px" : "1fr", gap: 10 }}>
+              <div>
+                <label style={labelStyle(T)}><Palette size={12} /> Preset</label>
                 <select value={theme} onChange={(e) => setTheme(e.target.value)} style={selectStyle(T)}>
                   {Object.keys(allPresets).map((t) => <option key={t}>{t}</option>)}
                 </select>
-              </div>
-              <div>
-                <label style={labelStyle(T)}><Type size={12} /> Brand Name</label>
-                <input type="text" value={brand} onChange={(e) => setActiveBrand((prev) => ({ ...(prev || {}), name: e.target.value }))} placeholder="PAIA" style={inputStyle(T)} />
               </div>
               {contentType === "carousel" && (
                 <div>
@@ -1338,6 +1342,35 @@ Return the same JSON structure with just the post object updated.`;
                 </button>
               ))}
             </div>
+
+            {/* Brand color quick-switch */}
+            {activeBrand?.colors && activeBrand.id && (
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                <span style={{ fontSize: 10, color: T.muted, marginRight: 4 }}>Brand colors:</span>
+                {Object.entries(activeBrand.colors).filter(([_, v]) => v && v.startsWith("#")).map(([key, color]) => (
+                  <button
+                    key={key}
+                    onClick={() => {
+                      const variants = makeCustomVariants(color);
+                      if (variants) {
+                        const themeName = `brand-${activeBrand.id}-${key}`;
+                        setCustomThemes((prev) => ({ ...prev, [themeName]: variants }));
+                        setTheme(themeName);
+                      }
+                    }}
+                    title={`${key}: ${color}`}
+                    style={{
+                      width: 28, height: 28, borderRadius: 8,
+                      border: `2px solid ${T.accent === color ? color : "transparent"}`,
+                      background: color, cursor: "pointer", padding: 0, transition: "all 0.2s",
+                      position: "relative",
+                    }}
+                  >
+                    <span style={{ position: "absolute", bottom: 1, right: 2, fontSize: 7, color: "rgba(255,255,255,0.6)" }}>{key[0].toUpperCase()}</span>
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Brand Domain Grabber */}
             <div>
