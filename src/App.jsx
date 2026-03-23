@@ -77,6 +77,7 @@ import {
   getCreations,
   deleteCreation,
 } from "./utils/firebase";
+import Logo from "./components/Logo";
 import SettingsPanel from "./components/SettingsPanel";
 import HistoryPanel from "./components/HistoryPanel";
 import LandingPage from "./components/LandingPage";
@@ -919,22 +920,7 @@ Return the same JSON structure with just the post object updated.`;
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 10,
-                background: A.gradient,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 18,
-                color: "#fff",
-                fontWeight: 700,
-              }}
-            >
-              &#9670;
-            </div>
+            <Logo size={34} rounded={9} />
             <div>
               <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: 18, fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.2 }}>
                 ContentForge
