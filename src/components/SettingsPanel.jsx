@@ -13,6 +13,7 @@ import {
   X,
   Loader2,
   Check,
+  Shield,
 } from "lucide-react";
 
 export default function SettingsPanel({ T, user, profile, onSave, apiKey, onApiKeySave }) {
@@ -178,6 +179,41 @@ export default function SettingsPanel({ T, user, profile, onSave, apiKey, onApiK
           style={textareaStyle(T)}
         />
         <p style={hintStyle(T)}>Personal rules for the AI. These instructions are applied to every generation — tone, style, words to avoid, formatting preferences, etc.</p>
+      </Section>
+
+      {/* Privacy */}
+      <Section T={T} icon={Shield} title="Privacy & Storage">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 2 }}>Cloud History</div>
+            <p style={hintStyle(T)}>
+              {localProfile.historyEnabled !== false
+                ? "Creations are saved to your library in the cloud. You can browse, reload, and remix past content."
+                : "History is disabled. Nothing is stored in the cloud. Only your current work survives page refresh (localStorage)."}
+            </p>
+          </div>
+          <button
+            onClick={() => updateField("historyEnabled", localProfile.historyEnabled === false ? true : false)}
+            style={{
+              width: 48, height: 28, borderRadius: 14, border: "none", cursor: "pointer",
+              background: localProfile.historyEnabled !== false ? T.accent || "#0077b5" : "rgba(128,128,128,0.3)",
+              position: "relative", transition: "background 0.2s", flexShrink: 0, marginLeft: 16,
+            }}
+          >
+            <div style={{
+              width: 22, height: 22, borderRadius: 11, background: "#fff",
+              position: "absolute", top: 3,
+              left: localProfile.historyEnabled !== false ? 23 : 3,
+              transition: "left 0.2s",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+            }} />
+          </button>
+        </div>
+        {localProfile.historyEnabled === false && (
+          <div style={{ marginTop: 8, padding: "8px 12px", background: "rgba(0,119,181,0.06)", borderRadius: 8, fontSize: 11, color: T.muted, lineHeight: 1.5 }}>
+            Your settings and profile are still synced. Only content creations (slides, posts, speaker visuals) are not stored in the cloud.
+          </div>
+        )}
       </Section>
 
       {/* Defaults */}

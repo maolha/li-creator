@@ -103,7 +103,7 @@ export default function LandingPage({ onSignIn }) {
                 <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZa3zOgexK2Mebawxy68F-sMSEQmGNPMggZJ9-jD0hEVAva9s-qe5TL8o9wDcI84NV0TRlwKo_ue3TPWMDF-RhKygaRBlnkQAF0pBeIwwloHAVdTE7fWI08sQVSBDpVFWBc-K68QtwCGdL3GzWqeLgvsg1C45JzEDMAZLJRvXkTYSeXOpkX3VmjWVJEjGWlB_iNdLR9QLJVR0EUiXocJYlBe1sF0tiiUcS_DAI0UI-QFI1PVKFL9BZvgtPTFKefEmyYOtHm1WGlKo" alt="" style={{ width: 18, height: 18 }} />
                 Start creating — free
               </motion.button>
-              <p style={{ fontSize: 11, color: "rgba(232,230,227,0.25)", marginTop: 12 }}>Your API key. Your data. Always private.</p>
+              <p style={{ fontSize: 11, color: "rgba(232,230,227,0.25)", marginTop: 12 }}>Your API key. Cloud history optional. Privacy controls in settings.</p>
             </motion.div>
 
             {/* Mockup — hidden on mobile */}

@@ -783,8 +783,10 @@ Return the same JSON structure with just the post object updated.`;
   // Save to Library
   const [savingToLibrary, setSavingToLibrary] = useState(false);
   const [savedToLibrary, setSavedToLibrary] = useState(false);
+  const historyEnabled = userProfile?.profile?.historyEnabled !== false;
+
   async function saveToLibrary() {
-    if (!user || savingToLibrary) return;
+    if (!user || savingToLibrary || !historyEnabled) return;
     setSavingToLibrary(true);
     try {
       // Save custom theme definition if using one
@@ -940,9 +942,9 @@ Return the same JSON structure with just the post object updated.`;
                 <NavBtn T={T} active={page === "create"} onClick={() => setPage("create")}>
                   <Sparkles size={13} /> Create
                 </NavBtn>
-                <NavBtn T={T} active={page === "history"} onClick={() => setPage("history")}>
+                {historyEnabled && <NavBtn T={T} active={page === "history"} onClick={() => setPage("history")}>
                   <History size={13} /> Library
-                </NavBtn>
+                </NavBtn>}
                 <NavBtn T={T} active={page === "settings"} onClick={() => setPage("settings")}>
                   <Settings size={13} />
                 </NavBtn>
@@ -1790,7 +1792,7 @@ Return the same JSON structure with just the post object updated.`;
                       {exportingPng ? "..." : "Download PNG"}
                     </button>
                     {user && (
-                      <button onClick={saveToLibrary} disabled={savingToLibrary} style={exportBtnStyle(T)}>
+                      <button onClick={saveToLibrary} disabled={savingToLibrary || !historyEnabled} style={exportBtnStyle(T)} title={!historyEnabled ? "Enable Cloud History in Settings to save" : ""}>
                         {savingToLibrary ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Save size={14} />}
                         {savedToLibrary ? "Saved!" : "Save to Library"}
                       </button>
