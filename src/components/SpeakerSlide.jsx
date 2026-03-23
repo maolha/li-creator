@@ -207,17 +207,17 @@ export function SpeakerSlideInner({ data, T, brand }) {
 
         <LogoOrBrand eventLogo={eventLogo} logoDarkBg={logoDarkBg} brand={brand} theme={theme} logoH={sz.logoH * 0.8} />
 
-        <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: tSz, fontWeight: 400, lineHeight: 1.15, color: theme.text, margin: `10px 0 ${sessionTitle ? 4 : 10}px`, fontStyle: "italic" }}>
+        <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: tSz, fontWeight: 400, lineHeight: 1.15, color: theme.text, margin: `14px 0 ${sessionTitle ? 6 : 14}px`, fontStyle: "italic" }}>
           {eventTitle || "Event Title"}
         </h2>
-        {show.session && sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginBottom: 10, fontWeight: 500 }}>{sessionTitle}</div>}
-        {show.date && eventDate && <div style={{ fontSize: sz.dateSz, color: theme.muted, marginBottom: 12 }}>{eventDate}</div>}
+        {show.session && sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginBottom: 14, fontWeight: 500 }}>{sessionTitle}</div>}
+        {show.date && eventDate && <div style={{ fontSize: sz.dateSz, color: theme.muted, marginBottom: 16 }}>{eventDate}</div>}
 
-        <div style={{ marginBottom: 14 }}>
+        <div style={{ marginBottom: 16 }}>
           <SpeakerPhotos speakers={speakers} count={count} photoSz={sz.photoSz} photoRadius={photoRadius} theme={theme} nameSz={sz.nameSz} roleSz={sz.roleSz} companySz={sz.companySz} photoGap={sz.photoGap} />
         </div>
 
-        {extraText && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginBottom: 12, lineHeight: 1.4, maxWidth: "80%" }}>{extraText}</div>}
+        {extraText && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginBottom: 14, lineHeight: 1.4, maxWidth: "80%" }}>{extraText}</div>}
 
         {show.cta && <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>{cta || "Register now"}</div>}
       </div>
@@ -300,35 +300,34 @@ export function SpeakerSlideInner({ data, T, brand }) {
       <div style={{ position: "absolute", top: -80, right: -80, width: 300, height: 300, borderRadius: "50%", background: theme.accent, opacity: 0.06 }} />
 
       {/* Header: tag + logo */}
-      <div style={{ padding: `${sz.padY * 0.7}px ${sz.pad}px 0`, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
-        {show.tag && (
+      <div style={{ padding: `${sz.padY}px ${sz.pad}px 0`, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
+        {show.tag ? (
           <div style={{ display: "inline-flex", alignItems: "center", background: theme.soft, border: `1px solid ${theme.border}`, borderRadius: 999, padding: `3px ${sz.pad * 0.4}px`, fontSize: sz.pillSz, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: theme.accent }}>
             {tagLabel || (count > 1 ? "Speakers" : "Speaker")}
           </div>
-        )}
-        {!show.tag && <div />}
+        ) : <div />}
         {show.brand ? <LogoOrBrand eventLogo={eventLogo} logoDarkBg={logoDarkBg} brand={brand} theme={theme} logoH={sz.logoH} /> : eventLogo ? <LogoOrBrand eventLogo={eventLogo} logoDarkBg={logoDarkBg} brand="" theme={theme} logoH={sz.logoH} /> : null}
       </div>
 
-      {/* Title — takes only needed space */}
-      <div style={{ padding: `8px ${sz.pad}px 0`, flexShrink: 0 }}>
-        <div style={{ width: sz.accentBarW, height: sz.accentBarH, background: theme.accent, borderRadius: 2, marginBottom: 8 }} />
+      {/* Title */}
+      <div style={{ padding: `12px ${sz.pad}px 0`, flexShrink: 0 }}>
+        <div style={{ width: sz.accentBarW, height: sz.accentBarH, background: theme.accent, borderRadius: 2, marginBottom: 12 }} />
         <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: tSz, fontWeight: 400, lineHeight: 1.15, color: theme.text, margin: 0, fontStyle: "italic" }}>
           {eventTitle || "Event Title"}
         </h2>
-        {show.session && sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginTop: 4, fontWeight: 500 }}>{sessionTitle}</div>}
+        {show.session && sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginTop: 6, fontWeight: 500 }}>{sessionTitle}</div>}
       </div>
 
-      {/* Speakers — fills available space */}
-      <div style={{ flex: 1, padding: `8px ${sz.pad}px`, display: "flex", alignItems: "flex-start", paddingTop: 10 }}>
+      {/* Speakers — vertically centered in remaining space */}
+      <div style={{ flex: 1, padding: `0 ${sz.pad}px`, display: "flex", alignItems: "center" }}>
         <SpeakerPhotos speakers={speakers} count={count} photoSz={sz.photoSz} photoRadius={photoRadius} theme={theme} nameSz={sz.nameSz} roleSz={sz.roleSz} companySz={sz.companySz} photoGap={sz.photoGap} />
       </div>
 
       {/* Extra text */}
-      {extraText && <div style={{ padding: `0 ${sz.pad}px 6px`, fontSize: sz.sessionSize, color: theme.muted, lineHeight: 1.4, flexShrink: 0 }}>{extraText}</div>}
+      {extraText && <div style={{ padding: `0 ${sz.pad}px 8px`, fontSize: sz.sessionSize, color: theme.muted, lineHeight: 1.4, flexShrink: 0 }}>{extraText}</div>}
 
-      {/* Footer — compact single line */}
-      <div style={{ padding: `0 ${sz.pad}px ${sz.padY * 0.6}px`, borderTop: `1px solid ${theme.border}`, paddingTop: 8, margin: `0 ${sz.pad}px`, flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      {/* Footer */}
+      <div style={{ padding: `0 ${sz.pad}px ${sz.padY * 0.7}px`, borderTop: `1px solid ${theme.border}`, paddingTop: 10, margin: `0 ${sz.pad}px`, flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {show.cta && <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>{cta || "Register now"}</div>}
           {show.date && eventDate && <span style={{ fontSize: sz.dateSz, color: theme.muted, fontWeight: 500 }}>{eventDate}</span>}
