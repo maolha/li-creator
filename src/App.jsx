@@ -45,6 +45,7 @@ import {
   CopyPlus,
   Hash,
   UserCircle,
+  FilePlus,
 } from "lucide-react";
 
 import { getThemes, contrastText, makeCustomVariants } from "./utils/themes";
@@ -761,6 +762,20 @@ Return the same JSON structure with just the post object updated.`;
     setTimeout(() => URL.revokeObjectURL(url), 90000);
   }
 
+  function resetToNew() {
+    setInput("");
+    setSource("");
+    setFiles([]);
+    setSlides(null);
+    setTitle("");
+    setPost(null);
+    setCur(0);
+    setSpeakerData({ eventTitle: "", eventDate: "", cta: "", eventUrl: "", sessionTitle: "", extraText: "", tagLabel: "", speakers: [{ name: "", title: "", company: "", photo: null, photoUrl: "" }], style: {} });
+    setActiveTab("slides");
+    setError("");
+    setPage("create");
+  }
+
   const slide = slides?.[cur];
   const isSpeakerMode = contentType === "speaker";
 
@@ -933,6 +948,9 @@ Return the same JSON structure with just the post object updated.`;
             {/* Nav buttons */}
             {user && (
               <>
+                <NavBtn T={T} active={false} onClick={resetToNew}>
+                  <FilePlus size={13} /> New
+                </NavBtn>
                 <NavBtn T={T} active={page === "create"} onClick={() => setPage("create")}>
                   <Sparkles size={13} /> Create
                 </NavBtn>
