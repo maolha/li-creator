@@ -18,12 +18,22 @@ function hexToRgb(hex) {
 
 // Ensure a color has enough contrast against a background
 function ensureContrastAgainst(color, bg) {
-  // If color and bg would both need the same contrast text, they're too similar
-  const colorCt = contrastText(color);
-  const bgCt = contrastText(bg);
-  if (colorCt === bgCt) {
-    // Both dark or both light — flip the color
-    return bgCt === "#FFFFFF" ? "#FFFFFF" : "#111111";
+  const colorRgb = hexToRgb(color);
+  const bgRgb = hexToRgb(bg);
+  if (!colorRgb || !bgRgb) return color;
+  // Calculate actual WCAG contrast ratio
+  function lum(rgb) {
+    const s = [rgb.r, rgb.g, rgb.b].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+    return 0.2126 * s[0] + 0.7152 * s[1] + 0.0722 * s[2];
+  }
+  const L1 = lum(colorRgb);
+  const L2 = lum(bgRgb);
+  const ratio = (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05);
+  // WCAG AA requires 3:1 for large text, 4.5:1 for normal
+  // Use 2.5:1 as minimum — accent text is usually large/bold
+  if (ratio < 2.5) {
+    // Not enough contrast — return white or black
+    return contrastText(bg);
   }
   return color;
 }
@@ -99,9 +109,9 @@ export function contrastText(hex) {
     const L = 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
     const contrastWhite = 1.05 / (L + 0.05);
     const contrastBlack = (L + 0.05) / 0.05;
-    // Bias toward white text — on saturated/colored backgrounds white
-    // is perceptually more readable even when ratios are close
-    return contrastWhite > contrastBlack * 0.75 ? "#FFFFFF" : "#111111";
+    // Slight bias toward white — on saturated colors white is
+    // perceptually more readable when ratios are close
+    return contrastWhite > contrastBlack * 0.9 ? "#FFFFFF" : "#111111";
   } catch {
     return "#F5F5F5";
   }
