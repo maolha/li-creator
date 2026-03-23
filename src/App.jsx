@@ -137,6 +137,7 @@ export default function App() {
   const [brandMode, setBrandMode] = useState(() => loadState("brandMode", "dark"));
   const [activeTab, setActiveTab] = useState(() => loadState("activeTab", "slides"));
   const [tone, setTone] = useState(() => loadState("tone", "professional"));
+  const [intensity, setIntensity] = useState(() => loadState("intensity", "clean"));
   const [audience, setAudience] = useState(() => loadState("audience", "general"));
   const [speakerData, setSpeakerData] = useState(() => {
     const saved = loadState("speakerData", null);
@@ -281,6 +282,7 @@ export default function App() {
   useEffect(() => { saveState("activeTab", activeTab); }, [activeTab]);
   useEffect(() => { saveState("tone", tone); }, [tone]);
   useEffect(() => { saveState("audience", audience); }, [audience]);
+  useEffect(() => { saveState("intensity", intensity); }, [intensity]);
   useEffect(() => { saveState("speakerData", speakerData); }, [speakerData]);
 
   // Responsive card size
@@ -609,7 +611,7 @@ Return the same JSON structure with just the post object updated.`;
 
         await new Promise((resolve) => {
           root.render(
-            <SlideInner s={slides[i]} brand={brand} i={i} n={slides.length} T={T} />
+            <SlideInner s={slides[i]} brand={brand} i={i} n={slides.length} T={T} intensity={intensity} />
           );
           requestAnimationFrame(() => requestAnimationFrame(resolve));
         });
@@ -872,7 +874,7 @@ Return the same JSON structure with just the post object updated.`;
       {slide && (
         <div style={{ position: "fixed", left: -9999, top: 0, zIndex: -1 }}>
           <div ref={hiddenSlideRef} style={{ width: SS, height: SS }}>
-            <SlideInner s={slide} brand={brand} i={cur} n={slides.length} T={T} />
+            <SlideInner s={slide} brand={brand} i={cur} n={slides.length} T={T} intensity={intensity} />
           </div>
         </div>
       )}
@@ -1164,6 +1166,36 @@ Return the same JSON structure with just the post object updated.`;
                 </select>
               </div>
             </div>
+
+            {/* Visual Intensity */}
+            {contentType !== "speaker" && contentType !== "text-post" && (
+              <div>
+                <label style={labelStyle(T)}><Sparkles size={12} /> Visual Style</label>
+                <div style={{ display: "flex", gap: 6 }}>
+                  {[
+                    { id: "clean", label: "Clean", desc: "Professional" },
+                    { id: "bold", label: "Bold", desc: "Stand out" },
+                    { id: "dramatic", label: "Dramatic", desc: "Editorial" },
+                  ].map((v) => (
+                    <button
+                      key={v.id}
+                      onClick={() => setIntensity(v.id)}
+                      style={{
+                        flex: 1, padding: "8px 6px", borderRadius: 10, cursor: "pointer",
+                        border: `1.5px solid ${intensity === v.id ? T.accent : T.border}`,
+                        background: intensity === v.id ? T.soft : "transparent",
+                        color: intensity === v.id ? T.accent : T.muted,
+                        fontFamily: "'Inter', sans-serif", textAlign: "center",
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      <div style={{ fontSize: 12, fontWeight: 700 }}>{v.label}</div>
+                      <div style={{ fontSize: 9, opacity: 0.6, marginTop: 2 }}>{v.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Theme swatches */}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
@@ -1769,7 +1801,7 @@ Return the same JSON structure with just the post object updated.`;
                   <div ref={slideContainerRef} style={{ position: "relative" }}>
                     <AnimatePresence mode="wait">
                       <motion.div key={cur} initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.2 }}>
-                        <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={cardPx} />
+                        <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={cardPx} intensity={intensity} />
                       </motion.div>
                     </AnimatePresence>
                     {cur > 0 && <button onClick={() => setCur((c) => c - 1)} style={navBtnStyle(T, "left")}><ChevronLeft size={20} /></button>}
@@ -1870,7 +1902,7 @@ Return the same JSON structure with just the post object updated.`;
 
                   {/* Mini preview */}
                   <div style={{ display: "flex", justifyContent: "center" }}>
-                    <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={Math.min(cardPx, 300)} />
+                    <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={Math.min(cardPx, 300)} intensity={intensity} />
                   </div>
 
                   {/* Edit fields */}
