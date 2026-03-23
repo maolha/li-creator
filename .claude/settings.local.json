@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Users/march/cc/li-creator/src -type f -name *.jsx -o -name *.js -o -name *.css)"
+    ]
+  }
+}

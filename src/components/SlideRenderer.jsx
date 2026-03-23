@@ -79,9 +79,9 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
     theme = { ...T, card: T.accent, text: invCt, muted: invCt === "#FFFFFF" ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)", border: invCt === "#FFFFFF" ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.12)", soft: invCt === "#FFFFFF" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)" };
   }
   // Override spec bg/colors if bgMode changes the background
-  const effectiveBg = bgMode === "default" ? effectiveBg : theme.card;
-  const effectiveText = bgMode === "default" ? (effectiveText || theme.text) : theme.text;
-  const effectiveBody = bgMode === "default" ? (effectiveBody || theme.muted) : theme.muted;
+  const effectiveBg = bgMode === "default" ? spec.bg : theme.card;
+  const effectiveText = bgMode === "default" ? (spec.textColor || theme.text) : theme.text;
+  const effectiveBody = bgMode === "default" ? (spec.bodyColor || theme.muted) : theme.muted;
 
   const ct = contrastText(theme.accent);
 
