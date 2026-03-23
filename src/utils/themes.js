@@ -40,11 +40,10 @@ function ensureContrastAgainst(color, bg) {
 
 function makeDark(accent, gradient) {
   const { r, g, b } = hexToRgb(accent);
-  const safeAccent = ensureContrastAgainst(accent, "#0F1117");
   return {
     bg: "#08090D",
     card: "#0F1117",
-    accent: safeAccent,
+    accent,
     soft: `rgba(${r},${g},${b},0.10)`,
     text: "#F0F0F8",
     muted: "#7878A0",
@@ -55,13 +54,13 @@ function makeDark(accent, gradient) {
 
 function makeLight(accent, gradient) {
   const { r, g, b } = hexToRgb(accent);
-  const safeAccent = ensureContrastAgainst(accent, "#FFFFFF");
+  const isDarkAccent = contrastText(accent) === "#FFFFFF";
   return {
     bg: "#F4F3EF",
     card: "#FFFFFF",
-    accent: safeAccent,
+    accent,
     soft: `rgba(${r},${g},${b},0.07)`,
-    text: safeAccent === accent ? (contrastText(accent) === "#FFFFFF" ? accent : "#1A1A2E") : "#1A1A2E",
+    text: isDarkAccent ? accent : "#1A1A2E",
     muted: "#888899",
     border: `rgba(${r},${g},${b},0.12)`,
     gradient,
