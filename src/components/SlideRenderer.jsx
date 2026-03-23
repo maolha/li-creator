@@ -24,8 +24,8 @@ function Pill({ tag, type, variant, T }) {
       style={{
         display: "inline-flex",
         alignItems: "center",
-        background: isLight ? "rgba(255,255,255,0.15)" : isFilled ? theme.accent : T.soft,
-        border: `1px solid ${isLight ? "rgba(255,255,255,0.22)" : isFilled ? theme.accent : T.border}`,
+        background: isLight ? "rgba(255,255,255,0.15)" : isFilled ? T.accent : T.soft,
+        border: `1px solid ${isLight ? "rgba(255,255,255,0.22)" : isFilled ? T.accent : T.border}`,
         borderRadius: 999,
         padding: "5px 16px",
         fontSize: 13,
