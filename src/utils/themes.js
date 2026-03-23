@@ -99,7 +99,9 @@ export function contrastText(hex) {
     const L = 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
     const contrastWhite = 1.05 / (L + 0.05);
     const contrastBlack = (L + 0.05) / 0.05;
-    return contrastWhite > contrastBlack ? "#FFFFFF" : "#111111";
+    // Bias toward white text — on saturated/colored backgrounds white
+    // is perceptually more readable even when ratios are close
+    return contrastWhite > contrastBlack * 0.75 ? "#FFFFFF" : "#111111";
   } catch {
     return "#F5F5F5";
   }
