@@ -1,5 +1,55 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { ScaledSlide } from "./SlideRenderer";
+
+// Demo themes for showcasing
+const T_BLUE = { bg: "#08090D", card: "#0F1117", accent: "#0077B5", soft: "rgba(0,119,181,0.10)", text: "#F0F0F8", muted: "#7878A0", border: "rgba(0,119,181,0.15)", gradient: "linear-gradient(135deg, #0077B5, #571BC1)" };
+const T_RED = { bg: "#0B0B0B", card: "#141414", accent: "#E83A3A", soft: "rgba(232,58,58,0.10)", text: "#F5F5F5", muted: "#808080", border: "rgba(232,58,58,0.18)", gradient: "linear-gradient(135deg, #E83A3A, #FF6B35)" };
+const T_PURPLE = { bg: "#08090D", card: "#0F1117", accent: "#7C5CFC", soft: "rgba(124,92,252,0.10)", text: "#F0F0F8", muted: "#7878A0", border: "rgba(124,92,252,0.15)", gradient: "linear-gradient(135deg, #7C5CFC, #E040FB)" };
+const T_TEAL = { bg: "#060D14", card: "#0C1520", accent: "#00D4AA", soft: "rgba(0,212,170,0.08)", text: "#E8F0F0", muted: "#607080", border: "rgba(0,212,170,0.15)", gradient: "linear-gradient(135deg, #00D4AA, #0099FF)" };
+const T_GOLD = { bg: "#0C0A08", card: "#141210", accent: "#D4A853", soft: "rgba(212,168,83,0.08)", text: "#F0ECE4", muted: "#8A8070", border: "rgba(212,168,83,0.15)", gradient: "linear-gradient(135deg, #D4A853, #F0C060)" };
+
+const DEMO_SLIDES = [
+  {
+    title: "Carousels",
+    desc: "Multi-slide decks with AI-crafted headlines, stats, and compelling CTAs. Choose from Clean, Bold, or Dramatic visual styles. Export as PNG, PDF, or copy directly to clipboard.",
+    theme: T_BLUE,
+    intensity: "bold",
+    slideIndex: 0,
+    slideCount: 7,
+    slide: { type: "cover", headline: "The Future of AI in Enterprise", body: "How leaders are rethinking strategy in the age of intelligent automation.", tag: "Insight" },
+  },
+  {
+    title: "Stat Cards",
+    desc: "Data-driven visuals with bold numbers that command attention. Perfect for sharing research findings, survey results, and performance metrics.",
+    theme: T_RED,
+    intensity: "dramatic",
+    slide: { type: "stat", headline: "Adoption is Accelerating", body: "Organizations implementing AI see measurable returns within the first quarter.", stat: "73%", statLabel: "Adoption rate", tag: "Data" },
+  },
+  {
+    title: "Quote Cards",
+    desc: "Turn insights into shareable single-image visuals. Use your own quotes or highlight thought leaders to build authority and spark conversation.",
+    theme: T_PURPLE,
+    intensity: "bold",
+    slide: { type: "quote", headline: "The best content doesn't sell. It starts conversations that lead to trust.", body: "Content strategy for the modern professional.", tag: "Insight" },
+  },
+  {
+    title: "Text Posts",
+    desc: "AI-crafted post copy with engineered hooks, structured bullets, and calls to action. LinkedIn-native bold formatting. Character counter built in.",
+    theme: T_TEAL,
+    intensity: "clean",
+    slide: { type: "insight", headline: "Your Hook Decides Everything", body: "The first two lines determine if anyone reads the rest. Make them count.", tag: "Strategy" },
+  },
+  {
+    title: "Speaker Visuals",
+    desc: "Event speaker cards with photos, titles, company logos, and full brand control. Four layouts, three aspect ratios, dark or light backgrounds.",
+    theme: T_GOLD,
+    intensity: "bold",
+    slideIndex: 0,
+    slideCount: 1,
+    slide: { type: "cta", headline: "Join the Conversation", body: "Connect with leaders shaping the future of their industries.", tag: "Event" },
+  },
+];
 
 export default function LandingPage({ onSignIn, loading }) {
   const heroRef = useRef(null);
@@ -139,30 +189,46 @@ export default function LandingPage({ onSignIn, loading }) {
             <h2 style={{ fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 12 }}>
               What you create
             </h2>
-            <p style={{ fontSize: 16, color: "rgba(232,230,227,0.5)", marginBottom: 48, maxWidth: 500 }}>
+            <p style={{ fontSize: 16, color: "rgba(232,230,227,0.5)", marginBottom: 56, maxWidth: 500 }}>
               Five content formats. One tool. Every one designed to perform on LinkedIn.
             </p>
           </motion.div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 2 }}>
-            {[
-              { title: "Carousels", desc: "Multi-slide decks with AI-crafted headlines, stats, and calls to action.", accent: "#0077B5" },
-              { title: "Quote Cards", desc: "Single-image visuals that make insights shareable.", accent: "#6B5CE7" },
-              { title: "Stat Cards", desc: "Data-driven visuals with bold numbers that demand attention.", accent: "#00B4D8" },
-              { title: "Text Posts", desc: "Scroll-stopping copy with engineered hooks and structure.", accent: "#7C5CFC" },
-              { title: "Speaker Visuals", desc: "Event cards with photos, titles, and full brand control.", accent: "#0077B5" },
-            ].map((f, i) => (
+          {/* Live rendered slide examples */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 64 }}>
+            {DEMO_SLIDES.map((demo, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ delay: 0.08 * i, duration: 0.5 }}
-                style={{ padding: "36px 32px", borderBottom: "1px solid rgba(255,255,255,0.04)", position: "relative" }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.6 }}
+                style={{
+                  display: "flex",
+                  flexDirection: i % 2 === 0 ? "row" : "row-reverse",
+                  gap: "clamp(24px, 4vw, 56px)",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                }}
               >
-                <div style={{ width: 3, height: 24, background: f.accent, borderRadius: 2, marginBottom: 16, opacity: 0.8 }} />
-                <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.01em" }}>{f.title}</h3>
-                <p style={{ fontSize: 14, color: "rgba(232,230,227,0.5)", lineHeight: 1.6, margin: 0 }}>{f.desc}</p>
+                {/* Slide preview */}
+                <div style={{ flex: "0 0 auto" }}>
+                  <ScaledSlide
+                    s={demo.slide}
+                    brand="PAIA"
+                    i={demo.slideIndex || 0}
+                    n={demo.slideCount || 1}
+                    T={demo.theme}
+                    size={220}
+                    intensity={demo.intensity || "bold"}
+                  />
+                </div>
+                {/* Description */}
+                <div style={{ flex: 1, minWidth: 240 }}>
+                  <div style={{ width: 3, height: 24, background: demo.theme.accent, borderRadius: 2, marginBottom: 14, opacity: 0.8 }} />
+                  <h3 style={{ fontSize: 24, fontWeight: 800, marginBottom: 8, letterSpacing: "-0.01em" }}>{demo.title}</h3>
+                  <p style={{ fontSize: 15, color: "rgba(232,230,227,0.55)", lineHeight: 1.65, margin: 0, maxWidth: 400 }}>{demo.desc}</p>
+                </div>
               </motion.div>
             ))}
           </div>
