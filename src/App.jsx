@@ -142,6 +142,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState(() => loadState("activeTab", "slides"));
   const [tone, setTone] = useState(() => loadState("tone", "professional"));
   const [intensity, setIntensity] = useState(() => loadState("intensity", "clean"));
+  const [slideAspect, setSlideAspect] = useState(() => loadState("slideAspect", "1:1"));
+  const [slideBgMode, setSlideBgMode] = useState(() => loadState("slideBgMode", "default"));
   const [audience, setAudience] = useState(() => loadState("audience", "general"));
   const [speakerData, setSpeakerData] = useState(() => {
     const saved = loadState("speakerData", null);
@@ -297,6 +299,8 @@ export default function App() {
   useEffect(() => { saveState("tone", tone); }, [tone]);
   useEffect(() => { saveState("audience", audience); }, [audience]);
   useEffect(() => { saveState("intensity", intensity); }, [intensity]);
+  useEffect(() => { saveState("slideAspect", slideAspect); }, [slideAspect]);
+  useEffect(() => { saveState("slideBgMode", slideBgMode); }, [slideBgMode]);
   useEffect(() => { saveState("speakerData", speakerData); }, [speakerData]);
 
   // Responsive card size
@@ -633,7 +637,7 @@ Return the same JSON structure with just the post object updated.`;
 
         await new Promise((resolve) => {
           root.render(
-            <SlideInner s={slides[i]} brand={brand} i={i} n={slides.length} T={T} intensity={intensity} />
+            <SlideInner s={slides[i]} brand={brand} i={i} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} />
           );
           requestAnimationFrame(() => requestAnimationFrame(resolve));
         });
@@ -820,6 +824,8 @@ Return the same JSON structure with just the post object updated.`;
         brandMode,
         brand: activeBrand || { name: brand },
         intensity,
+        slideAspect,
+        slideBgMode,
         tone,
         audience,
         sc,
@@ -850,6 +856,8 @@ Return the same JSON structure with just the post object updated.`;
       brandMode,
       brand: activeBrand || { name: brand },
       intensity,
+      slideAspect,
+      slideBgMode,
       tone,
       audience,
       sc,
@@ -914,7 +922,7 @@ Return the same JSON structure with just the post object updated.`;
       {slide && (
         <div style={{ position: "fixed", left: -9999, top: 0, zIndex: -1 }}>
           <div ref={hiddenSlideRef} style={{ width: SS, height: SS }}>
-            <SlideInner s={slide} brand={brand} i={cur} n={slides.length} T={T} intensity={intensity} />
+            <SlideInner s={slide} brand={brand} i={cur} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} />
           </div>
         </div>
       )}
@@ -1102,6 +1110,8 @@ Return the same JSON structure with just the post object updated.`;
               else if (c.brand) setActiveBrand({ name: c.brand });
               else setActiveBrand(null);
               setIntensity(c.intensity || "clean");
+              setSlideAspect(c.slideAspect || "1:1");
+              setSlideBgMode(c.slideBgMode || "default");
               setTone(c.tone || "professional");
               setAudience(c.audience || "general");
               setSc(c.sc || 7);
@@ -1245,7 +1255,7 @@ Return the same JSON structure with just the post object updated.`;
             </div>
 
             {/* Visual Intensity */}
-            {contentType !== "speaker" && contentType !== "text-post" && (
+            {contentType !== "speaker" && contentType !== "text-post" && (<>
               <div>
                 <label style={labelStyle(T)}><Sparkles size={12} /> Visual Style</label>
                 <div style={{ display: "flex", gap: 6 }}>
@@ -1272,7 +1282,43 @@ Return the same JSON structure with just the post object updated.`;
                   ))}
                 </div>
               </div>
-            )}
+
+              {/* Aspect ratio + Background mode */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div>
+                  <label style={labelStyle(T)}>Size</label>
+                  <div style={{ display: "flex", gap: 4 }}>
+                    {["1:1", "4:5", "16:9"].map((a) => (
+                      <button key={a} onClick={() => setSlideAspect(a)} style={{
+                        flex: 1, padding: "7px 4px", borderRadius: 6, fontSize: 11, fontWeight: 600,
+                        border: `1px solid ${slideAspect === a ? T.accent : T.border}`,
+                        background: slideAspect === a ? T.soft : "transparent",
+                        color: slideAspect === a ? T.accent : T.muted,
+                        cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", textAlign: "center",
+                      }}>{a}</button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label style={labelStyle(T)}>Background</label>
+                  <div style={{ display: "flex", gap: 4 }}>
+                    {[
+                      { id: "default", label: "Default" },
+                      { id: "light", label: "Light" },
+                      { id: "invert", label: "Invert" },
+                    ].map((m) => (
+                      <button key={m.id} onClick={() => setSlideBgMode(m.id)} style={{
+                        flex: 1, padding: "7px 4px", borderRadius: 6, fontSize: 10, fontWeight: 600,
+                        border: `1px solid ${slideBgMode === m.id ? T.accent : T.border}`,
+                        background: slideBgMode === m.id ? T.soft : "transparent",
+                        color: slideBgMode === m.id ? T.accent : T.muted,
+                        cursor: "pointer", fontFamily: "'Inter', sans-serif", textAlign: "center",
+                      }}>{m.label}</button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </>)}
 
             {/* Theme swatches */}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>

@@ -1,8 +1,20 @@
 import { contrastText } from "../utils/themes";
+
+function hexToRgb(hex) {
+  const h = (hex || "#000000").replace("#", "");
+  const n = parseInt(h.length === 3 ? h[0]+h[0]+h[1]+h[1]+h[2]+h[2] : h, 16);
+  return `${(n>>16)&255},${(n>>8)&255},${n&255}`;
+}
 import { getIntensitySpec } from "../utils/intensityStyles";
 import Decorations from "./Decorations";
 
 const SS = 540;
+
+const SLIDE_ASPECTS = {
+  "1:1": { w: 540, h: 540 },
+  "4:5": { w: 540, h: 675 },
+  "16:9": { w: 640, h: 360 },
+};
 
 function Pill({ tag, type, variant, T }) {
   const isFilled = variant === "filled";
@@ -53,15 +65,30 @@ function Bar({ brand, i, n, light, T }) {
   );
 }
 
-export function SlideInner({ s, brand, i, n, T, intensity = "clean" }) {
+export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1:1", bgMode = "default" }) {
   const type = s.type || "insight";
+  const { w: SW, h: SH } = SLIDE_ASPECTS[aspect] || SLIDE_ASPECTS["1:1"];
   const spec = getIntensitySpec(type, intensity, T, s.headline?.length || 0);
-  const ct = contrastText(T.accent);
+
+  // Apply background mode override
+  let theme = T;
+  if (bgMode === "light") {
+    theme = { ...T, card: "#FFFFFF", text: "#1A1A2E", muted: "#6B6B7B", border: "rgba(26,26,46,0.10)", soft: `rgba(${hexToRgb(T.accent)},0.07)` };
+  } else if (bgMode === "invert") {
+    const invCt = contrastText(T.accent);
+    theme = { ...T, card: T.accent, text: invCt, muted: invCt === "#FFFFFF" ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)", border: invCt === "#FFFFFF" ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.12)", soft: invCt === "#FFFFFF" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)" };
+  }
+  // Override spec bg/colors if bgMode changes the background
+  const effectiveBg = bgMode === "default" ? spec.bg : theme.card;
+  const effectiveText = bgMode === "default" ? (spec.textColor || theme.text) : theme.text;
+  const effectiveBody = bgMode === "default" ? (spec.bodyColor || theme.muted) : theme.muted;
+
+  const ct = contrastText(theme.accent);
 
   /* COVER */
   if (type === "cover") {
     return (
-      <div style={{ width: SS, height: SS, background: spec.bg, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", padding: spec.padding, boxSizing: "border-box" }}>
+      <div style={{ width: SW, height: SH, background: spec.bg, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", padding: spec.padding, boxSizing: "border-box" }}>
         <Decorations items={spec.decorations} />
         <div style={{ paddingLeft: spec.accentBarW > 0 ? spec.accentBarW + 2 : 0, display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "auto", position: "relative" }}>
           <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: spec.textColor === ct ? ct : T.accent, opacity: spec.textColor === ct ? 0.8 : 1 }}>{brand}</span>
@@ -84,7 +111,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean" }) {
     const sn = s.stat || "?";
     const sf = s.statFontSize || spec.statSize(sn.length);
     return (
-      <div style={{ width: SS, height: SS, background: T.card, overflow: "hidden", display: "flex", boxSizing: "border-box" }}>
+      <div style={{ width: SW, height: SH, background: T.card, overflow: "hidden", display: "flex", boxSizing: "border-box" }}>
         <div style={{ width: spec.panelW, flexShrink: 0, background: spec.panelBg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 18px", position: "relative", overflow: "hidden" }}>
           <Decorations items={spec.decorations} />
           <div style={{ fontFamily: "'DM Serif Display',serif", fontSize: sf, fontWeight: 400, color: ct, lineHeight: 1, textAlign: "center", whiteSpace: "nowrap", position: "relative", zIndex: 1 }}>{sn}</div>
@@ -110,7 +137,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean" }) {
     const qBody = spec.bodyColor;
     const isCentered = spec.centered;
     return (
-      <div style={{ width: SS, height: SS, background: qBg, overflow: "hidden", display: "flex", flexDirection: "column", padding: spec.padding, boxSizing: "border-box", justifyContent: isCentered ? "center" : undefined, alignItems: isCentered ? "center" : undefined, textAlign: isCentered ? "center" : undefined, position: "relative" }}>
+      <div style={{ width: SW, height: SH, background: qBg, overflow: "hidden", display: "flex", flexDirection: "column", padding: spec.padding, boxSizing: "border-box", justifyContent: isCentered ? "center" : undefined, alignItems: isCentered ? "center" : undefined, textAlign: isCentered ? "center" : undefined, position: "relative" }}>
         <Decorations items={spec.decorations} />
         {/* Quote mark */}
         {spec.quoteMarkPosition === "center" ? (
@@ -142,7 +169,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean" }) {
   /* CTA */
   if (type === "cta") {
     return (
-      <div style={{ width: SS, height: SS, background: spec.bg, overflow: "hidden", position: "relative", display: "flex", flexDirection: "column", padding: spec.padding, boxSizing: "border-box" }}>
+      <div style={{ width: SW, height: SH, background: spec.bg, overflow: "hidden", position: "relative", display: "flex", flexDirection: "column", padding: spec.padding, boxSizing: "border-box" }}>
         <Decorations items={spec.decorations} />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", flexShrink: 0 }}>
           <Pill tag={s.tag} type={type} variant="light" T={T} />
@@ -164,7 +191,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean" }) {
 
   /* INSIGHT (default) */
   return (
-    <div style={{ width: SS, height: SS, background: spec.bg, overflow: "hidden", display: "flex", position: "relative", boxSizing: "border-box" }}>
+    <div style={{ width: SW, height: SH, background: spec.bg, overflow: "hidden", display: "flex", position: "relative", boxSizing: "border-box" }}>
       <Decorations items={spec.decorations} />
       {/* Ghost number */}
       <div style={{ position: "absolute", bottom: -14, right: -8, fontFamily: "'DM Serif Display',serif", fontSize: spec.ghostSize, fontWeight: 400, lineHeight: 1, color: T.accent, opacity: spec.ghostOpacity, userSelect: "none", letterSpacing: "-0.04em", pointerEvents: "none" }}>
@@ -183,12 +210,14 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean" }) {
   );
 }
 
-export function ScaledSlide({ s, brand, i, n, T, size, intensity }) {
-  const sc = size / SS;
+export function ScaledSlide({ s, brand, i, n, T, size, intensity, aspect = "1:1", bgMode = "default" }) {
+  const { w, h } = SLIDE_ASPECTS[aspect] || SLIDE_ASPECTS["1:1"];
+  const sc = size / w;
+  const scaledH = h * sc;
   return (
-    <div style={{ width: size, height: size, borderRadius: 16, overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)" }}>
-      <div style={{ width: SS, height: SS, transform: `scale(${sc})`, transformOrigin: "top left" }}>
-        <SlideInner s={s} brand={brand} i={i} n={n} T={T} intensity={intensity} />
+    <div style={{ width: size, height: scaledH, borderRadius: 16, overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)" }}>
+      <div style={{ width: w, height: h, transform: `scale(${sc})`, transformOrigin: "top left" }}>
+        <SlideInner s={s} brand={brand} i={i} n={n} T={T} intensity={intensity} aspect={aspect} bgMode={bgMode} />
       </div>
     </div>
   );
