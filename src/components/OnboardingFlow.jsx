@@ -48,7 +48,7 @@ export default function OnboardingFlow({ T, user, onComplete }) {
 
   return (
     <div style={{
-      minHeight: "100vh", background: "#08090D", color: "#F0F0F8",
+      minHeight: "100vh", background: "#0a0c10", color: "#F0F0F8",
       fontFamily: "'Inter', sans-serif", display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center", padding: "24px",
     }}>
@@ -57,7 +57,7 @@ export default function OnboardingFlow({ T, user, onComplete }) {
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{
             width: 48, height: 48, borderRadius: 14,
-            background: "linear-gradient(135deg, #6B8AFF, #9B6BFF)",
+            background: "linear-gradient(135deg, #0077B5, #571BC1)",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 22, color: "#fff", fontWeight: 700, margin: "0 auto 16px",
           }}>
@@ -76,7 +76,7 @@ export default function OnboardingFlow({ T, user, onComplete }) {
           {STEPS.map((_, i) => (
             <div key={i} style={{
               width: i === step ? 32 : 10, height: 6, borderRadius: 3,
-              background: i <= step ? "#6B8AFF" : "rgba(107,138,255,0.15)",
+              background: i <= step ? "#0077B5" : "rgba(0,119,181,0.15)",
               transition: "all 0.3s",
             }} />
           ))}
@@ -91,12 +91,12 @@ export default function OnboardingFlow({ T, user, onComplete }) {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.25 }}
             style={{
-              background: "#0F1117", border: "1px solid rgba(107,138,255,0.12)",
+              background: "#12151c", border: "1px solid rgba(0,119,181,0.12)",
               borderRadius: 18, padding: "28px 24px",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-              <current.icon size={18} style={{ color: "#6B8AFF" }} />
+              <current.icon size={18} style={{ color: "#0077B5" }} />
               <div>
                 <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{current.title}</h2>
                 <p style={{ fontSize: 12, color: "#7878A0", margin: 0 }}>{current.subtitle}</p>
@@ -190,9 +190,9 @@ export default function OnboardingFlow({ T, user, onComplete }) {
 }
 
 const inputStyle = {
-  background: "#08090D",
+  background: "#0a0c10",
   color: "#F0F0F8",
-  border: "1px solid rgba(107,138,255,0.15)",
+  border: "1px solid rgba(0,119,181,0.15)",
   borderRadius: 10,
   padding: "11px 14px",
   fontFamily: "'Inter', sans-serif",
@@ -219,7 +219,7 @@ const hintStyle = {
 };
 
 const primaryBtnStyle = {
-  background: "linear-gradient(135deg, #6B8AFF, #9B6BFF)",
+  background: "linear-gradient(135deg, #0077B5, #571BC1)",
   color: "#fff",
   border: "none",
   borderRadius: 10,
@@ -236,7 +236,7 @@ const primaryBtnStyle = {
 const secondaryBtnStyle = {
   background: "transparent",
   color: "#7878A0",
-  border: "1px solid rgba(107,138,255,0.12)",
+  border: "1px solid rgba(0,119,181,0.12)",
   borderRadius: 10,
   padding: "11px 16px",
   fontSize: 13,

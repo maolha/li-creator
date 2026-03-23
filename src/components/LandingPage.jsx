@@ -1,6 +1,7 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { ScaledSlide } from "./SlideRenderer";
+import { ScaledSpeakerSlide } from "./SpeakerSlide";
 import Logo from "./Logo";
 
 // Demo themes
@@ -11,12 +12,23 @@ const T_TEAL = { bg: "#060D14", card: "#0C1520", accent: "#00D4AA", soft: "rgba(
 const T_GOLD = { bg: "#0C0A08", card: "#141210", accent: "#D4A853", soft: "rgba(212,168,83,0.08)", text: "#F0ECE4", muted: "#8A8070", border: "rgba(212,168,83,0.15)", gradient: "linear-gradient(135deg, #D4A853, #F0C060)" };
 
 const SHOWCASE = [
-  { slide: { type: "cover", headline: "The Future of AI in Enterprise", body: "How leaders are rethinking strategy in the age of intelligent automation.", tag: "Insight" }, theme: T_BLUE, intensity: "bold", i: 0, n: 7, label: "Carousel" },
-  { slide: { type: "stat", headline: "Adoption Accelerating", body: "Measurable returns within the first quarter.", stat: "73%", statLabel: "Adoption", tag: "Data" }, theme: T_RED, intensity: "dramatic", i: 0, n: 1, label: "Stat Card" },
-  { slide: { type: "quote", headline: "The best content doesn't sell. It starts conversations that lead to trust.", body: "Content strategy for the modern professional.", tag: "Insight" }, theme: T_PURPLE, intensity: "bold", i: 0, n: 1, label: "Quote Card" },
-  { slide: { type: "insight", headline: "Your Hook Decides Everything", body: "The first two lines determine if anyone reads the rest.", tag: "Strategy" }, theme: T_TEAL, intensity: "clean", i: 2, n: 7, label: "Insight Slide" },
-  { slide: { type: "cta", headline: "Join the Conversation", body: "Connect with leaders shaping the future.", tag: "Action" }, theme: T_GOLD, intensity: "bold", i: 6, n: 7, label: "CTA Slide" },
+  { slide: { type: "cover", headline: "The Future of AI in Enterprise", body: "How leaders are rethinking strategy in the age of intelligent automation.", tag: "Insight" }, theme: T_BLUE, intensity: "bold", i: 0, n: 7, label: "Carousels", desc: "Multi-slide decks with AI-crafted headlines, stats, and CTAs. Three visual intensities. Export as PNG or PDF." },
+  { slide: { type: "stat", headline: "Adoption Accelerating", body: "Measurable returns within the first quarter.", stat: "73%", statLabel: "Adoption", tag: "Data" }, theme: T_RED, intensity: "dramatic", i: 0, n: 1, label: "Stat Cards", desc: "Data-driven visuals with bold numbers. Perfect for research findings and performance metrics." },
+  { slide: { type: "quote", headline: "The best content doesn't sell. It starts conversations.", body: "Content strategy for the modern professional.", tag: "Insight" }, theme: T_PURPLE, intensity: "bold", i: 0, n: 1, label: "Quote Cards", desc: "Turn insights into shareable visuals. Build authority and spark conversation." },
 ];
+
+const SPEAKER_DEMO = {
+  eventTitle: "AI in Finance Summit",
+  sessionTitle: "The Future of Compliance",
+  eventDate: "March 28, 2026",
+  cta: "Register now",
+  tagLabel: "Keynote",
+  speakers: [
+    { name: "Sarah Chen", title: "Chief AI Officer", company: "SwissBank AG", photo: null },
+    { name: "Marc Weber", title: "Head of Innovation", company: "FinTech Labs", photo: null },
+  ],
+  style: { layout: "classic", aspect: "1:1", bgMode: "dark" },
+};
 
 export default function LandingPage({ onSignIn }) {
   const heroRef = useRef(null);
@@ -29,6 +41,10 @@ export default function LandingPage({ onSignIn }) {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
         ::selection { background: rgba(0,119,181,0.4); }
+        .cf-hero-mockup { display: block; }
+        @media (max-width: 700px) {
+          .cf-hero-mockup { display: none !important; }
+        }
       `}</style>
 
       {/* NAV */}
@@ -50,7 +66,7 @@ export default function LandingPage({ onSignIn }) {
       </header>
 
       {/* HERO — centered two-column */}
-      <section ref={heroRef} style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", overflow: "hidden" }}>
+      <section ref={heroRef} style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", overflow: "hidden", paddingTop: 72 }}>
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,119,181,0.15), transparent 70%)" }} />
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 60% 50% at 75% 55%, rgba(87,27,193,0.1), transparent 70%)" }} />
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "30%", background: "linear-gradient(to top, #0a0c10, transparent)" }} />
@@ -90,8 +106,9 @@ export default function LandingPage({ onSignIn }) {
               <p style={{ fontSize: 11, color: "rgba(232,230,227,0.25)", marginTop: 12 }}>Your API key. Your data. Always private.</p>
             </motion.div>
 
-            {/* Mockup */}
+            {/* Mockup — hidden on mobile */}
             <motion.div
+              className="cf-hero-mockup"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
@@ -124,42 +141,58 @@ export default function LandingPage({ onSignIn }) {
         </motion.div>
       </section>
 
-      {/* SHOWCASE — horizontal scroll of real rendered slides */}
-      <section style={{ padding: "clamp(60px, 10vw, 100px) 0", position: "relative" }}>
+      {/* SHOWCASE — visual grid with context */}
+      <section style={{ padding: "clamp(60px, 10vw, 100px) clamp(24px, 5vw, 64px)", position: "relative" }}>
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, #0a0c10, #0e1118, #0a0c10)" }} />
-        <div style={{ position: "relative", maxWidth: 1100, margin: "0 auto", padding: "0 clamp(24px, 5vw, 64px)" }}>
+        <div style={{ position: "relative", maxWidth: 1100, margin: "0 auto" }}>
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
             <h2 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 10 }}>
               What you create
             </h2>
-            <p style={{ fontSize: 15, color: "rgba(232,230,227,0.45)", marginBottom: 40 }}>
-              Five content formats. One tool. All designed to perform.
+            <p style={{ fontSize: 15, color: "rgba(232,230,227,0.45)", marginBottom: 48 }}>
+              Every format designed to perform on LinkedIn.
             </p>
           </motion.div>
-        </div>
 
-        {/* Scrollable slide strip */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          style={{ display: "flex", gap: 20, overflowX: "auto", padding: "0 clamp(24px, 5vw, 64px) 20px", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}
-        >
-          {SHOWCASE.map((demo, idx) => (
+          {/* Slide examples — 2-column grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 32 }}>
+            {SHOWCASE.map((demo, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ delay: 0.1 * idx, duration: 0.5 }}
+                style={{ display: "flex", gap: 20, alignItems: "center" }}
+              >
+                <div style={{ flexShrink: 0 }}>
+                  <ScaledSlide s={demo.slide} brand="PAIA" i={demo.i} n={demo.n} T={demo.theme} size={160} intensity={demo.intensity} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 6, letterSpacing: "-0.01em" }}>{demo.label}</h3>
+                  <p style={{ fontSize: 13, color: "rgba(232,230,227,0.5)", lineHeight: 1.55, margin: 0 }}>{demo.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+
+            {/* Speaker visual with fake data */}
             <motion.div
-              key={idx}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 * idx, duration: 0.5 }}
-              style={{ flex: "0 0 auto", scrollSnapAlign: "start", display: "flex", flexDirection: "column", gap: 10, alignItems: "center" }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              style={{ display: "flex", gap: 20, alignItems: "center" }}
             >
-              <ScaledSlide s={demo.slide} brand="PAIA" i={demo.i} n={demo.n} T={demo.theme} size={200} intensity={demo.intensity} />
-              <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(232,230,227,0.5)", letterSpacing: "0.04em" }}>{demo.label}</span>
+              <div style={{ flexShrink: 0 }}>
+                <ScaledSpeakerSlide data={SPEAKER_DEMO} T={T_BLUE} brand="PAIA" size={160} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 6, letterSpacing: "-0.01em" }}>Speaker Visuals</h3>
+                <p style={{ fontSize: 13, color: "rgba(232,230,227,0.5)", lineHeight: 1.55, margin: 0 }}>Event speaker cards with photos, titles, logos. Four layouts, custom colors, any aspect ratio.</p>
+              </div>
             </motion.div>
-          ))}
-        </motion.div>
+          </div>
+        </div>
       </section>
 
       {/* HOW IT WORKS */}
@@ -182,7 +215,7 @@ export default function LandingPage({ onSignIn }) {
               transition={{ delay: 0.1 * i, duration: 0.5 }}
               style={{ display: "flex", gap: 20, padding: "28px 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}
             >
-              <span style={{ fontSize: 44, fontWeight: 800, color: "rgba(0,119,181,0.12)", lineHeight: 1, flexShrink: 0, width: 56 }}>{s.n}</span>
+              <span style={{ fontSize: 44, fontWeight: 800, color: "rgba(0,119,181,0.3)", lineHeight: 1, flexShrink: 0, width: 56 }}>{s.n}</span>
               <div>
                 <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 4 }}>{s.title}</h3>
                 <p style={{ fontSize: 14, color: "rgba(232,230,227,0.45)", lineHeight: 1.5, margin: 0 }}>{s.desc}</p>
