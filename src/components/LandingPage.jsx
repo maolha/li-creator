@@ -1,253 +1,250 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 
 export default function LandingPage({ onSignIn, loading }) {
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, 150]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
   return (
-    <div style={{ minHeight: "100vh", background: "#131313", color: "#e5e2e1", fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#0a0c10", color: "#e8e6e3", fontFamily: "'Manrope', sans-serif", overflowX: "hidden" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Inter:wght@400;500;600&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
-        .font-headline { font-family: 'Manrope', sans-serif; }
-        .text-gradient-ai { background: linear-gradient(135deg, #0077B5 0%, #571BC1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .glass-panel { background: rgba(28, 27, 27, 0.6); backdrop-filter: blur(20px); }
-        ::selection { background: rgba(0,119,181,0.3); }
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
+        ::selection { background: rgba(0, 119, 181, 0.4); }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
       `}</style>
 
-      {/* Nav */}
-      <header style={{ position: "fixed", top: 0, width: "100%", zIndex: 50, background: "rgba(19,19,19,0.6)", backdropFilter: "blur(20px)", boxShadow: "0 20px 40px rgba(229,226,225,0.06)" }}>
-        <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: 80, padding: "0 32px", maxWidth: 1200, margin: "0 auto" }}>
-          <div className="font-headline" style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.04em" }}>ContentForge</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-            <button
-              onClick={onSignIn}
-              className="font-headline"
-              style={{ background: "none", border: "none", color: "rgba(229,226,225,0.7)", fontSize: 14, fontWeight: 700, cursor: "pointer", letterSpacing: "-0.01em" }}
-            >
-              Sign in
-            </button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onSignIn}
-              className="font-headline"
-              style={{
-                background: "#0077b5", color: "#f3f7ff", padding: "10px 24px", borderRadius: 12,
-                border: "none", fontSize: 14, fontWeight: 700, cursor: "pointer", letterSpacing: "-0.01em",
-                transition: "all 0.3s",
-              }}
-            >
-              Get Started
-            </motion.button>
+      {/* ── NAV ── */}
+      <header style={{ position: "fixed", top: 0, width: "100%", zIndex: 50, background: "rgba(10,12,16,0.7)", backdropFilter: "blur(24px)" }}>
+        <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: 72, padding: "0 clamp(20px, 4vw, 48px)", maxWidth: 1300, margin: "0 auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: "linear-gradient(135deg, #0077B5, #571BC1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#fff", fontWeight: 800 }}>&#9670;</div>
+            <span style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-0.03em" }}>ContentForge</span>
           </div>
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={onSignIn}
+            style={{ background: "#fff", color: "#0a0c10", padding: "10px 22px", borderRadius: 10, border: "none", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Manrope', sans-serif" }}
+          >
+            Get Started
+          </motion.button>
         </nav>
       </header>
 
-      <main>
-        {/* Hero */}
-        <section style={{ paddingTop: 160, paddingBottom: 80, padding: "160px 32px 80px", position: "relative", overflow: "hidden" }}>
-          <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", position: "relative", zIndex: 10 }}>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              {/* Badge */}
-              <div style={{
-                display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 16px", borderRadius: 999,
-                background: "rgba(53,53,52,0.6)", border: "1px solid rgba(64,72,80,0.15)", marginBottom: 24,
-              }}>
-                <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#93ccff" }}>verified_user</span>
-                <span style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase", color: "rgba(191,199,209,0.9)" }}>
-                  Bring your own Claude API key. Your data stays yours.
-                </span>
+      {/* ── HERO ── */}
+      <section ref={heroRef} style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", overflow: "hidden" }}>
+        {/* Atmospheric background */}
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,119,181,0.15), transparent 70%)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 60% 50% at 80% 60%, rgba(87,27,193,0.1), transparent 70%)" }} />
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "30%", background: "linear-gradient(to top, #0a0c10, transparent)" }} />
+
+        {/* Floating product mockups */}
+        <motion.div style={{ y: heroY, opacity: heroOpacity, position: "absolute", right: "5%", top: "18%", width: "clamp(260px, 35vw, 440px)" }}>
+          {/* Carousel mockup */}
+          <motion.div
+            animate={{ y: [0, -10, 0] }}
+            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+            style={{ background: "#151820", borderRadius: 16, padding: 16, border: "1px solid rgba(255,255,255,0.06)", boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}
+          >
+            <div style={{ background: "linear-gradient(135deg, #0077B5, #571BC1)", borderRadius: 10, height: "clamp(180px, 22vw, 280px)", display: "flex", flexDirection: "column", justifyContent: "center", padding: "clamp(20px, 3vw, 36px)", position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", marginBottom: 12 }}>CAROUSEL SLIDE</div>
+              <div style={{ fontFamily: "'DM Serif Display',serif", fontSize: "clamp(18px, 2.5vw, 28px)", fontWeight: 400, fontStyle: "italic", lineHeight: 1.15, color: "#fff" }}>The future belongs to those who create it</div>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 12 }}>1 / 7</div>
+            </div>
+            <div style={{ display: "flex", gap: 4, marginTop: 12, justifyContent: "center" }}>
+              {[1,2,3,4,5,6,7].map((_, i) => <div key={i} style={{ width: i === 0 ? 20 : 6, height: 6, borderRadius: 3, background: i === 0 ? "#0077B5" : "rgba(255,255,255,0.15)" }} />)}
+            </div>
+          </motion.div>
+
+          {/* Floating stat card */}
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }}
+            style={{ position: "absolute", bottom: -40, left: -60, background: "#151820", borderRadius: 12, padding: 14, border: "1px solid rgba(255,255,255,0.06)", boxShadow: "0 12px 40px rgba(0,0,0,0.5)", width: 150 }}
+          >
+            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0077B5", marginBottom: 6 }}>STAT CARD</div>
+            <div style={{ fontFamily: "'DM Serif Display',serif", fontSize: 32, color: "#e8e6e3", lineHeight: 1 }}>73%</div>
+            <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>Engagement lift</div>
+          </motion.div>
+        </motion.div>
+
+        {/* Hero text */}
+        <motion.div
+          style={{ y: heroY, opacity: heroOpacity }}
+          initial={false}
+        >
+          <div style={{ maxWidth: 1300, margin: "0 auto", padding: "0 clamp(20px, 4vw, 48px)", position: "relative", zIndex: 10 }}>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              style={{ maxWidth: 580 }}
+            >
+              {/* Brand as hero signal */}
+              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 32 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: "linear-gradient(135deg, #0077B5, #571BC1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, color: "#fff", fontWeight: 800, boxShadow: "0 8px 24px rgba(0,119,181,0.3)" }}>&#9670;</div>
+                <div>
+                  <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.03em" }}>ContentForge</div>
+                  <div style={{ fontSize: 12, color: "rgba(232,230,227,0.4)", letterSpacing: "0.06em", textTransform: "uppercase" }}>LinkedIn Content Studio</div>
+                </div>
               </div>
 
-              <h1 className="font-headline" style={{ fontSize: "clamp(40px, 6vw, 72px)", fontWeight: 800, lineHeight: 1.1, marginBottom: 24, letterSpacing: "-0.03em" }}>
-                AI-Powered LinkedIn<br />
-                <span className="text-gradient-ai">Content Studio</span>
+              <h1 style={{ fontSize: "clamp(38px, 5.5vw, 68px)", fontWeight: 800, lineHeight: 1.05, letterSpacing: "-0.03em", marginBottom: 20 }}>
+                Create content<br />
+                that stops<br />
+                <span style={{ background: "linear-gradient(135deg, #0077B5, #571BC1)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>the scroll</span>
               </h1>
 
-              <p style={{ fontSize: 18, color: "rgba(191,199,209,0.9)", maxWidth: 600, margin: "0 auto 40px", lineHeight: 1.7 }}>
-                Create content that stops the scroll. Transform any text into stunning LinkedIn carousels, quote cards, and post copy. Personalized to your voice. Ready to publish in seconds.
+              <p style={{ fontSize: 17, color: "rgba(232,230,227,0.6)", lineHeight: 1.7, marginBottom: 36, maxWidth: 440 }}>
+                Transform any text into stunning LinkedIn carousels and post copy. Personalized to your voice. Published in seconds.
               </p>
 
-              <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={onSignIn}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 12, padding: "16px 32px",
-                    background: "#fff", color: "#000", fontWeight: 700, borderRadius: 12,
-                    border: "none", fontSize: 15, cursor: "pointer", fontFamily: "'Inter', sans-serif",
-                  }}
-                >
-                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZa3zOgexK2Mebawxy68F-sMSEQmGNPMggZJ9-jD0hEVAva9s-qe5TL8o9wDcI84NV0TRlwKo_ue3TPWMDF-RhKygaRBlnkQAF0pBeIwwloHAVdTE7fWI08sQVSBDpVFWBc-K68QtwCGdL3GzWqeLgvsg1C45JzEDMAZLJRvXkTYSeXOpkX3VmjWVJEjGWlB_iNdLR9QLJVR0EUiXocJYlBe1sF0tiiUcS_DAI0UI-QFI1PVKFL9BZvgtPTFKefEmyYOtHm1WGlKo" alt="Google" style={{ width: 20, height: 20 }} />
-                  Sign in with Google
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={onSignIn}
-                  style={{
-                    padding: "16px 32px", background: "#353534", color: "#e5e2e1",
-                    fontWeight: 700, borderRadius: 12, border: "1px solid rgba(64,72,80,0.3)",
-                    fontSize: 15, cursor: "pointer", fontFamily: "'Inter', sans-serif",
-                  }}
-                >
-                  Get Started Free
-                </motion.button>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Feature Grid */}
-        <section style={{ padding: "96px 32px", background: "#1c1b1b" }}>
-          <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-            <div style={{ marginBottom: 64 }}>
-              <h2 className="font-headline" style={{ fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 800, marginBottom: 16, letterSpacing: "-0.02em" }}>
-                The Architect's Toolkit
-              </h2>
-              <p style={{ fontSize: 17, color: "rgba(191,199,209,0.8)" }}>
-                Every asset you need for a dominant LinkedIn presence.
-              </p>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 32 }}>
-              {[
-                { icon: "view_carousel", title: "Carousels", desc: "Multi-slide decks that stop the scroll. AI-crafted headlines, stats, and CTAs tailored for engagement.", color: "#93ccff" },
-                { icon: "format_quote", title: "Quote Cards", desc: "Turn insights into impactful visuals. Single-image quote visuals designed to be pasted directly into LinkedIn.", color: "#d0bcff" },
-                { icon: "bar_chart", title: "Stat Cards", desc: "Authority through data. High-conversion visuals with bold numbers that demand immediate professional attention.", color: "#ddb8ff" },
-                { icon: "notes", title: "Text Posts", desc: "Scroll-stopping post copy with engineered hooks, structured bullets, and compelling calls-to-action.", color: "#93ccff" },
-                { icon: "account_circle", title: "Speaker Visuals", desc: "Professional event speaker cards with high-fidelity branding, titles, and perfectly framed portraits.", color: "#d0bcff" },
-                { icon: "palette", title: "6+ Themes", desc: "Professional dark and light presets that match your aesthetic. Fully customizable brand colors and typography.", color: "#ddb8ff" },
-              ].map((f, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.08 * i, duration: 0.4 }}
-                  style={{
-                    padding: 32, borderRadius: 16,
-                    background: "rgba(53,53,52,0.4)", border: "1px solid transparent",
-                    transition: "all 0.3s",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#353534"; e.currentTarget.style.borderColor = "rgba(64,72,80,0.2)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(53,53,52,0.4)"; e.currentTarget.style.borderColor = "transparent"; }}
-                >
-                  <div style={{
-                    width: 48, height: 48, borderRadius: 12,
-                    background: `${f.color}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24,
-                  }}>
-                    <span className="material-symbols-outlined" style={{ color: f.color }}>{f.icon}</span>
-                  </div>
-                  <h3 className="font-headline" style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>{f.title}</h3>
-                  <p style={{ fontSize: 14, color: "rgba(191,199,209,0.8)", lineHeight: 1.6, margin: 0 }}>{f.desc}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* How it Works */}
-        <section style={{ padding: "96px 32px" }}>
-          <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-            <div style={{ textAlign: "center", marginBottom: 80 }}>
-              <h2 className="font-headline" style={{ fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 800, marginBottom: 24, letterSpacing: "-0.02em" }}>
-                From Idea to Viral Post in Seconds
-              </h2>
-              <p style={{ fontSize: 18, color: "rgba(191,199,209,0.8)", maxWidth: 600, margin: "0 auto" }}>
-                The streamlined workflow designed for busy founders and content creators.
-              </p>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 48 }}>
-              {[
-                { n: "01", title: "Paste your content", desc: "Input an article, report, podcast transcript, or just a rough idea into the forge." },
-                { n: "02", title: "AI generates everything", desc: "Slides, post copy, and hashtags — all tailored perfectly to your unique brand voice." },
-                { n: "03", title: "Edit and refine", desc: "Tweak headlines, rewrite sections with AI instructions, or adjust styling instantly." },
-                { n: "04", title: "Copy and publish", desc: "One click to clipboard. Paste directly into LinkedIn. Your content is ready to shine." },
-              ].map((s, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 * i, duration: 0.4 }}
-                  style={{ position: "relative" }}
-                >
-                  <span className="font-headline" style={{
-                    fontSize: 60, fontWeight: 900, color: "rgba(64,72,80,0.2)",
-                    position: "absolute", top: -32, left: -16, lineHeight: 1,
-                  }}>
-                    {s.n}
-                  </span>
-                  <div style={{ position: "relative", zIndex: 1, paddingTop: 16 }}>
-                    <h4 className="font-headline" style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>{s.title}</h4>
-                    <p style={{ fontSize: 14, color: "rgba(191,199,209,0.8)", lineHeight: 1.6, margin: 0 }}>{s.desc}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Trust */}
-        <section style={{ padding: "96px 32px", background: "#0e0e0e", borderTop: "1px solid rgba(64,72,80,0.1)", borderBottom: "1px solid rgba(64,72,80,0.1)" }}>
-          <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 48, alignItems: "center" }}>
-            {[
-              { icon: "lock", title: "Privacy First", desc: "Your API key, encrypted. Powered by Claude AI. We don't store your proprietary insights.", color: "#93ccff" },
-              { icon: "content_paste", title: "Frictionless", desc: "Copy to clipboard, paste to LinkedIn. No complex downloads or file conversions needed.", color: "#d0bcff" },
-              { icon: "psychology", title: "Dynamic Iteration", desc: "AI rewrite with specific instructions. Refine your message until it matches your exact vision.", color: "#ddb8ff" },
-            ].map((t, i) => (
-              <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: 40, borderRadius: 24, background: "#1c1b1b", border: "1px solid rgba(64,72,80,0.1)" }}>
-                <div style={{ width: 64, height: 64, borderRadius: "50%", background: `${t.color}20`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: 28, color: t.color, fontVariationSettings: "'FILL' 1" }}>{t.icon}</span>
-                </div>
-                <h3 className="font-headline" style={{ fontSize: 22, fontWeight: 700, marginBottom: 16 }}>{t.title}</h3>
-                <p style={{ fontSize: 14, color: "rgba(191,199,209,0.8)", lineHeight: 1.6, margin: 0 }}>{t.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Final CTA */}
-        <section style={{ padding: "128px 32px", textAlign: "center" }}>
-          <div className="glass-panel" style={{
-            maxWidth: 800, margin: "0 auto", padding: 64, borderRadius: 32,
-            border: "1px solid rgba(0,119,181,0.2)", position: "relative",
-          }}>
-            <div style={{ position: "absolute", top: -48, left: "50%", transform: "translateX(-50%)", width: 96, height: 96, background: "#0077b5", borderRadius: "50%", filter: "blur(60px)", opacity: 0.5 }} />
-            <h2 className="font-headline" style={{ fontSize: "clamp(28px, 4vw, 56px)", fontWeight: 800, marginBottom: 32, letterSpacing: "-0.03em" }}>
-              Ready to become a <span style={{ color: "#93ccff" }}>Content Architect?</span>
-            </h2>
-            <p style={{ fontSize: 18, color: "rgba(191,199,209,0.8)", marginBottom: 48, maxWidth: 500, margin: "0 auto 48px" }}>
-              Join leaders using ContentForge to build their LinkedIn presence without losing their authenticity.
-            </p>
-            <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
               <motion.button
-                whileHover={{ boxShadow: "0 0 30px rgba(0,119,181,0.3)" }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.03, boxShadow: "0 8px 32px rgba(0,119,181,0.4)" }}
+                whileTap={{ scale: 0.97 }}
                 onClick={onSignIn}
                 style={{
-                  padding: "20px 40px", background: "#0077b5", color: "#f3f7ff",
-                  fontWeight: 800, borderRadius: 12, border: "none", fontSize: 15,
-                  cursor: "pointer", fontFamily: "'Manrope', sans-serif",
-                  transition: "all 0.3s",
+                  display: "flex", alignItems: "center", gap: 10, padding: "16px 36px",
+                  background: "#fff", color: "#0a0c10", fontWeight: 700, borderRadius: 12,
+                  border: "none", fontSize: 16, cursor: "pointer", fontFamily: "'Manrope', sans-serif",
+                  boxShadow: "0 4px 20px rgba(255,255,255,0.1)",
+                  transition: "box-shadow 0.3s",
                 }}
               >
-                Get Started For Free
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZa3zOgexK2Mebawxy68F-sMSEQmGNPMggZJ9-jD0hEVAva9s-qe5TL8o9wDcI84NV0TRlwKo_ue3TPWMDF-RhKygaRBlnkQAF0pBeIwwloHAVdTE7fWI08sQVSBDpVFWBc-K68QtwCGdL3GzWqeLgvsg1C45JzEDMAZLJRvXkTYSeXOpkX3VmjWVJEjGWlB_iNdLR9QLJVR0EUiXocJYlBe1sF0tiiUcS_DAI0UI-QFI1PVKFL9BZvgtPTFKefEmyYOtHm1WGlKo" alt="" style={{ width: 20, height: 20 }} />
+                Start creating — free
               </motion.button>
-            </div>
+              <p style={{ fontSize: 12, color: "rgba(232,230,227,0.3)", marginTop: 14 }}>
+                Bring your own Claude API key. Your data stays private.
+              </p>
+            </motion.div>
           </div>
-        </section>
-      </main>
+        </motion.div>
+      </section>
 
-      {/* Footer */}
-      <footer style={{ borderTop: "1px solid rgba(229,226,225,0.15)", background: "#131313" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "48px 32px", maxWidth: 1200, margin: "0 auto", flexWrap: "wrap", gap: 24 }}>
-          <div>
-            <div className="font-headline" style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>ContentForge</div>
-            <p style={{ fontSize: 13, color: "rgba(229,226,225,0.5)", margin: 0 }}>Built for LinkedIn creators who mean business.</p>
-          </div>
-          <div style={{ display: "flex", gap: 32 }}>
-            {["Privacy Policy", "Terms of Service"].map((link) => (
-              <span key={link} style={{ fontSize: 13, color: "rgba(229,226,225,0.4)", cursor: "pointer" }}>{link}</span>
+      {/* ── WHAT YOU CREATE ── */}
+      <section style={{ padding: "clamp(60px, 10vw, 120px) clamp(20px, 4vw, 48px)", position: "relative" }}>
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, #0a0c10, #0e1118, #0a0c10)" }} />
+        <div style={{ maxWidth: 1300, margin: "0 auto", position: "relative" }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 style={{ fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 12 }}>
+              What you create
+            </h2>
+            <p style={{ fontSize: 16, color: "rgba(232,230,227,0.5)", marginBottom: 48, maxWidth: 500 }}>
+              Five content formats. One tool. Every one designed to perform on LinkedIn.
+            </p>
+          </motion.div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 2 }}>
+            {[
+              { title: "Carousels", desc: "Multi-slide decks with AI-crafted headlines, stats, and calls to action.", accent: "#0077B5" },
+              { title: "Quote Cards", desc: "Single-image visuals that make insights shareable.", accent: "#6B5CE7" },
+              { title: "Stat Cards", desc: "Data-driven visuals with bold numbers that demand attention.", accent: "#00B4D8" },
+              { title: "Text Posts", desc: "Scroll-stopping copy with engineered hooks and structure.", accent: "#7C5CFC" },
+              { title: "Speaker Visuals", desc: "Event cards with photos, titles, and full brand control.", accent: "#0077B5" },
+            ].map((f, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ delay: 0.08 * i, duration: 0.5 }}
+                style={{ padding: "36px 32px", borderBottom: "1px solid rgba(255,255,255,0.04)", position: "relative" }}
+              >
+                <div style={{ width: 3, height: 24, background: f.accent, borderRadius: 2, marginBottom: 16, opacity: 0.8 }} />
+                <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.01em" }}>{f.title}</h3>
+                <p style={{ fontSize: 14, color: "rgba(232,230,227,0.5)", lineHeight: 1.6, margin: 0 }}>{f.desc}</p>
+              </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <section style={{ padding: "clamp(60px, 10vw, 120px) clamp(20px, 4vw, 48px)" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <motion.h2
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            style={{ fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 56, textAlign: "center" }}
+          >
+            From idea to published<br />in under a minute
+          </motion.h2>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+            {[
+              { n: "01", title: "Paste anything", desc: "An article, transcript, idea, or just a few bullet points." },
+              { n: "02", title: "AI builds everything", desc: "Slides, post copy, hashtags — matched to your voice and audience." },
+              { n: "03", title: "Refine with instructions", desc: "Edit visually. Or tell the AI: 'make it more provocative.'" },
+              { n: "04", title: "Copy. Paste. Publish.", desc: "One click to clipboard. Paste into LinkedIn. Done." },
+            ].map((s, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ delay: 0.1 * i, duration: 0.5 }}
+                style={{ display: "flex", gap: 24, padding: "32px 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+              >
+                <span style={{ fontSize: 48, fontWeight: 800, color: "rgba(0,119,181,0.15)", lineHeight: 1, flexShrink: 0, width: 60 }}>{s.n}</span>
+                <div>
+                  <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 6 }}>{s.title}</h3>
+                  <p style={{ fontSize: 14, color: "rgba(232,230,227,0.5)", lineHeight: 1.5, margin: 0 }}>{s.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section style={{ padding: "clamp(80px, 12vw, 160px) clamp(20px, 4vw, 48px)", textAlign: "center", position: "relative" }}>
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 70% 50% at 50% 50%, rgba(0,119,181,0.08), transparent 70%)" }} />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          style={{ position: "relative" }}
+        >
+          <h2 style={{ fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: 20 }}>
+            Your LinkedIn presence,<br />
+            <span style={{ background: "linear-gradient(135deg, #0077B5, #571BC1)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>architected</span>
+          </h2>
+          <p style={{ fontSize: 16, color: "rgba(232,230,227,0.5)", marginBottom: 36, maxWidth: 420, marginLeft: "auto", marginRight: "auto" }}>
+            Join creators who build authority without burning hours on content.
+          </p>
+          <motion.button
+            whileHover={{ scale: 1.04, boxShadow: "0 8px 32px rgba(0,119,181,0.4)" }}
+            whileTap={{ scale: 0.96 }}
+            onClick={onSignIn}
+            style={{
+              padding: "18px 40px", background: "#fff", color: "#0a0c10",
+              fontWeight: 700, borderRadius: 12, border: "none", fontSize: 16,
+              cursor: "pointer", fontFamily: "'Manrope', sans-serif",
+              boxShadow: "0 4px 20px rgba(255,255,255,0.08)",
+            }}
+          >
+            Start creating — free
+          </motion.button>
+        </motion.div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer style={{ borderTop: "1px solid rgba(255,255,255,0.04)", padding: "32px clamp(20px, 4vw, 48px)" }}>
+        <div style={{ maxWidth: 1300, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "-0.02em" }}>ContentForge</span>
+          <span style={{ fontSize: 12, color: "rgba(232,230,227,0.3)" }}>Your API key. Your data. Your content.</span>
         </div>
       </footer>
     </div>
