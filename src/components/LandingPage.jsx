@@ -4,6 +4,21 @@ import { ScaledSlide } from "./SlideRenderer";
 import { ScaledSpeakerSlide } from "./SpeakerSlide";
 import Logo from "./Logo";
 
+// ── Hook to measure container width ──
+function useContainerWidth() {
+  const [width, setWidth] = useState(520);
+  const ref = useCallback((node) => {
+    if (!node) return;
+    const measure = () => setWidth(node.offsetWidth);
+    measure();
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(measure);
+      ro.observe(node);
+    }
+  }, []);
+  return [ref, width];
+}
+
 // ── Dark demo themes ──
 const T_BLUE = { bg: "#08090D", card: "#0F1117", accent: "#0077B5", soft: "rgba(0,119,181,0.10)", text: "#F0F0F8", muted: "#7878A0", border: "rgba(0,119,181,0.15)", gradient: "linear-gradient(135deg, #0077B5, #571BC1)" };
 const T_RED = { bg: "#0B0B0B", card: "#141414", accent: "#E83A3A", soft: "rgba(232,58,58,0.10)", text: "#F5F5F5", muted: "#808080", border: "rgba(232,58,58,0.18)", gradient: "linear-gradient(135deg, #E83A3A, #FF6B35)" };
@@ -484,22 +499,6 @@ export default function LandingPage({ onSignIn }) {
       </footer>
     </div>
   );
-}
-
-// ── Hook to measure container width ──
-function useContainerWidth() {
-  const [width, setWidth] = useState(520);
-  const ref = useCallback((node) => {
-    if (!node) return;
-    const measure = () => setWidth(node.offsetWidth);
-    measure();
-    if (typeof ResizeObserver !== "undefined") {
-      const ro = new ResizeObserver(measure);
-      ro.observe(node);
-      // store cleanup ref — will be cleaned up on unmount via React
-    }
-  }, []);
-  return [ref, width];
 }
 
 // ── Fake LinkedIn feed post ──
