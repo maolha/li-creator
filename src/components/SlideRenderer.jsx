@@ -298,6 +298,19 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
           )}
           <h2 style={{ fontFamily: headingFont, fontSize: spec.headlineSize, fontWeight: headingWeight, lineHeight: spec.headlineLH, color: effectiveText, margin: "0 0 20px" }}>{s.headline}</h2>
           <p style={{ fontSize: spec.bodySize, lineHeight: 1.65, color: effectiveText, opacity: spec.bodyOpacity, margin: 0 }}>{s.body}</p>
+          {s.ctaButton && (
+            <div style={{ marginTop: Math.round(24 * vScale), position: "relative" }}>
+              <div style={{
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                background: theme.accent, color: contrastText(theme.accent),
+                padding: `${Math.round(12 * vScale)}px ${Math.round(28 * hScale)}px`,
+                borderRadius: 10, fontSize: Math.round(15 * vScale), fontWeight: 700,
+                letterSpacing: "0.01em",
+              }}>
+                {s.ctaButton}
+              </div>
+            </div>
+          )}
         </div>
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.18)", paddingTop: 20, position: "relative", flexShrink: 0 }}>
           {!hideBrandText && <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: effectiveText, opacity: 0.6 }}>{slideLabel}</span>}

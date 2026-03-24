@@ -2140,6 +2140,13 @@ Return the same JSON structure with just the post object updated.`;
                       <label style={{ ...labelStyle(A), marginBottom: 3 }}>Body</label>
                       <textarea value={slide.body || ""} onChange={(e) => updateSlideField(cur, "body", e.target.value)} rows={2} style={{ ...inputStyle(A), resize: "vertical", lineHeight: 1.6 }} />
                     </div>
+                    {/* CTA button text */}
+                    {slide.type === "cta" && (
+                      <div>
+                        <label style={{ ...labelStyle(A), marginBottom: 3 }}>Button Text</label>
+                        <input type="text" value={slide.ctaButton || ""} onChange={(e) => updateSlideField(cur, "ctaButton", e.target.value)} placeholder="e.g. Learn more, Get started, Join us" style={{ ...inputStyle(A), padding: "7px 10px" }} />
+                      </div>
+                    )}
                     {/* Stat fields */}
                     {slide.type === "stat" && (
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8, alignItems: "end" }}>
@@ -2207,18 +2214,20 @@ Return the same JSON structure with just the post object updated.`;
                           })}
                         </div>
                       )}
-                      {/* CTA icon toggle */}
+                      {/* CTA icon toggle + button text */}
                       {slide.type === "cta" && (
-                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                          <span style={{ fontSize: 10, color: A.muted }}>Icon:</span>
-                          <button onClick={() => updateSlideField(cur, "hideIcon", !slide.hideIcon)} style={{
-                            padding: "3px 8px", borderRadius: 4, fontSize: 9, fontWeight: 600,
-                            border: `1px solid ${A.border}`,
-                            background: slide.hideIcon ? "transparent" : A.soft,
-                            color: slide.hideIcon ? A.muted : A.accent,
-                            cursor: "pointer",
-                          }}>{slide.hideIcon ? "Off" : "On"}</button>
-                        </div>
+                        <>
+                          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                            <span style={{ fontSize: 10, color: A.muted }}>Icon:</span>
+                            <button onClick={() => updateSlideField(cur, "hideIcon", !slide.hideIcon)} style={{
+                              padding: "3px 8px", borderRadius: 4, fontSize: 9, fontWeight: 600,
+                              border: `1px solid ${A.border}`,
+                              background: slide.hideIcon ? "transparent" : A.soft,
+                              color: slide.hideIcon ? A.muted : A.accent,
+                              cursor: "pointer",
+                            }}>{slide.hideIcon ? "Off" : "On"}</button>
+                          </div>
+                        </>
                       )}
                       {/* Per-slide BG toggle */}
                       {activeBrand?.backgroundImage && bgImageMode !== "off" && (
