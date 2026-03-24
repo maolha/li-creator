@@ -1120,7 +1120,7 @@ Return the same JSON structure with just the post object updated.`;
               setTitle(c.title || "");
               setPost(c.post || null);
               setContentType(c.contentType || "carousel");
-              setAppMode(c.appMode || c.brandMode || "dark");
+              // appMode is a user preference, not restored from creations
               if (c.theme) setTheme(c.theme);
               // Restore brand (object or legacy string)
               if (c.brand && typeof c.brand === "object") setActiveBrand(c.brand);
