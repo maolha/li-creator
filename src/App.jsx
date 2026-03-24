@@ -305,7 +305,7 @@ export default function App() {
   // Persist all content state to localStorage
   useEffect(() => { saveState("input", input); }, [input]);
   useEffect(() => { saveState("source", source); }, [source]);
-  useEffect(() => { saveState("files", files); }, [files]);
+  useEffect(() => { saveState("files", files.map(({ name, type }) => ({ name, type }))); }, [files]);
   useEffect(() => { saveState("sc", sc); }, [sc]);
   useEffect(() => { saveState("theme", theme); }, [theme]);
   useEffect(() => { saveState("activeBrand", activeBrand); }, [activeBrand]);
@@ -326,7 +326,13 @@ export default function App() {
   useEffect(() => { saveState("bgImageMode", bgImageMode); }, [bgImageMode]);
   useEffect(() => { saveState("ghostNumbers", ghostNumbers); }, [ghostNumbers]);
   useEffect(() => { saveState("genInstructions", genInstructions); }, [genInstructions]);
-  useEffect(() => { saveState("speakerData", speakerData); }, [speakerData]);
+  useEffect(() => {
+    const slim = { ...speakerData,
+      eventLogo: speakerData.eventLogo?.startsWith?.("data:") ? null : speakerData.eventLogo,
+      speakers: (speakerData.speakers || []).map((s) => ({ ...s, photo: s.photo?.startsWith?.("data:") ? null : s.photo })),
+    };
+    saveState("speakerData", slim);
+  }, [speakerData]);
 
   // Responsive card size
   useEffect(() => {
@@ -446,7 +452,7 @@ export default function App() {
       },
       body: JSON.stringify({
         model: CLAUDE_MODEL,
-        max_tokens: 2048,
+        max_tokens: 4096,
         system: systemPrompt,
         messages: [{ role: "user", content: userText }],
       }),
@@ -492,7 +498,7 @@ export default function App() {
         },
         body: JSON.stringify({
           model: CLAUDE_MODEL,
-          max_tokens: 2048,
+          max_tokens: 4096,
           system: getPromptForType(contentType),
           messages: [{ role: "user", content: parts }],
         }),
@@ -583,7 +589,7 @@ ${input.trim() ? `\nOriginal source context:\n${input.slice(0, 500)}` : ""}`;
 Current hook: "${post.hook}"
 Current body: "${post.body}"
 Current CTA: "${post.cta}"
-Current hashtags: ${post.hashtags.join(", ")}
+Current hashtags: ${(Array.isArray(post.hashtags) ? post.hashtags : []).join(", ")}
 ${postRewritePrompt.trim() ? `\nInstructions for rewrite: ${postRewritePrompt}` : "Make it more engaging, bolder, and more scroll-stopping."}
 ${source.trim() ? `\nSource/reference: "${source}"` : ""}
 ${input.trim() ? `\nOriginal source context:\n${input.slice(0, 500)}` : ""}
@@ -603,8 +609,9 @@ Return the same JSON structure with just the post object updated.`;
   async function copySlideToClipboard() {
     if (!hiddenSlideRef.current) return;
     try {
+      const _a = SLIDE_ASPECTS[slideAspect] || SLIDE_ASPECTS["1:1"];
       const dataUrl = await toPng(hiddenSlideRef.current, {
-        width: SS, height: SS, pixelRatio: 2, cacheBust: true,
+        width: _a.w, height: _a.h, pixelRatio: 2, cacheBust: true,
       });
       const res = await fetch(dataUrl);
       const blob = await res.blob();
@@ -777,7 +784,7 @@ Return the same JSON structure with just the post object updated.`;
   function postTextRaw() {
     if (!post) return "";
     let t = post.hook + "\n\n" + post.body + "\n\n" + post.cta;
-    t += "\n\n" + post.hashtags.map((h) => `#${h.replace(/^#/, "")}`).join(" ");
+    t += "\n\n" + (Array.isArray(post.hashtags) ? post.hashtags : []).map((h) => `#${h.replace(/^#/, "")}`).join(" ");
     if (source.trim()) t += `\n\n💬 Source: ${source.trim()}`;
     return t;
   }
@@ -862,6 +869,8 @@ Return the same JSON structure with just the post object updated.`;
         source: source || "",
         speakerData: savedSpeakerData || null,
         customThemeDef: customThemeDef || null,
+        slideLogo: slideLogo || { show: "none", position: "top-right" },
+        ghostNumbers: ghostNumbers || "on",
       };
       await saveCreation(user.uid, cleanForFirestore(payload));
       const updated = await getCreations(user.uid);
@@ -905,6 +914,8 @@ Return the same JSON structure with just the post object updated.`;
       source: source || "",
       speakerData: copySpeakerData,
       customThemeDef: customThemeDef || null,
+      slideLogo: slideLogo || { show: "none", position: "top-right" },
+      ghostNumbers: ghostNumbers || "on",
     };
     await saveCreation(user.uid, cleanForFirestore(copyPayload));
     const updated = await getCreations(user.uid);
@@ -1165,6 +1176,8 @@ Return the same JSON structure with just the post object updated.`;
               setIntensity(c.intensity || "clean");
               setSlideAspect(c.slideAspect || "1:1");
               setSlideBgMode(c.slideBgMode || "default");
+              setSlideLogo(c.slideLogo || { show: "none", position: "top-right" });
+              setGhostNumbers(c.ghostNumbers || "on");
               setTone(c.tone || "professional");
               setAudience(c.audience || "general");
               setSc(c.sc || 7);
@@ -1212,7 +1225,7 @@ Return the same JSON structure with just the post object updated.`;
               <label style={labelStyle(A)}>
                 <Layers size={12} /> Content Type
               </label>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(72px, 1fr))", gap: 6 }}>
                 {CONTENT_TYPES.map((ct) => (
                   <button
                     key={ct.id}
@@ -1780,7 +1793,7 @@ Return the same JSON structure with just the post object updated.`;
                   style={{
                     display: "flex", alignItems: "center", justifyContent: "space-between",
                     padding: "10px 14px", borderRadius: 10,
-                    background: `rgba(${A.accent === "#0077b5" ? "0,119,181" : "124,92,252"},0.08)`,
+                    background: A.soft,
                     border: `1px solid ${A.accent}33`,
                   }}
                 >
@@ -2366,7 +2379,7 @@ Return the same JSON structure with just the post object updated.`;
                       <div style={postLabelStyle(A)}>Hashtags</div>
                       <input
                         type="text"
-                        value={post.hashtags.map((h) => h.replace(/^#/, "")).join(", ")}
+                        value={(Array.isArray(post.hashtags) ? post.hashtags : []).map((h) => h.replace(/^#/, "")).join(", ")}
                         onChange={(e) => {
                           const tags = e.target.value.split(",").map((t) => t.trim()).filter(Boolean);
                           updatePostField("hashtags", tags);
@@ -2381,7 +2394,7 @@ Return the same JSON structure with just the post object updated.`;
                             <button
                               key={gi}
                               onClick={() => {
-                                const existing = post.hashtags.map((h) => h.replace(/^#/, ""));
+                                const existing = (Array.isArray(post.hashtags) ? post.hashtags : []).map((h) => h.replace(/^#/, ""));
                                 const merged = [...new Set([...existing, ...group.tags])];
                                 updatePostField("hashtags", merged);
                               }}

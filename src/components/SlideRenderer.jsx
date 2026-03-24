@@ -218,7 +218,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   /* STAT */
   if (type === "stat") {
     const sn = s.stat || "?";
-    const sf = s.statFontSize || spec.statSize(sn.length);
+    const sf = s.statFontSize || (spec.statSize ? spec.statSize(sn.length) : 90);
     return (
       <div style={{ width: SW, height: SH, background: theme.card, overflow: "hidden", display: "flex", boxSizing: "border-box" }}>
         <div style={{ width: spec.panelW, flexShrink: 0, background: spec.panelBg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: `${Math.round(32 * vScale)}px 18px`, position: "relative", overflow: "hidden" }}>
