@@ -112,7 +112,15 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
     theme = { ...T, card: "#FFFFFF", text: "#1A1A2E", muted: "#6B6B7B", border: "rgba(26,26,46,0.10)", soft: `rgba(${hexToRgb(T.accent)},0.07)` };
   } else if (bgMode === "invert") {
     const invCt = contrastText(T.accent);
-    theme = { ...T, card: T.accent, text: invCt, muted: invCt === "#FFFFFF" ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)", border: invCt === "#FFFFFF" ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.12)", soft: invCt === "#FFFFFF" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)" };
+    theme = {
+      ...T,
+      card: T.accent,
+      text: invCt,
+      accent: invCt, // accent elements become contrast color so they're visible on accent bg
+      muted: invCt === "#FFFFFF" ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.45)",
+      border: invCt === "#FFFFFF" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.10)",
+      soft: invCt === "#FFFFFF" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)",
+    };
   }
   // Override spec bg/colors if bgMode changes the background
   const effectiveBg = bgMode === "default" ? spec.bg : theme.card;
