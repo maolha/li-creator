@@ -2120,6 +2120,41 @@ Return the same JSON structure with just the post object updated.`;
                       <p style={{ fontSize: 9, color: A.muted, marginTop: 2, opacity: 0.6 }}>Custom text shown on this slide (e.g. source, URL, tagline)</p>
                     </div>
 
+                    {/* Per-slide toggles */}
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {/* Logo version override */}
+                      {activeBrand?.logos && (activeBrand.logos.light || activeBrand.logos.dark) && slideLogo?.show !== "none" && (
+                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                          <span style={{ fontSize: 10, color: A.muted }}>Logo:</span>
+                          {[
+                            { id: "auto", label: "Auto" },
+                            { id: "light", label: "Light" },
+                            { id: "dark", label: "Dark" },
+                            { id: "none", label: "None" },
+                          ].map((o) => (
+                            <button key={o.id} onClick={() => updateSlideField(cur, "logoVersion", o.id === "auto" ? undefined : o.id)} style={{
+                              padding: "3px 6px", borderRadius: 4, fontSize: 9, fontWeight: 600,
+                              border: `1px solid ${(slide.logoVersion || "auto") === (o.id === "auto" ? undefined : o.id) || (!slide.logoVersion && o.id === "auto") ? A.accent : A.border}`,
+                              background: (slide.logoVersion || "auto") === (o.id === "auto" ? undefined : o.id) || (!slide.logoVersion && o.id === "auto") ? A.soft : "transparent",
+                              color: (slide.logoVersion || "auto") === (o.id === "auto" ? undefined : o.id) || (!slide.logoVersion && o.id === "auto") ? A.accent : A.muted,
+                              cursor: "pointer",
+                            }}>{o.label}</button>
+                          ))}
+                        </div>
+                      )}
+                      {/* Counter toggle */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <span style={{ fontSize: 10, color: A.muted }}>Counter:</span>
+                        <button onClick={() => updateSlideField(cur, "hideCounter", !slide.hideCounter)} style={{
+                          padding: "3px 8px", borderRadius: 4, fontSize: 9, fontWeight: 600,
+                          border: `1px solid ${A.border}`,
+                          background: slide.hideCounter ? "transparent" : A.soft,
+                          color: slide.hideCounter ? A.muted : A.accent,
+                          cursor: "pointer",
+                        }}>{slide.hideCounter ? "Off" : "On"}</button>
+                      </div>
+                    </div>
+
                     {/* Rewrite with instructions */}
                     <div style={{ borderTop: `1px solid ${A.border}`, paddingTop: 12 }}>
                       <label style={{ ...labelStyle(A), marginBottom: 4 }}>

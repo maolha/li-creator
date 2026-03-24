@@ -132,7 +132,11 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   // Logo overlay
   const logoUrl = (() => {
     if (!showLogo || !brandLogos) return null;
-    // Pick light logo for dark bg, dark logo for light bg
+    // Per-slide override: s.logoVersion can be "light", "dark", "none", or undefined (auto)
+    if (s.logoVersion === "none") return null;
+    if (s.logoVersion === "light") return brandLogos.light || brandLogos.dark;
+    if (s.logoVersion === "dark") return brandLogos.dark || brandLogos.light;
+    // Auto: pick light logo for dark bg, dark logo for light bg
     const bgIsDark = contrastText(effectiveBg || theme.card) === "#FFFFFF";
     return bgIsDark ? (brandLogos.light || brandLogos.dark) : (brandLogos.dark || brandLogos.light);
   })();
@@ -160,7 +164,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   ) : null;
 
   const slideLabel = s.label !== undefined ? s.label : brand; // per-slide override
-  const hideCounter = !!logoUrl; // hide slide counter when logo is showing
+  const hideCounter = !!logoUrl || s.hideCounter; // hide when logo showing or per-slide toggle
   const hideBrandText = !!logoUrl && !s.label; // logo replaces brand text unless slide has custom label
 
   // Brand fonts
