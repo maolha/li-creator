@@ -1654,12 +1654,12 @@ Return the same JSON structure with just the post object updated.`;
                   </div>
                 ))}
 
-                {(speakerData.speakers || []).length < 3 && (
+                {(speakerData.speakers || []).length < 6 && (
                   <button
                     onClick={() => setSpeakerData((p) => ({ ...p, speakers: [...p.speakers, { name: "", title: "", company: "", photo: null }] }))}
                     style={{ background: A.soft, border: `1px solid ${A.border}`, borderRadius: 10, padding: "10px", cursor: "pointer", color: A.accent, fontSize: 12, fontWeight: 600, fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}
                   >
-                    <UserCircle size={14} /> Add Speaker ({(speakerData.speakers || []).length}/3)
+                    <UserCircle size={14} /> Add Speaker ({(speakerData.speakers || []).length}/6)
                   </button>
                 )}
               </div>

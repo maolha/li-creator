@@ -28,50 +28,51 @@ function getSizes(aspect, count) {
   const isTall = aspect === "9:16";
   const isFourFive = aspect === "4:5";
   // 4:5 is taller than 1:1 — more room for bigger photos
+  const c = count; // shorthand
   const sz = {
     "16:9": {
       pad: 20, padY: 16,
       titleSize: 22, titleSizeLong: 18, sessionSize: 10,
-      photoSz: count === 1 ? 72 : count === 2 ? 64 : 52,
-      nameSz: count === 1 ? 14 : 11,
-      roleSz: 9, companySz: 8, pillSz: 9,
+      photoSz: c === 1 ? 72 : c === 2 ? 64 : c <= 3 ? 52 : c <= 4 ? 44 : 36,
+      nameSz: c === 1 ? 14 : c <= 3 ? 11 : 9,
+      roleSz: c <= 3 ? 9 : 8, companySz: c <= 3 ? 8 : 7, pillSz: 9,
       ctaSz: 10, ctaPad: "6px 16px",
       dateSz: 9, brandSz: 9,
       barH: 4, accentBarW: 40, accentBarH: 2,
-      gap: 10, photoGap: 6, logoH: 22,
+      gap: 10, photoGap: c <= 3 ? 6 : 4, logoH: 22,
     },
     "9:16": {
       pad: 22, padY: 24,
       titleSize: 28, titleSizeLong: 22, sessionSize: 13,
-      photoSz: count === 1 ? 100 : count === 2 ? 88 : 72,
-      nameSz: count === 1 ? 18 : count === 2 ? 15 : 13,
-      roleSz: count === 1 ? 13 : 11, companySz: count === 1 ? 12 : 10, pillSz: 11,
+      photoSz: c === 1 ? 100 : c === 2 ? 88 : c <= 3 ? 72 : c <= 4 ? 60 : 50,
+      nameSz: c === 1 ? 18 : c === 2 ? 15 : c <= 3 ? 13 : 11,
+      roleSz: c === 1 ? 13 : c <= 3 ? 11 : 9, companySz: c === 1 ? 12 : c <= 3 ? 10 : 8, pillSz: 11,
       ctaSz: 12, ctaPad: "8px 22px",
       dateSz: 11, brandSz: 11,
       barH: 6, accentBarW: 50, accentBarH: 3,
-      gap: 16, photoGap: 8, logoH: 26,
+      gap: 16, photoGap: c <= 3 ? 8 : 5, logoH: 26,
     },
     "4:5": {
       pad: 32, padY: 26,
       titleSize: 34, titleSizeLong: 26, sessionSize: 13,
-      photoSz: count === 1 ? 120 : count === 2 ? 104 : 88,
-      nameSz: count === 1 ? 18 : count === 2 ? 16 : 14,
-      roleSz: count === 1 ? 13 : 12, companySz: count === 1 ? 12 : 11, pillSz: 11,
+      photoSz: c === 1 ? 120 : c === 2 ? 104 : c <= 3 ? 88 : c <= 4 ? 72 : 58,
+      nameSz: c === 1 ? 18 : c === 2 ? 16 : c <= 3 ? 14 : 11,
+      roleSz: c === 1 ? 13 : c <= 3 ? 12 : 10, companySz: c === 1 ? 12 : c <= 3 ? 11 : 9, pillSz: 11,
       ctaSz: 12, ctaPad: "9px 24px",
       dateSz: 11, brandSz: 11,
       barH: 6, accentBarW: 50, accentBarH: 3,
-      gap: 16, photoGap: 10, logoH: 32,
+      gap: 16, photoGap: c <= 3 ? 10 : 6, logoH: 32,
     },
     "1:1": {
       pad: 36, padY: 28,
       titleSize: 34, titleSizeLong: 26, sessionSize: 13,
-      photoSz: count === 1 ? 120 : count === 2 ? 100 : 84,
-      nameSz: count === 1 ? 18 : count === 2 ? 15 : 13,
-      roleSz: count === 1 ? 13 : 11, companySz: count === 1 ? 12 : 10, pillSz: 11,
+      photoSz: c === 1 ? 120 : c === 2 ? 100 : c <= 3 ? 84 : c <= 4 ? 68 : 54,
+      nameSz: c === 1 ? 18 : c === 2 ? 15 : c <= 3 ? 13 : 11,
+      roleSz: c === 1 ? 13 : c <= 3 ? 11 : 9, companySz: c === 1 ? 12 : c <= 3 ? 10 : 8, pillSz: 11,
       ctaSz: 12, ctaPad: "8px 22px",
       dateSz: 11, brandSz: 11,
       barH: 6, accentBarW: 50, accentBarH: 3,
-      gap: 16, photoGap: 8, logoH: 32,
+      gap: 16, photoGap: c <= 3 ? 8 : 5, logoH: 32,
     },
   };
   return {
@@ -97,16 +98,17 @@ function SpeakerPhotos({ speakers, count, photoSz, photoRadius, theme, nameSz, r
   const borderStyle = ct ? "2px solid rgba(255,255,255,0.3)" : `3px solid ${theme.accent}`;
   const photoBg = ct ? "rgba(255,255,255,0.1)" : theme.soft;
 
+  const named = speakers.filter((s) => s?.name);
   return (
-    <div style={{ display: "flex", gap: count === 1 ? 0 : photoGap * 2, alignItems: "flex-start", justifyContent: count === 1 ? "flex-start" : "center", width: "100%" }}>
-      {speakers.filter((s) => s?.name).map((speaker, i) => (
+    <div style={{ display: "flex", flexWrap: count > 3 ? "wrap" : "nowrap", gap: count === 1 ? 0 : photoGap * 2, alignItems: "flex-start", justifyContent: count === 1 ? "flex-start" : "center", width: "100%" }}>
+      {named.map((speaker, i) => (
         <div key={i} style={{
           display: "flex",
           flexDirection: count === 1 ? "row" : "column",
           alignItems: count === 1 ? "center" : "center",
           gap: count === 1 ? photoGap * 2 : photoGap,
-          flex: count > 1 ? 1 : undefined,
-          width: count > 1 ? 0 : undefined,
+          flex: count > 3 ? `0 0 ${Math.floor(100 / Math.min(count, 3)) - 2}%` : count > 1 ? 1 : undefined,
+          width: count > 1 && count <= 3 ? 0 : undefined,
         }}>
           <div style={{
             width: photoSz, height: photoSz, borderRadius: photoRadius,
