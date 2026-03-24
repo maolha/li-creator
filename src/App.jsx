@@ -2086,6 +2086,11 @@ Return the same JSON structure with just the post object updated.`;
                       <label style={{ ...labelStyle(A), marginBottom: 4 }}>Tag</label>
                       <input type="text" value={slide.tag || ""} onChange={(e) => updateSlideField(cur, "tag", e.target.value)} style={inputStyle(A)} />
                     </div>
+                    <div>
+                      <label style={{ ...labelStyle(A), marginBottom: 4 }}>Slide Label</label>
+                      <input type="text" value={slide.label ?? brand} onChange={(e) => updateSlideField(cur, "label", e.target.value)} placeholder={brand || "Optional text on slide"} style={inputStyle(A)} />
+                      <p style={{ fontSize: 9, color: A.muted, marginTop: 2, opacity: 0.6 }}>Custom text shown on this slide (e.g. source, URL, tagline)</p>
+                    </div>
 
                     {/* Rewrite with instructions */}
                     <div style={{ borderTop: `1px solid ${A.border}`, paddingTop: 12 }}>

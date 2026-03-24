@@ -150,7 +150,8 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   } : null;
 
   const LogoOverlay = logoUrl ? <img src={logoUrl} alt="" style={logoStyle} /> : null;
-  const hideBrandText = !!logoUrl; // logo replaces brand text
+  const slideLabel = s.label !== undefined ? s.label : brand; // per-slide override
+  const hideBrandText = !!logoUrl && !s.label; // logo replaces brand text unless slide has custom label
 
   // Brand fonts
   const headingFont = brandFonts?.heading ? `'${brandFonts.heading}', sans-serif` : "'DM Serif Display',serif";
@@ -164,7 +165,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
         <Decorations items={spec.decorations} />
         {LogoOverlay}
         <div style={{ paddingLeft: spec.accentBarW > 0 ? spec.accentBarW + 2 : 0, display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", flexShrink: 0 }}>
-          {!hideBrandText && <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: effectiveText === ct ? ct : theme.accent, opacity: effectiveText === ct ? 0.8 : 1 }}>{brand}</span>}
+          {!hideBrandText && <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: effectiveText === ct ? ct : theme.accent, opacity: effectiveText === ct ? 0.8 : 1 }}>{slideLabel}</span>}
           {hideBrandText && <span />}
           <span style={{ fontSize: 12, color: effectiveText, opacity: 0.5 }}>{n > 1 ? `${i + 1} / ${n}` : ""}</span>
         </div>
@@ -232,11 +233,11 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
         {!isCentered && (
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid ${effectiveBg === theme.card ? theme.border : "rgba(255,255,255,0.18)"}`, paddingTop: 20, flexShrink: 0 }}>
             <Pill tag={s.tag} type={type} variant={effectiveBg === theme.card ? "default" : "light"} T={theme} />
-            {!hideBrandText && <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: effectiveBg === theme.card ? theme.accent : qText, opacity: 0.85 }}>{brand}</span>}
+            {!hideBrandText && <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: effectiveBg === theme.card ? theme.accent : qText, opacity: 0.85 }}>{slideLabel}</span>}
           </div>
         )}
         {isCentered && !hideBrandText && (
-          <div style={{ marginTop: 24, fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: qText, opacity: 0.5 }}>{brand}</div>
+          <div style={{ marginTop: 24, fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: qText, opacity: 0.5 }}>{slideLabel}</div>
         )}
       </div>
     );
@@ -260,7 +261,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
           <p style={{ fontSize: spec.bodySize, lineHeight: 1.65, color: effectiveText, opacity: spec.bodyOpacity, margin: 0 }}>{s.body}</p>
         </div>
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.18)", paddingTop: 20, position: "relative", flexShrink: 0 }}>
-          {!hideBrandText && <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: effectiveText, opacity: 0.6 }}>{brand}</span>}
+          {!hideBrandText && <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: effectiveText, opacity: 0.6 }}>{slideLabel}</span>}
         </div>
       </div>
     );
