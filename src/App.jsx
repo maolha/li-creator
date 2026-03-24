@@ -481,24 +481,7 @@ export default function App() {
       if (contentType === "text-post") setActiveTab("post");
       else setActiveTab("slides");
 
-      // Auto-save to Firebase if logged in
-      if (user) {
-        try {
-          await saveCreation(user.uid, {
-            title: p.title,
-            slides: p.slides || [],
-            post: p.post || null,
-            contentType,
-            theme,
-            brand,
-            tone,
-            audience,
-          });
-          // Refresh history
-          const updated = await getCreations(user.uid);
-          setCreations(updated);
-        } catch {}
-      }
+      // No auto-save — user saves manually via "Save to Library"
     } catch (e) {
       setError(e.message || "Generation failed. Please try again.");
     }
