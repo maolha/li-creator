@@ -5,6 +5,7 @@ import {
   BookOpen, Heart, PenLine, Image, Type, Package,
 } from "lucide-react";
 import { createBrand } from "../utils/brandSchema";
+import FontPicker from "./FontPicker";
 
 export default function BrandEditor({ T, brands, onChange }) {
   const [expandedId, setExpandedId] = useState(null);
@@ -96,14 +97,13 @@ export default function BrandEditor({ T, brands, onChange }) {
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                     <div>
                       <span style={{ fontSize: 9, color: T.muted, opacity: 0.7 }}>Heading</span>
-                      <input type="text" value={brand.fonts?.heading || ""} onChange={(e) => updateNested(brand.id, "fonts", "heading", e.target.value)} placeholder="DM Serif Display" style={inp(T)} />
+                      <FontPicker value={brand.fonts?.heading || ""} onChange={(v) => updateNested(brand.id, "fonts", "heading", v)} type="heading" T={T} />
                     </div>
                     <div>
                       <span style={{ fontSize: 9, color: T.muted, opacity: 0.7 }}>Body</span>
-                      <input type="text" value={brand.fonts?.body || ""} onChange={(e) => updateNested(brand.id, "fonts", "body", e.target.value)} placeholder="Inter" style={inp(T)} />
+                      <FontPicker value={brand.fonts?.body || ""} onChange={(v) => updateNested(brand.id, "fonts", "body", v)} type="body" T={T} />
                     </div>
                   </div>
-                  <p style={hint(T)}>Enter Google Font names. Leave blank for defaults.</p>
                 </div>
 
                 {/* Voice: Tone + Audience */}
