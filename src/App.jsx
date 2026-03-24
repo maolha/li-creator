@@ -97,6 +97,18 @@ function saveState(key, value) {
   try { localStorage.setItem(`cf_${key}`, JSON.stringify(value)); } catch {}
 }
 
+// Deep-clean object for Firestore: replace undefined with null at all depths
+function cleanForFirestore(obj) {
+  if (obj === undefined) return null;
+  if (obj === null || typeof obj !== "object") return obj;
+  if (Array.isArray(obj)) return obj.map(cleanForFirestore);
+  const cleaned = {};
+  for (const [k, v] of Object.entries(obj)) {
+    cleaned[k] = cleanForFirestore(v);
+  }
+  return cleaned;
+}
+
 const TONES = [
   { id: "professional", label: "Professional" },
   { id: "provocative", label: "Provocative" },
@@ -813,25 +825,26 @@ Return the same JSON structure with just the post object updated.`;
           })),
         };
       }
-      await saveCreation(user.uid, {
+      // Firestore rejects undefined values — use null instead
+      const payload = {
         title: title || speakerData?.eventTitle || "Untitled",
         slides: slides || [],
         post: post || null,
-        contentType,
-        theme,
-        appMode,
-        brand: activeBrand || { name: brand },
-        intensity,
-        slideAspect,
-        slideBgMode,
-        tone,
-        audience,
-        sc,
+        contentType: contentType || "carousel",
+        theme: theme || "Midnight Pro",
+        brand: activeBrand || { name: brand || "PAIA" },
+        intensity: intensity || "clean",
+        slideAspect: slideAspect || "1:1",
+        slideBgMode: slideBgMode || "default",
+        tone: tone || "professional",
+        audience: audience || "general",
+        sc: sc || 7,
         input: input || "",
         source: source || "",
-        speakerData: savedSpeakerData,
-        customThemeDef,
-      });
+        speakerData: savedSpeakerData || null,
+        customThemeDef: customThemeDef || null,
+      };
+      await saveCreation(user.uid, cleanForFirestore(payload));
       const updated = await getCreations(user.uid);
       setCreations(updated);
       setSavedToLibrary(true);
@@ -845,32 +858,36 @@ Return the same JSON structure with just the post object updated.`;
   async function saveAsCopy() {
     if (!user) return;
     const customThemeDef = customThemes[theme] || null;
-    await saveCreation(user.uid, {
-      title: (title || speakerData?.eventTitle || "Untitled") + " (copy)",
-      slides: slides || [],
-      post: post || null,
-      contentType,
-      theme,
-      appMode,
-      brand: activeBrand || { name: brand },
-      intensity,
-      slideAspect,
-      slideBgMode,
-      tone,
-      audience,
-      sc,
-      input: input || "",
-      source: source || "",
-      speakerData: isSpeakerMode && speakerData ? {
+    let copySpeakerData = null;
+    if (isSpeakerMode && speakerData) {
+      copySpeakerData = {
         ...speakerData,
         eventLogo: speakerData.eventLogo?.startsWith?.("data:") ? null : speakerData.eventLogo,
         speakers: (speakerData.speakers || []).map((s) => ({
           ...s,
           photo: s.photo?.startsWith?.("data:") ? null : s.photo,
         })),
-      } : undefined,
-      customThemeDef,
-    });
+      };
+    }
+    const copyPayload = {
+      title: (title || speakerData?.eventTitle || "Untitled") + " (copy)",
+      slides: slides || [],
+      post: post || null,
+      contentType: contentType || "carousel",
+      theme: theme || "Midnight Pro",
+      brand: activeBrand || { name: brand || "PAIA" },
+      intensity: intensity || "clean",
+      slideAspect: slideAspect || "1:1",
+      slideBgMode: slideBgMode || "default",
+      tone: tone || "professional",
+      audience: audience || "general",
+      sc: sc || 7,
+      input: input || "",
+      source: source || "",
+      speakerData: copySpeakerData,
+      customThemeDef: customThemeDef || null,
+    };
+    await saveCreation(user.uid, cleanForFirestore(copyPayload));
     const updated = await getCreations(user.uid);
     setCreations(updated);
   }
