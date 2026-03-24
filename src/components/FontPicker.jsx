@@ -1,9 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 
 const HEADING_FONTS = [
+  // Bold / Impact
+  "Poppins", "Inter", "Montserrat", "Raleway", "Bebas Neue",
+  "Oswald", "Anton", "Barlow Condensed",
+  // Modern Sans
+  "Plus Jakarta Sans", "Space Grotesk", "Sora", "Manrope", "Outfit",
+  // Serif / Editorial
   "DM Serif Display", "Playfair Display", "Lora", "Merriweather",
   "Libre Baskerville", "Crimson Text", "Cormorant Garamond",
-  "Plus Jakarta Sans", "Space Grotesk", "Sora", "Manrope", "Outfit",
 ];
 
 const BODY_FONTS = [
@@ -18,7 +23,7 @@ function loadFont(fontName) {
   loadedFonts.add(fontName);
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}:wght@400;700&display=swap`;
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}:wght@400;700;800;900&display=swap`;
   document.head.appendChild(link);
 }
 
