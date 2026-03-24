@@ -1145,6 +1145,7 @@ Return the same JSON structure with just the post object updated.`;
 
         {/* Create Page */}
         {page === "create" && <div
+          className="cf-main-grid"
           style={{
             display: "grid",
             gridTemplateColumns: hasOutput ? "minmax(0,420px) minmax(0,1fr)" : "minmax(0,600px)",
@@ -1154,7 +1155,7 @@ Return the same JSON structure with just the post object updated.`;
           }}
         >
           {/* ─── LEFT PANEL ─── */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="cf-left-panel" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {/* Hero */}
             {!hasOutput && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 8 }}>
@@ -1717,6 +1718,7 @@ Return the same JSON structure with just the post object updated.`;
           {/* ─── RIGHT PANEL ─── */}
           {hasOutput && (
             <motion.div
+              className="cf-right-panel"
               ref={rightRef}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -2341,18 +2343,17 @@ Return the same JSON structure with just the post object updated.`;
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @media (max-width: 768px) {
-          /* Main layout: stack to single column */
-          div[style*="grid-template-columns: minmax(0,420px) minmax(0,1fr)"] { grid-template-columns: 1fr !important; }
+          /* Main layout: stack to single column, output first */
+          .cf-main-grid { grid-template-columns: 1fr !important; }
+          .cf-right-panel { order: -1 !important; }
+          .cf-left-panel { order: 1 !important; }
           /* Content type: 2x2 grid */
           div[style*="grid-template-columns: repeat(4, 1fr)"] { grid-template-columns: repeat(2, 1fr) !important; }
-          /* Settings rows: stack */
+          /* Settings rows: compact */
           div[style*="grid-template-columns: 1fr 1fr 72px"] { grid-template-columns: 1fr 1fr !important; }
           div[style*="grid-template-columns: 1fr 72px"] { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 480px) {
-          /* Extra small: tighter padding */
-          div[style*="padding: 24px 20px"] { padding: 16px 12px !important; }
-          /* Brand + label: stack */
           div[style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
         }
         /* Header nav: hide text labels on small screens */
