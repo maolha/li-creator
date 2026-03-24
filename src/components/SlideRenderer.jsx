@@ -190,7 +190,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
     return (
       <div style={{ width: SW, height: SH, background: effectiveBg, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: spec.padding, boxSizing: "border-box" }}>
         {BgImageOverlay}
-        <Decorations items={spec.decorations} />
+        <Decorations items={activeBgMode !== "off" ? [] : spec.decorations} />
         {LogoOverlay}
         <div style={{ paddingLeft: spec.accentBarW > 0 ? spec.accentBarW + 2 : 0, display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", flexShrink: 0 }}>
           {!hideBrandText && <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: effectiveText === ct ? ct : theme.accent, opacity: effectiveText === ct ? 0.8 : 1 }}>{slideLabel}</span>}
@@ -217,7 +217,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
       <div style={{ width: SW, height: SH, background: theme.card, overflow: "hidden", display: "flex", boxSizing: "border-box" }}>
         <div style={{ width: spec.panelW, flexShrink: 0, background: spec.panelBg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: `${Math.round(32 * vScale)}px 18px`, position: "relative", overflow: "hidden" }}>
           {BgImageOverlay}
-        <Decorations items={spec.decorations} />
+        <Decorations items={activeBgMode !== "off" ? [] : spec.decorations} />
         {LogoOverlay}
           <div style={{ fontFamily: "'DM Serif Display',serif", fontSize: sf, fontWeight: 400, color: ct, lineHeight: 1, textAlign: "center", whiteSpace: "nowrap", position: "relative", zIndex: 1 }}>{sn}</div>
           {s.statLabel && <div style={{ fontSize: spec.labelSize, fontWeight: 600, color: ct, opacity: 0.7, marginTop: Math.round(14 * vScale), textAlign: "center", textTransform: "uppercase", letterSpacing: spec.labelSpacing || "0.06em", position: "relative", zIndex: 1 }}>{s.statLabel}</div>}
@@ -244,7 +244,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
     return (
       <div style={{ width: SW, height: SH, background: qBg, overflow: "hidden", display: "flex", flexDirection: "column", padding: spec.padding, boxSizing: "border-box", justifyContent: isCentered ? "center" : undefined, alignItems: isCentered ? "center" : undefined, textAlign: isCentered ? "center" : undefined, position: "relative" }}>
         {BgImageOverlay}
-        <Decorations items={spec.decorations} />
+        <Decorations items={activeBgMode !== "off" ? [] : spec.decorations} />
         {LogoOverlay}
         {/* Quote mark */}
         {spec.quoteMarkPosition === "center" ? (
@@ -278,7 +278,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
     return (
       <div style={{ width: SW, height: SH, background: effectiveBg, overflow: "hidden", position: "relative", display: "flex", flexDirection: "column", padding: spec.padding, boxSizing: "border-box" }}>
         {BgImageOverlay}
-        <Decorations items={spec.decorations} />
+        <Decorations items={activeBgMode !== "off" ? [] : spec.decorations} />
         {LogoOverlay}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", flexShrink: 0 }}>
           <Pill tag={s.tag} type={type} variant={bgMode === "light" ? "default" : "light"} T={theme} />
@@ -301,11 +301,13 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   /* INSIGHT (default) */
   return (
     <div style={{ width: SW, height: SH, background: effectiveBg, overflow: "hidden", display: "flex", position: "relative", boxSizing: "border-box" }}>
-      <Decorations items={spec.decorations} />
-      {/* Ghost number */}
-      <div style={{ position: "absolute", bottom: -14, right: -8, fontFamily: "'DM Serif Display',serif", fontSize: spec.ghostSize, fontWeight: 400, lineHeight: 1, color: theme.accent, opacity: spec.ghostOpacity, userSelect: "none", letterSpacing: "-0.04em", pointerEvents: "none" }}>
-        {String(i + 1).padStart(2, "0")}
-      </div>
+      <Decorations items={activeBgMode !== "off" ? [] : spec.decorations} />
+      {/* Ghost number — hidden when BG image active */}
+      {activeBgMode === "off" && (
+        <div style={{ position: "absolute", bottom: -14, right: -8, fontFamily: "'DM Serif Display',serif", fontSize: spec.ghostSize, fontWeight: 400, lineHeight: 1, color: theme.accent, opacity: spec.ghostOpacity, userSelect: "none", letterSpacing: "-0.04em", pointerEvents: "none" }}>
+          {String(i + 1).padStart(2, "0")}
+        </div>
+      )}
       <div style={{ flex: 1, padding: spec.padding, display: "flex", flexDirection: "column", position: "relative", boxSizing: "border-box", marginLeft: spec.barW > 0 ? 0 : undefined }}>
         <Pill tag={s.tag} type={type} variant={intensity === "dramatic" ? "light" : "default"} T={theme} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: `${Math.round(18 * vScale)}px 0` }}>
