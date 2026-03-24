@@ -454,7 +454,7 @@ export default function App() {
   function genFingerprint() {
     return JSON.stringify([input, files.map((f) => f.name), sc, contentType, tone, audience, source, activeBrand?.id]);
   }
-  const isOutputStale = hasOutput && !isSpeakerMode && lastGenFingerprint && lastGenFingerprint !== genFingerprint();
+  // Note: isOutputStale computed later, after hasOutput is defined
 
   async function generate() {
     if (!input.trim() && !files.length) return;
@@ -904,6 +904,7 @@ Return the same JSON structure with just the post object updated.`;
   const hasContent = isSpeakerMode ? hasSpeakerContent : (input.trim() || files.length > 0);
   const hasSlides = slides?.length > 0;
   const hasOutput = hasSlides || post || hasSpeakerContent;
+  const isOutputStale = hasOutput && !isSpeakerMode && lastGenFingerprint && lastGenFingerprint !== genFingerprint();
   const showSlideControls = hasSlides && contentType !== "text-post" && !isSpeakerMode;
 
   // Generate button tooltip for missing fields
