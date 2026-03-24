@@ -192,8 +192,10 @@ export default function LandingPage({ onSignIn }) {
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
         ::selection { background: rgba(0,119,181,0.4); }
         .cf-hero-mockup { display: block; }
+        .cf-features-grid { grid-template-columns: repeat(3, 1fr); }
         @media (max-width: 700px) {
           .cf-hero-mockup { display: none !important; }
+          .cf-features-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
       `}</style>
 
@@ -397,7 +399,7 @@ export default function LandingPage({ onSignIn }) {
             </p>
           </motion.div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16 }}>
+          <div className="cf-features-grid" style={{ display: "grid", gap: "clamp(8px, 2vw, 16px)" }}>
             {FEATURES.map((f, i) => (
               <motion.div
                 key={i}
@@ -406,15 +408,15 @@ export default function LandingPage({ onSignIn }) {
                 viewport={{ once: true, margin: "-30px" }}
                 transition={{ delay: 0.06 * i, duration: 0.4 }}
                 style={{
-                  background: P.featureCardBg, borderRadius: 14,
+                  background: P.featureCardBg, borderRadius: "clamp(10px, 2vw, 14px)",
                   border: `1px solid ${P.featureBorder}`,
-                  padding: "24px 22px",
+                  padding: "clamp(14px, 3vw, 24px) clamp(12px, 2.5vw, 22px)",
                   transition: "background 0.4s, border 0.4s",
                 }}
               >
-                <div style={{ fontSize: 28, marginBottom: 12 }}>{f.icon}</div>
-                <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 6, color: P.text }}>{f.title}</h3>
-                <p style={{ fontSize: 13, color: P.mutedStrong, lineHeight: 1.6, margin: 0 }}>{f.desc}</p>
+                <div style={{ fontSize: "clamp(20px, 4vw, 28px)", marginBottom: "clamp(6px, 1.5vw, 12px)" }}>{f.icon}</div>
+                <h3 style={{ fontSize: "clamp(12px, 2.5vw, 16px)", fontWeight: 700, marginBottom: 4, color: P.text, lineHeight: 1.25 }}>{f.title}</h3>
+                <p style={{ fontSize: "clamp(10px, 2vw, 13px)", color: P.mutedStrong, lineHeight: 1.5, margin: 0 }}>{f.desc}</p>
               </motion.div>
             ))}
           </div>
