@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, RotateCcw, Loader2, Calendar, Layers, Quote, BarChart3, AlignLeft, UserCircle } from "lucide-react";
+import { Trash2, RotateCcw, Loader2, Calendar, Layers, Quote, BarChart3, AlignLeft, UserCircle, Pencil, Check, X } from "lucide-react";
 
 const TYPE_ICONS = {
   carousel: Layers,
@@ -10,13 +10,43 @@ const TYPE_ICONS = {
   speaker: UserCircle,
 };
 
-export default function HistoryPanel({ T, creations, onLoad, onDelete, loading }) {
+export default function HistoryPanel({ T, creations, onLoad, onRename, onDelete, loading }) {
   const [deleting, setDeleting] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [editValue, setEditValue] = useState("");
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (editingId && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editingId]);
 
   async function handleDelete(id) {
     setDeleting(id);
     await onDelete(id);
     setDeleting(null);
+  }
+
+  function startRename(c) {
+    setEditingId(c.id);
+    setEditValue(c.title || "");
+  }
+
+  async function confirmRename() {
+    if (!editingId) return;
+    const trimmed = editValue.trim();
+    if (trimmed && onRename) {
+      await onRename(editingId, trimmed);
+    }
+    setEditingId(null);
+    setEditValue("");
+  }
+
+  function cancelRename() {
+    setEditingId(null);
+    setEditValue("");
   }
 
   if (loading) {
@@ -61,6 +91,7 @@ export default function HistoryPanel({ T, creations, onLoad, onDelete, loading }
             ? c.createdAt.toDate().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
             : "";
           const slideCount = c.slides?.length || 0;
+          const isEditing = editingId === c.id;
 
           return (
             <motion.div
@@ -77,10 +108,10 @@ export default function HistoryPanel({ T, creations, onLoad, onDelete, loading }
                 display: "flex",
                 alignItems: "center",
                 gap: 14,
-                cursor: "pointer",
+                cursor: isEditing ? "default" : "pointer",
                 transition: "border-color 0.2s",
               }}
-              onClick={() => onLoad(c)}
+              onClick={() => !isEditing && onLoad(c)}
               onMouseEnter={(e) => (e.currentTarget.style.borderColor = T.accent)}
               onMouseLeave={(e) => (e.currentTarget.style.borderColor = T.border)}
             >
@@ -102,18 +133,61 @@ export default function HistoryPanel({ T, creations, onLoad, onDelete, loading }
 
               {/* Info */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 600,
-                    color: T.text,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {c.title || "Untitled"}
-                </div>
+                {isEditing ? (
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 6 }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <input
+                      ref={inputRef}
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") confirmRename();
+                        if (e.key === "Escape") cancelRename();
+                      }}
+                      style={{
+                        flex: 1,
+                        fontSize: 14,
+                        fontWeight: 600,
+                        color: T.text,
+                        background: T.soft,
+                        border: `1px solid ${T.accent}`,
+                        borderRadius: 6,
+                        padding: "4px 8px",
+                        outline: "none",
+                        fontFamily: "inherit",
+                      }}
+                    />
+                    <button
+                      onClick={confirmRename}
+                      title="Save"
+                      style={{ ...actionBtn(T), color: T.accent }}
+                    >
+                      <Check size={14} />
+                    </button>
+                    <button
+                      onClick={cancelRename}
+                      title="Cancel"
+                      style={actionBtn(T)}
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: T.text,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {c.title || "Untitled"}
+                  </div>
+                )}
                 <div style={{ display: "flex", gap: 12, fontSize: 11, color: T.muted, marginTop: 2 }}>
                   {date && (
                     <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
@@ -146,6 +220,13 @@ export default function HistoryPanel({ T, creations, onLoad, onDelete, loading }
 
               {/* Actions */}
               <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                <button
+                  onClick={(e) => { e.stopPropagation(); startRename(c); }}
+                  title="Rename"
+                  style={actionBtn(T)}
+                >
+                  <Pencil size={14} />
+                </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); onLoad(c); }}
                   title="Load this creation"

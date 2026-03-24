@@ -111,6 +111,11 @@ export async function getCreations(uid, count = 50) {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
+export async function renameCreation(uid, creationId, title) {
+  const docRef = doc(db, "users", uid, "creations", creationId);
+  await updateDoc(docRef, { title });
+}
+
 export async function deleteCreation(uid, creationId) {
   const docRef = doc(db, "users", uid, "creations", creationId);
   await deleteDoc(docRef);

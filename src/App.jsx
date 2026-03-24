@@ -77,6 +77,7 @@ import {
   saveCreation,
   getCreations,
   deleteCreation,
+  renameCreation,
 } from "./utils/firebase";
 import Logo from "./components/Logo";
 import SettingsPanel from "./components/SettingsPanel";
@@ -1201,6 +1202,10 @@ Return the same JSON structure with just the post object updated.`;
               setActiveTab(c.contentType === "speaker" ? "slides" : c.slides?.length ? "slides" : "post");
               setLastGenFingerprint(genFingerprint());
               setPage("create");
+            }}
+            onRename={async (id, newTitle) => {
+              await renameCreation(user.uid, id, newTitle);
+              setCreations((prev) => prev.map((c) => c.id === id ? { ...c, title: newTitle } : c));
             }}
             onDelete={async (id) => {
               await deleteCreation(user.uid, id);
