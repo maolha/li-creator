@@ -1655,12 +1655,42 @@ Return the same JSON structure with just the post object updated.`;
                 ))}
 
                 {(speakerData.speakers || []).length < 6 && (
-                  <button
-                    onClick={() => setSpeakerData((p) => ({ ...p, speakers: [...p.speakers, { name: "", title: "", company: "", photo: null }] }))}
-                    style={{ background: A.soft, border: `1px solid ${A.border}`, borderRadius: 10, padding: "10px", cursor: "pointer", color: A.accent, fontSize: 12, fontWeight: 600, fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}
-                  >
-                    <UserCircle size={14} /> Add Speaker ({(speakerData.speakers || []).length}/6)
-                  </button>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <button
+                      onClick={() => setSpeakerData((p) => ({ ...p, speakers: [...p.speakers, { name: "", title: "", company: "", photo: null }] }))}
+                      style={{ background: A.soft, border: `1px solid ${A.border}`, borderRadius: 10, padding: "10px", cursor: "pointer", color: A.accent, fontSize: 12, fontWeight: 600, fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 5, width: "100%" }}
+                    >
+                      <UserCircle size={14} /> Add Speaker ({(speakerData.speakers || []).length}/6)
+                    </button>
+                    {(userProfile?.profile?.savedSpeakers || []).filter((sp) => sp.name).length > 0 && (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {userProfile.profile.savedSpeakers.filter((sp) => sp.name).map((sp, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setSpeakerData((p) => ({
+                              ...p,
+                              speakers: [...p.speakers, { name: sp.name, title: sp.title || "", company: sp.company || "", photo: sp.photoUrl || null, photoUrl: sp.photoUrl || "" }],
+                            }))}
+                            style={{
+                              background: A.card, border: `1px solid ${A.border}`, borderRadius: 8,
+                              padding: "6px 10px", cursor: "pointer", fontSize: 11, fontWeight: 600,
+                              fontFamily: "'Inter', sans-serif", color: A.text,
+                              display: "flex", alignItems: "center", gap: 6, transition: "border-color 0.2s",
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.borderColor = A.accent)}
+                            onMouseLeave={(e) => (e.currentTarget.style.borderColor = A.border)}
+                          >
+                            {sp.photoUrl ? (
+                              <img src={sp.photoUrl} alt="" style={{ width: 20, height: 20, borderRadius: "50%", objectFit: "cover" }} />
+                            ) : (
+                              <UserCircle size={16} style={{ color: A.muted, opacity: 0.5 }} />
+                            )}
+                            {sp.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             )}

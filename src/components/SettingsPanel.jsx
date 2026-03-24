@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Save, Key, User, Target, Package, BookOpen,
-  Plus, X, Loader2, Check, Shield, Briefcase,
+  Plus, X, Loader2, Check, Shield, Briefcase, UserCircle, Upload,
 } from "lucide-react";
 import BrandEditor from "./BrandEditor";
 
@@ -79,6 +79,57 @@ export default function SettingsPanel({ T, profile, onSave, apiKey, onApiKeySave
           brands={localProfile.brands || []}
           onChange={(brands) => updateField("brands", brands)}
         />
+      </Section>
+
+      {/* Saved Speakers */}
+      <Section T={T} icon={UserCircle} title="Saved Speakers">
+        <p style={hintStyle(T)}>Pre-fill speaker details with one click when creating speaker slides.</p>
+        {(localProfile.savedSpeakers || []).map((sp, i) => (
+          <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: T.bg, borderRadius: 10, padding: 10, border: `1px solid ${T.border}` }}>
+            {/* Photo */}
+            <div style={{ width: 44, height: 44, borderRadius: "50%", background: T.soft, border: `2px solid ${T.accent}`, overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", position: "relative" }}>
+              {sp.photoUrl ? (
+                <img src={sp.photoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <UserCircle size={20} style={{ color: T.accent, opacity: 0.4 }} />
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    const arr = [...(localProfile.savedSpeakers || [])];
+                    arr[i] = { ...arr[i], photoUrl: reader.result };
+                    updateField("savedSpeakers", arr);
+                  };
+                  reader.readAsDataURL(file);
+                }}
+              />
+            </div>
+            {/* Fields */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+              <input type="text" value={sp.name || ""} onChange={(e) => { const arr = [...(localProfile.savedSpeakers || [])]; arr[i] = { ...arr[i], name: e.target.value }; updateField("savedSpeakers", arr); }} placeholder="Full name" style={inputStyle(T)} />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                <input type="text" value={sp.title || ""} onChange={(e) => { const arr = [...(localProfile.savedSpeakers || [])]; arr[i] = { ...arr[i], title: e.target.value }; updateField("savedSpeakers", arr); }} placeholder="Title / Role" style={inputStyle(T)} />
+                <input type="text" value={sp.company || ""} onChange={(e) => { const arr = [...(localProfile.savedSpeakers || [])]; arr[i] = { ...arr[i], company: e.target.value }; updateField("savedSpeakers", arr); }} placeholder="Company" style={inputStyle(T)} />
+              </div>
+            </div>
+            {/* Remove */}
+            <button onClick={() => { const arr = (localProfile.savedSpeakers || []).filter((_, j) => j !== i); updateField("savedSpeakers", arr); }} style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 2, flexShrink: 0, marginTop: 2 }}>
+              <X size={14} />
+            </button>
+          </div>
+        ))}
+        <button
+          onClick={() => updateField("savedSpeakers", [...(localProfile.savedSpeakers || []), { name: "", title: "", company: "", photoUrl: "" }])}
+          style={{ background: T.soft, border: `1px solid ${T.border}`, borderRadius: 10, padding: "10px", cursor: "pointer", color: T.accent, fontSize: 12, fontWeight: 600, fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 5, width: "100%" }}
+        >
+          <Plus size={14} /> Add Speaker
+        </button>
       </Section>
 
       {/* Privacy */}
