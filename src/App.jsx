@@ -1342,21 +1342,36 @@ Return the same JSON structure with just the post object updated.`;
                         </div>
                       )}
                     </div>
-                    {/* BG image mode */}
-                    {activeBrand?.backgroundImage && (
-                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                        <span style={{ fontSize: 10, color: A.muted, flexShrink: 0 }}>BG Image:</span>
-                        {["off", "subtle", "strong"].map((m) => (
-                          <button key={m} onClick={() => setBgImageMode(m)} style={{
-                            padding: "3px 8px", borderRadius: 4, fontSize: 9, fontWeight: 600, textTransform: "capitalize",
-                            border: `1px solid ${bgImageMode === m ? A.accent : A.border}`,
-                            background: bgImageMode === m ? A.soft : "transparent",
-                            color: bgImageMode === m ? A.accent : A.muted,
-                            cursor: "pointer",
-                          }}>{m}</button>
-                        ))}
-                      </div>
-                    )}
+                    {/* BG image */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+                      <span style={{ fontSize: 10, color: A.muted, flexShrink: 0 }}>BG:</span>
+                      {["off", "subtle", "strong"].map((m) => (
+                        <button key={m} onClick={() => setBgImageMode(m)} style={{
+                          padding: "3px 7px", borderRadius: 4, fontSize: 9, fontWeight: 600, textTransform: "capitalize",
+                          border: `1px solid ${bgImageMode === m ? A.accent : A.border}`,
+                          background: bgImageMode === m ? A.soft : "transparent",
+                          color: bgImageMode === m ? A.accent : A.muted,
+                          cursor: "pointer",
+                        }}>{m}</button>
+                      ))}
+                      {/* Quick upload */}
+                      <label style={{ padding: "3px 7px", borderRadius: 4, fontSize: 9, fontWeight: 600, border: `1px solid ${A.border}`, color: A.muted, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}>
+                        <Upload size={10} /> {activeBrand?.backgroundImage ? "Change" : "Upload"}
+                        <input type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            setActiveBrand((prev) => ({ ...(prev || {}), backgroundImage: reader.result }));
+                            if (bgImageMode === "off") setBgImageMode("subtle");
+                          };
+                          reader.readAsDataURL(file);
+                        }} />
+                      </label>
+                      {activeBrand?.backgroundImage && (
+                        <button onClick={() => { setActiveBrand((prev) => ({ ...(prev || {}), backgroundImage: null })); setBgImageMode("off"); }} style={{ background: "none", border: "none", color: A.muted, cursor: "pointer", fontSize: 9, padding: 0 }}>✕</button>
+                      )}
+                    </div>
                     {/* Global slide label */}
                     <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
                       <span style={{ fontSize: 10, color: A.muted, flexShrink: 0 }}>Label:</span>
