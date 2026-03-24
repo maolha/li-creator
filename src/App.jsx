@@ -1865,12 +1865,12 @@ Return the same JSON structure with just the post object updated.`;
               {/* ── SPEAKER PREVIEW ── */}
               {contentType === "speaker" && hasSpeakerContent && (
                 <>
-                  <ScaledSpeakerSlide data={speakerData} T={T} brand={brand} size={cardPx} />
+                  <ScaledSpeakerSlide data={speakerData} T={T} brand={brand} size={cardPx} brandFonts={activeBrand?.fonts} brandLogos={activeBrand?.logos} />
                   {/* Export */}
                   <div ref={slideContainerRef}>
                     <div style={{ position: "fixed", left: -9999, top: 0, zIndex: -1 }}>
                       <div ref={hiddenSlideRef} style={{ width: (SPEAKER_ASPECTS[speakerData?.style?.aspect] || SPEAKER_ASPECTS["1:1"]).w, height: (SPEAKER_ASPECTS[speakerData?.style?.aspect] || SPEAKER_ASPECTS["1:1"]).h }}>
-                        <SpeakerSlideInner data={speakerData} T={T} brand={brand} />
+                        <SpeakerSlideInner data={speakerData} T={T} brand={brand} brandFonts={activeBrand?.fonts} brandLogos={activeBrand?.logos} />
                       </div>
                     </div>
                   </div>

@@ -80,11 +80,17 @@ function getSizes(aspect, count) {
   };
 }
 
-function LogoOrBrand({ eventLogo, logoDarkBg, brand, theme, logoH }) {
-  if (eventLogo) {
+function LogoOrBrand({ eventLogo, logoDarkBg, brand, theme, logoH, brandLogos, cardBg }) {
+  // Prefer event-specific logo, then fall back to brand logo
+  let logoUrl = eventLogo;
+  if (!logoUrl && brandLogos) {
+    const bgIsDark = contrastText(cardBg || theme.card) === "#FFFFFF";
+    logoUrl = bgIsDark ? (brandLogos.light || brandLogos.dark) : (brandLogos.dark || brandLogos.light);
+  }
+  if (logoUrl) {
     return (
       <div style={{ background: logoDarkBg ? "#1a1a2e" : "transparent", borderRadius: logoDarkBg ? 6 : 0, padding: logoDarkBg ? "4px 8px" : 0 }}>
-        <img src={eventLogo} alt="" style={{ height: logoH, maxWidth: logoH * 3, objectFit: "contain", display: "block" }} />
+        <img src={logoUrl} alt="" style={{ height: logoH, maxWidth: logoH * 3, objectFit: "contain", display: "block" }} />
       </div>
     );
   }
@@ -134,7 +140,9 @@ function SpeakerPhotos({ speakers, count, photoSz, photoRadius, theme, nameSz, r
   );
 }
 
-export function SpeakerSlideInner({ data, T, brand }) {
+const WEIGHT_MAP = { light: 300, medium: 500, bold: 700, black: 900 };
+
+export function SpeakerSlideInner({ data, T, brand, brandFonts, brandLogos }) {
   const { eventTitle, eventDate, cta, eventLogo, sessionTitle, regUrl, tagLabel, logoDarkBg, extraText } = data || {};
   const speakers = Array.isArray(data?.speakers) ? data.speakers : [];
   const style = data?.style || {};
@@ -142,6 +150,11 @@ export function SpeakerSlideInner({ data, T, brand }) {
   const aspect = style.aspect || "1:1";
   const bgMode = style.bgMode || "dark";
   const { w: SW, h: SH } = ASPECT_RATIOS[aspect] || ASPECT_RATIOS["1:1"];
+
+  // Brand fonts
+  const headingFont = brandFonts?.heading ? `'${brandFonts.heading}', sans-serif` : "'DM Serif Display',serif";
+  const headingWeight = WEIGHT_MAP[brandFonts?.headingWeight] || 400;
+  const headingItalic = !brandFonts?.heading;
 
   const accentRgb = hexToRgbStr(T.accent);
   const accentCt = contrastText(T.accent);
@@ -203,9 +216,9 @@ export function SpeakerSlideInner({ data, T, brand }) {
       <div style={{ width: SW, height: SH, background: theme.card, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxSizing: "border-box", textAlign: "center", padding: `${sz.padY}px ${sz.pad}px` }}>
         <div style={{ position: "absolute", top: 0, left: 0, width: SW, height: sz.barH, background: theme.accent }} />
 
-        <LogoOrBrand eventLogo={eventLogo} logoDarkBg={logoDarkBg} brand={brand} theme={theme} logoH={sz.logoH * 0.8} />
+        <LogoOrBrand eventLogo={eventLogo} logoDarkBg={logoDarkBg} brand={brand} theme={theme} logoH={sz.logoH * 0.8} brandLogos={brandLogos} cardBg={theme.card} />
 
-        <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: tSz, fontWeight: 400, lineHeight: 1.15, color: theme.text, margin: `14px 0 ${sessionTitle ? 6 : 14}px`, fontStyle: "italic" }}>
+        <h2 style={{ fontFamily: headingFont, fontSize: tSz, fontWeight: headingWeight, lineHeight: 1.15, color: theme.text, margin: `14px 0 ${sessionTitle ? 6 : 14}px`, fontStyle: headingItalic ? "italic" : "normal" }}>
           {eventTitle || "Event Title"}
         </h2>
         {show.session && sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginBottom: 14, fontWeight: 500 }}>{sessionTitle}</div>}
@@ -236,7 +249,7 @@ export function SpeakerSlideInner({ data, T, brand }) {
         </div>
 
         <div style={{ flex: 1, padding: `${sz.padY * 0.5}px ${sz.pad}px`, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: tSz * 1.1, fontWeight: 400, lineHeight: 1.12, color: ct, margin: `0 0 ${sessionTitle ? 4 : 12}px`, fontStyle: "italic" }}>
+          <h2 style={{ fontFamily: headingFont, fontSize: tSz * 1.1, fontWeight: headingWeight, lineHeight: 1.12, color: ct, margin: `0 0 ${sessionTitle ? 4 : 12}px`, fontStyle: headingItalic ? "italic" : "normal" }}>
             {eventTitle || "Event Title"}
           </h2>
           {show.session && sessionTitle && <div style={{ fontSize: sz.sessionSize, color: ct, opacity: 0.7, marginBottom: 12, fontWeight: 500 }}>{sessionTitle}</div>}
@@ -261,7 +274,7 @@ export function SpeakerSlideInner({ data, T, brand }) {
 
         {show.date && eventDate && <div style={{ fontSize: sz.dateSz, color: theme.muted, marginBottom: 8, fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>{eventDate}</div>}
 
-        <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: tSz, fontWeight: 400, lineHeight: 1.15, color: theme.text, margin: `0 0 ${sessionTitle ? 4 : 12}px`, fontStyle: "italic" }}>
+        <h2 style={{ fontFamily: headingFont, fontSize: tSz, fontWeight: headingWeight, lineHeight: 1.15, color: theme.text, margin: `0 0 ${sessionTitle ? 4 : 12}px`, fontStyle: headingItalic ? "italic" : "normal" }}>
           {eventTitle || "Event Title"}
         </h2>
         {show.session && sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginBottom: 12, fontWeight: 500 }}>{sessionTitle}</div>}
@@ -304,13 +317,13 @@ export function SpeakerSlideInner({ data, T, brand }) {
             {tagLabel || (count > 1 ? "Speakers" : "Speaker")}
           </div>
         ) : <div />}
-        {show.brand ? <LogoOrBrand eventLogo={eventLogo} logoDarkBg={logoDarkBg} brand={brand} theme={theme} logoH={sz.logoH} /> : eventLogo ? <LogoOrBrand eventLogo={eventLogo} logoDarkBg={logoDarkBg} brand="" theme={theme} logoH={sz.logoH} /> : null}
+        {show.brand ? <LogoOrBrand eventLogo={eventLogo} logoDarkBg={logoDarkBg} brand={brand} theme={theme} logoH={sz.logoH} brandLogos={brandLogos} cardBg={theme.card} /> : eventLogo ? <LogoOrBrand eventLogo={eventLogo} logoDarkBg={logoDarkBg} brand="" theme={theme} logoH={sz.logoH} /> : null}
       </div>
 
       {/* Title */}
       <div style={{ padding: `12px ${sz.pad}px 0`, flexShrink: 0 }}>
         <div style={{ width: sz.accentBarW, height: sz.accentBarH, background: theme.accent, borderRadius: 2, marginBottom: 12 }} />
-        <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: tSz, fontWeight: 400, lineHeight: 1.15, color: theme.text, margin: 0, fontStyle: "italic" }}>
+        <h2 style={{ fontFamily: headingFont, fontSize: tSz, fontWeight: headingWeight, lineHeight: 1.15, color: theme.text, margin: 0, fontStyle: headingItalic ? "italic" : "normal" }}>
           {eventTitle || "Event Title"}
         </h2>
         {show.session && sessionTitle && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginTop: 6, fontWeight: 500 }}>{sessionTitle}</div>}
@@ -337,7 +350,7 @@ export function SpeakerSlideInner({ data, T, brand }) {
   );
 }
 
-export function ScaledSpeakerSlide({ data, T, brand, size }) {
+export function ScaledSpeakerSlide({ data, T, brand, size, brandFonts, brandLogos }) {
   const aspect = data?.style?.aspect || "1:1";
   const { w, h } = ASPECT_RATIOS[aspect] || ASPECT_RATIOS["1:1"];
   const sc = size / w;
@@ -345,7 +358,7 @@ export function ScaledSpeakerSlide({ data, T, brand, size }) {
   return (
     <div style={{ width: size, height: scaledH, borderRadius: 16, overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)" }}>
       <div style={{ width: w, height: h, transform: `scale(${sc})`, transformOrigin: "top left" }}>
-        <SpeakerSlideInner data={data} T={T} brand={brand} />
+        <SpeakerSlideInner data={data} T={T} brand={brand} brandFonts={brandFonts} brandLogos={brandLogos} />
       </div>
     </div>
   );
