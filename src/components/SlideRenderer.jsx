@@ -8,9 +8,7 @@ function hexToRgb(hex) {
 import { getIntensitySpec } from "../utils/intensityStyles";
 import Decorations from "./Decorations";
 
-const SS = 540;
-
-const SLIDE_ASPECTS = {
+export const SLIDE_ASPECTS = {
   "1:1": { w: 540, h: 540 },
   "4:5": { w: 540, h: 675 },
   "16:9": { w: 640, h: 360 },
@@ -288,10 +286,12 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
         {BgImageOverlay}
         <Decorations items={activeBgMode !== "off" ? [] : spec.decorations} />
         {LogoOverlay}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", flexShrink: 0 }}>
-          <Pill tag={s.tag} type={type} variant={bgMode === "light" ? "default" : "light"} T={theme} />
-          <span style={{ fontSize: 12, color: effectiveText, opacity: 0.45 }}>{!hideCounter && n > 1 ? `${i + 1} / ${n}` : ""}</span>
-        </div>
+        {(s.tag || (!hideCounter && n > 1)) && (
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", flexShrink: 0 }}>
+            {s.tag ? <Pill tag={s.tag} type={type} variant={bgMode === "light" ? "default" : "light"} T={theme} /> : <span />}
+            <span style={{ fontSize: 12, color: effectiveText, opacity: 0.45 }}>{!hideCounter && n > 1 ? `${i + 1} / ${n}` : ""}</span>
+          </div>
+        )}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" }}>
           {spec.showIcon && !s.hideIcon && (
             <div style={{ fontSize: spec.iconSize, lineHeight: 1, color: effectiveText, opacity: spec.iconOpacity, marginBottom: 20, fontFamily: "'DM Serif Display',serif" }}>&#9670;</div>
