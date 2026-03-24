@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useCallback } from "react";
 import { ScaledSlide } from "./SlideRenderer";
 import { ScaledSpeakerSlide } from "./SpeakerSlide";
 import Logo from "./Logo";
@@ -486,8 +486,26 @@ export default function LandingPage({ onSignIn }) {
   );
 }
 
+// ── Hook to measure container width ──
+function useContainerWidth() {
+  const [width, setWidth] = useState(520);
+  const ref = useCallback((node) => {
+    if (!node) return;
+    const measure = () => setWidth(node.offsetWidth);
+    measure();
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(measure);
+      ro.observe(node);
+      // store cleanup ref — will be cleaned up on unmount via React
+    }
+  }, []);
+  return [ref, width];
+}
+
 // ── Fake LinkedIn feed post ──
 function FeedPost({ name, title, time, text, likes, comments, boring, featured, slide, speakerData, speakerTheme, P, darkMode }) {
+  const [slideContainerRef, slideWidth] = useContainerWidth();
+  const slideSize = Math.min(slideWidth, 528);
   const initials = name.split(" ").map((w) => w[0]).join("");
   const avatarBg = boring ? P.avatarBoring : "linear-gradient(135deg, #0077B5, #571BC1)";
 
@@ -529,13 +547,13 @@ function FeedPost({ name, title, time, text, likes, comments, boring, featured, 
 
       {/* Visual */}
       {slide && (
-        <div style={{ padding: "0 16px 4px", display: "flex", justifyContent: "center" }}>
-          <ScaledSlide s={slide.slide} brand="Content Forge" i={slide.i} n={slide.n} T={slide.theme} size={Math.min(528, 520)} intensity={slide.intensity} />
+        <div ref={slideContainerRef} style={{ padding: "0 16px 4px", display: "flex", justifyContent: "center" }}>
+          <ScaledSlide s={slide.slide} brand="Content Forge" i={slide.i} n={slide.n} T={slide.theme} size={slideSize} intensity={slide.intensity} />
         </div>
       )}
       {speakerData && (
-        <div style={{ padding: "0 16px 4px", display: "flex", justifyContent: "center" }}>
-          <ScaledSpeakerSlide data={speakerData} T={speakerTheme || T_BLUE} brand="Content Forge" size={Math.min(528, 520)} />
+        <div ref={!slide ? slideContainerRef : undefined} style={{ padding: "0 16px 4px", display: "flex", justifyContent: "center" }}>
+          <ScaledSpeakerSlide data={speakerData} T={speakerTheme || T_BLUE} brand="Content Forge" size={slideSize} />
         </div>
       )}
 
