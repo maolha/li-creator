@@ -201,7 +201,8 @@ export default function App() {
   }
   const allPresets = { ...builtInPresets, ...customResolved };
   const T = allPresets[theme] || builtInPresets["Midnight Pro"];
-  const ct = contrastText(T.accent);
+  const ct = contrastText(A.accent); // for UI buttons
+  const slideCt = contrastText(T.accent); // for slide rendering
 
   // Auth listener
   useEffect(() => {
@@ -906,7 +907,7 @@ Return the same JSON structure with just the post object updated.`;
 
   // Onboarding for new users
   if (needsOnboarding) {
-    return <OnboardingFlow T={T} user={user} onComplete={handleOnboardingComplete} />;
+    return <OnboardingFlow T={A} user={user} onComplete={handleOnboardingComplete} />;
   }
 
   // Main app
@@ -968,16 +969,16 @@ Return the same JSON structure with just the post object updated.`;
             {/* Nav buttons */}
             {user && (
               <>
-                <NavBtn T={T} active={false} onClick={resetToNew}>
+                <NavBtn T={A} active={false} onClick={resetToNew}>
                   <FilePlus size={13} /> <span className="cf-nav-label">New</span>
                 </NavBtn>
-                <NavBtn T={T} active={page === "create"} onClick={() => setPage("create")}>
+                <NavBtn T={A} active={page === "create"} onClick={() => setPage("create")}>
                   <Sparkles size={13} /> <span className="cf-nav-label">Create</span>
                 </NavBtn>
-                {historyEnabled && <NavBtn T={T} active={page === "history"} onClick={() => setPage("history")}>
+                {historyEnabled && <NavBtn T={A} active={page === "history"} onClick={() => setPage("history")}>
                   <History size={13} /> <span className="cf-nav-label">Library</span>
                 </NavBtn>}
-                <NavBtn T={T} active={page === "settings"} onClick={() => setPage("settings")}>
+                <NavBtn T={A} active={page === "settings"} onClick={() => setPage("settings")}>
                   <Settings size={13} />
                 </NavBtn>
               </>
@@ -1009,7 +1010,7 @@ Return the same JSON structure with just the post object updated.`;
                   <img
                     src={user.photoURL}
                     alt=""
-                    style={{ width: 28, height: 28, borderRadius: "50%", border: `2px solid ${T.border}` }}
+                    style={{ width: 28, height: 28, borderRadius: "50%", border: `2px solid ${A.border}` }}
                     referrerPolicy="no-referrer"
                   />
                 )}
@@ -1038,20 +1039,20 @@ Return the same JSON structure with just the post object updated.`;
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            style={{ overflow: "hidden", borderBottom: `1px solid ${T.border}`, background: T.card }}
+            style={{ overflow: "hidden", borderBottom: `1px solid ${A.border}`, background: A.card }}
           >
             <div style={{ maxWidth: 1200, margin: "0 auto", padding: "16px 20px", display: "flex", alignItems: "center", gap: 12 }}>
-              <Zap size={16} style={{ color: T.accent, flexShrink: 0 }} />
+              <Zap size={16} style={{ color: A.accent, flexShrink: 0 }} />
               <input
                 type="password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder="sk-ant-api03-... (stored locally only)"
-                style={{ flex: 1, background: T.bg, color: T.text, border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 14px", fontSize: 13, fontFamily: "'JetBrains Mono', monospace" }}
+                style={{ flex: 1, background: A.bg, color: A.text, border: `1px solid ${A.border}`, borderRadius: 8, padding: "10px 14px", fontSize: 13, fontFamily: "'JetBrains Mono', monospace" }}
               />
               <button
                 onClick={() => { saveApiKey(apiKey); setShowApiInput(false); }}
-                style={{ background: T.accent, color: ct, border: "none", borderRadius: 8, padding: "10px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter', sans-serif" }}
+                style={{ background: A.accent, color: ct, border: "none", borderRadius: 8, padding: "10px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter', sans-serif" }}
               >
                 Save
               </button>
@@ -1066,7 +1067,7 @@ Return the same JSON structure with just the post object updated.`;
         {/* Settings Page */}
         {page === "settings" && user && (
           <SettingsPanel
-            T={T}
+            T={A}
             user={user}
             profile={userProfile?.profile}
             apiKey={apiKey}
@@ -1100,7 +1101,7 @@ Return the same JSON structure with just the post object updated.`;
         {/* History Page */}
         {page === "history" && user && (
           <HistoryPanel
-            T={T}
+            T={A}
             creations={creations}
             loading={loadingHistory}
             onLoad={(c) => {
@@ -1160,7 +1161,7 @@ Return the same JSON structure with just the post object updated.`;
                 <h1 style={{ fontFamily: "'Manrope', sans-serif", fontSize: "clamp(28px, 5vw, 38px)", fontWeight: 800, lineHeight: 1.15, marginBottom: 8, letterSpacing: "-0.02em" }}>
                   Create content that<span className="text-gradient-ai" style={{ background: "linear-gradient(135deg, #0077B5, #571BC1)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}> stops the scroll</span>
                 </h1>
-                <p style={{ color: T.muted, fontSize: 15, lineHeight: 1.6, maxWidth: 480 }}>
+                <p style={{ color: A.muted, fontSize: 15, lineHeight: 1.6, maxWidth: 480 }}>
                   Transform any text, article, or document into stunning LinkedIn carousels, quote cards, stat cards, and post copy with AI. Ready to publish in seconds.
                 </p>
               </motion.div>
@@ -1168,7 +1169,7 @@ Return the same JSON structure with just the post object updated.`;
 
             {/* Content Type Selector */}
             <div>
-              <label style={labelStyle(T)}>
+              <label style={labelStyle(A)}>
                 <Layers size={12} /> Content Type
               </label>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
@@ -1177,8 +1178,8 @@ Return the same JSON structure with just the post object updated.`;
                     key={ct.id}
                     onClick={() => setContentType(ct.id)}
                     style={{
-                      background: contentType === ct.id ? T.soft : "transparent",
-                      border: `1.5px solid ${contentType === ct.id ? T.accent : T.border}`,
+                      background: contentType === ct.id ? A.soft : "transparent",
+                      border: `1.5px solid ${contentType === ct.id ? A.accent : A.border}`,
                       borderRadius: 10,
                       padding: "10px 6px",
                       cursor: "pointer",
@@ -1187,7 +1188,7 @@ Return the same JSON structure with just the post object updated.`;
                       alignItems: "center",
                       gap: 4,
                       transition: "all 0.2s",
-                      color: contentType === ct.id ? T.accent : T.muted,
+                      color: contentType === ct.id ? A.accent : A.muted,
                     }}
                   >
                     <ct.icon size={16} />
@@ -1200,7 +1201,7 @@ Return the same JSON structure with just the post object updated.`;
             {/* Brand + Label */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               <div>
-                <label style={labelStyle(T)}>Brand</label>
+                <label style={labelStyle(A)}>Brand</label>
                 <select
                   value={activeBrand?.id || "_custom"}
                   onChange={(e) => {
@@ -1224,7 +1225,7 @@ Return the same JSON structure with just the post object updated.`;
                       }
                     }
                   }}
-                  style={selectStyle(T)}
+                  style={selectStyle(A)}
                 >
                   <option value="_custom">Custom</option>
                   {(userProfile?.profile?.brands || []).map((b) => (
@@ -1233,23 +1234,23 @@ Return the same JSON structure with just the post object updated.`;
                 </select>
               </div>
               <div>
-                <label style={labelStyle(T)}><Type size={12} /> Label on visual</label>
-                <input type="text" value={brand} onChange={(e) => setActiveBrand((prev) => ({ ...(prev || {}), name: e.target.value }))} placeholder="Shown on slides" style={inputStyle(T)} />
+                <label style={labelStyle(A)}><Type size={12} /> Label on visual</label>
+                <input type="text" value={brand} onChange={(e) => setActiveBrand((prev) => ({ ...(prev || {}), name: e.target.value }))} placeholder="Shown on slides" style={inputStyle(A)} />
               </div>
             </div>
 
             {/* Theme + Slides */}
             <div style={{ display: "grid", gridTemplateColumns: contentType === "carousel" ? "1fr 72px" : "1fr", gap: 10 }}>
               <div>
-                <label style={labelStyle(T)}><Palette size={12} /> Preset</label>
-                <select value={theme} onChange={(e) => setTheme(e.target.value)} style={selectStyle(T)}>
+                <label style={labelStyle(A)}><Palette size={12} /> Preset</label>
+                <select value={theme} onChange={(e) => setTheme(e.target.value)} style={selectStyle(A)}>
                   {Object.keys(allPresets).map((t) => <option key={t}>{t}</option>)}
                 </select>
               </div>
               {contentType === "carousel" && (
                 <div>
-                  <label style={labelStyle(T)}><LayoutGrid size={12} /> Slides</label>
-                  <select value={sc} onChange={(e) => setSc(Number(e.target.value))} style={selectStyle(T)}>
+                  <label style={labelStyle(A)}><LayoutGrid size={12} /> Slides</label>
+                  <select value={sc} onChange={(e) => setSc(Number(e.target.value))} style={selectStyle(A)}>
                     {[5, 6, 7, 8, 9, 10].map((n) => <option key={n}>{n}</option>)}
                   </select>
                 </div>
@@ -1259,14 +1260,14 @@ Return the same JSON structure with just the post object updated.`;
             {/* Tone + Audience */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               <div>
-                <label style={labelStyle(T)}><Mic size={12} /> Tone</label>
-                <select value={tone} onChange={(e) => setTone(e.target.value)} style={selectStyle(T)}>
+                <label style={labelStyle(A)}><Mic size={12} /> Tone</label>
+                <select value={tone} onChange={(e) => setTone(e.target.value)} style={selectStyle(A)}>
                   {TONES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
                 </select>
               </div>
               <div>
-                <label style={labelStyle(T)}><Users size={12} /> Audience</label>
-                <select value={audience} onChange={(e) => setAudience(e.target.value)} style={selectStyle(T)}>
+                <label style={labelStyle(A)}><Users size={12} /> Audience</label>
+                <select value={audience} onChange={(e) => setAudience(e.target.value)} style={selectStyle(A)}>
                   {AUDIENCES.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
                 </select>
               </div>
@@ -1275,7 +1276,7 @@ Return the same JSON structure with just the post object updated.`;
             {/* Visual Intensity */}
             {contentType !== "speaker" && contentType !== "text-post" && (<>
               <div>
-                <label style={labelStyle(T)}><Sparkles size={12} /> Visual Style</label>
+                <label style={labelStyle(A)}><Sparkles size={12} /> Visual Style</label>
                 <div style={{ display: "flex", gap: 6 }}>
                   {[
                     { id: "clean", label: "Clean", desc: "Professional" },
@@ -1287,9 +1288,9 @@ Return the same JSON structure with just the post object updated.`;
                       onClick={() => setIntensity(v.id)}
                       style={{
                         flex: 1, padding: "8px 6px", borderRadius: 10, cursor: "pointer",
-                        border: `1.5px solid ${intensity === v.id ? T.accent : T.border}`,
-                        background: intensity === v.id ? T.soft : "transparent",
-                        color: intensity === v.id ? T.accent : T.muted,
+                        border: `1.5px solid ${intensity === v.id ? A.accent : A.border}`,
+                        background: intensity === v.id ? A.soft : "transparent",
+                        color: intensity === v.id ? A.accent : A.muted,
                         fontFamily: "'Inter', sans-serif", textAlign: "center",
                         transition: "all 0.2s",
                       }}
@@ -1304,21 +1305,21 @@ Return the same JSON structure with just the post object updated.`;
               {/* Aspect ratio + Background mode */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                 <div>
-                  <label style={labelStyle(T)}>Size</label>
+                  <label style={labelStyle(A)}>Size</label>
                   <div style={{ display: "flex", gap: 4 }}>
                     {["1:1", "4:5", "16:9"].map((a) => (
                       <button key={a} onClick={() => setSlideAspect(a)} style={{
                         flex: 1, padding: "7px 4px", borderRadius: 6, fontSize: 11, fontWeight: 600,
-                        border: `1px solid ${slideAspect === a ? T.accent : T.border}`,
-                        background: slideAspect === a ? T.soft : "transparent",
-                        color: slideAspect === a ? T.accent : T.muted,
+                        border: `1px solid ${slideAspect === a ? A.accent : A.border}`,
+                        background: slideAspect === a ? A.soft : "transparent",
+                        color: slideAspect === a ? A.accent : A.muted,
                         cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", textAlign: "center",
                       }}>{a}</button>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <label style={labelStyle(T)}>Background</label>
+                  <label style={labelStyle(A)}>Background</label>
                   <div style={{ display: "flex", gap: 4 }}>
                     {[
                       { id: "default", label: "Default" },
@@ -1327,9 +1328,9 @@ Return the same JSON structure with just the post object updated.`;
                     ].map((m) => (
                       <button key={m.id} onClick={() => setSlideBgMode(m.id)} style={{
                         flex: 1, padding: "7px 4px", borderRadius: 6, fontSize: 10, fontWeight: 600,
-                        border: `1px solid ${slideBgMode === m.id ? T.accent : T.border}`,
-                        background: slideBgMode === m.id ? T.soft : "transparent",
-                        color: slideBgMode === m.id ? T.accent : T.muted,
+                        border: `1px solid ${slideBgMode === m.id ? A.accent : A.border}`,
+                        background: slideBgMode === m.id ? A.soft : "transparent",
+                        color: slideBgMode === m.id ? A.accent : A.muted,
                         cursor: "pointer", fontFamily: "'Inter', sans-serif", textAlign: "center",
                       }}>{m.label}</button>
                     ))}
@@ -1359,7 +1360,7 @@ Return the same JSON structure with just the post object updated.`;
             {/* Brand color quick-switch */}
             {activeBrand?.colors && activeBrand.id && (
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-                <span style={{ fontSize: 10, color: T.muted, marginRight: 4 }}>Brand colors:</span>
+                <span style={{ fontSize: 10, color: A.muted, marginRight: 4 }}>Brand colors:</span>
                 {Object.entries(activeBrand.colors).filter(([_, v]) => v && v.startsWith("#")).map(([key, color]) => (
                   <button
                     key={key}
@@ -1374,7 +1375,7 @@ Return the same JSON structure with just the post object updated.`;
                     title={`${key}: ${color}`}
                     style={{
                       width: 28, height: 28, borderRadius: 8,
-                      border: `2px solid ${T.accent === color ? color : "transparent"}`,
+                      border: `2px solid ${A.accent === color ? color : "transparent"}`,
                       background: color, cursor: "pointer", padding: 0, transition: "all 0.2s",
                       position: "relative",
                     }}
@@ -1387,14 +1388,14 @@ Return the same JSON structure with just the post object updated.`;
 
             {/* Brand Domain Grabber */}
             <div>
-              <label style={labelStyle(T)}><Globe size={12} /> Brand from Website</label>
+              <label style={labelStyle(A)}><Globe size={12} /> Brand from Website</label>
               <div style={{ display: "flex", gap: 8 }}>
                 <input
                   type="text"
                   value={brandUrl}
                   onChange={(e) => setBrandUrl(e.target.value)}
                   placeholder="example.com or #FF5722"
-                  style={{ ...inputStyle(T), flex: 1 }}
+                  style={{ ...inputStyle(A), flex: 1 }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       if (brandUrl.match(/^#[0-9a-fA-F]{6}$/)) addCustomThemeFromColor(brandUrl);
@@ -1409,7 +1410,7 @@ Return the same JSON structure with just the post object updated.`;
                   }}
                   disabled={extractingBrand || !brandUrl.trim()}
                   style={{
-                    background: T.accent, color: contrastText(T.accent), border: "none", borderRadius: 10,
+                    background: A.accent, color: contrastText(A.accent), border: "none", borderRadius: 10,
                     padding: "0 14px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter', sans-serif",
                     opacity: extractingBrand || !brandUrl.trim() ? 0.4 : 1, whiteSpace: "nowrap",
                     display: "flex", alignItems: "center", gap: 5,
@@ -1419,7 +1420,7 @@ Return the same JSON structure with just the post object updated.`;
                   {extractingBrand ? "..." : "Apply"}
                 </button>
               </div>
-              <p style={{ fontSize: 10, color: T.muted, marginTop: 4, opacity: 0.7 }}>
+              <p style={{ fontSize: 10, color: A.muted, marginTop: 4, opacity: 0.7 }}>
                 Enter a domain to grab colors, or paste a hex code like #4F8EF7
               </p>
             </div>
@@ -1427,38 +1428,38 @@ Return the same JSON structure with just the post object updated.`;
             {/* Source — not for speaker mode */}
             {!isSpeakerMode && (
               <div>
-                <label style={labelStyle(T)}><MessageSquare size={12} /> Source (first comment)</label>
-                <input type="text" value={source} onChange={(e) => setSource(e.target.value)} placeholder="e.g. CIO.com — 6 Innovation Curves" style={inputStyle(T)} />
+                <label style={labelStyle(A)}><MessageSquare size={12} /> Source (first comment)</label>
+                <input type="text" value={source} onChange={(e) => setSource(e.target.value)} placeholder="e.g. CIO.com — 6 Innovation Curves" style={inputStyle(A)} />
               </div>
             )}
 
             {/* File Upload */}
             {contentType !== "text-post" && !isSpeakerMode && (
               <div>
-                <label style={labelStyle(T)}><Upload size={12} /> Upload Files <span style={{ opacity: 0.5, fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(max 4)</span></label>
+                <label style={labelStyle(A)}><Upload size={12} /> Upload Files <span style={{ opacity: 0.5, fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(max 4)</span></label>
                 <div
                   onClick={() => fileRef.current.click()}
                   onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
                   onDragLeave={() => setDrag(false)}
                   onDrop={(e) => { e.preventDefault(); setDrag(false); addFiles(e.dataTransfer.files); }}
                   style={{
-                    border: `1.5px dashed ${drag ? T.accent : T.border}`, borderRadius: 12, padding: "20px 16px",
+                    border: `1.5px dashed ${drag ? A.accent : A.border}`, borderRadius: 12, padding: "20px 16px",
                     display: "flex", flexDirection: "column", alignItems: "center", gap: 6, cursor: "pointer",
-                    transition: "all 0.2s", background: drag ? T.soft : "transparent", textAlign: "center",
+                    transition: "all 0.2s", background: drag ? A.soft : "transparent", textAlign: "center",
                   }}
                 >
                   <input ref={fileRef} type="file" accept=".pdf,image/*" multiple style={{ display: "none" }} onChange={(e) => addFiles(e.target.files)} />
-                  <Upload size={20} style={{ color: T.muted, opacity: 0.6 }} />
-                  <span style={{ fontSize: 13, color: T.muted }}>Drop files or tap to browse</span>
-                  <span style={{ fontSize: 11, color: T.muted, opacity: 0.5 }}>PDF, JPG, PNG, WEBP</span>
+                  <Upload size={20} style={{ color: A.muted, opacity: 0.6 }} />
+                  <span style={{ fontSize: 13, color: A.muted }}>Drop files or tap to browse</span>
+                  <span style={{ fontSize: 11, color: A.muted, opacity: 0.5 }}>PDF, JPG, PNG, WEBP</span>
                 </div>
                 {files.length > 0 && (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
                     {files.map((f, i) => (
-                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, background: T.soft, border: `1px solid ${T.border}`, borderRadius: 8, padding: "6px 10px", fontSize: 12, color: T.text }}>
-                        {f.type === "application/pdf" ? <FileText size={13} style={{ color: T.accent }} /> : <ImageIcon size={13} style={{ color: T.accent }} />}
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, background: A.soft, border: `1px solid ${A.border}`, borderRadius: 8, padding: "6px 10px", fontSize: 12, color: A.text }}>
+                        {f.type === "application/pdf" ? <FileText size={13} style={{ color: A.accent }} /> : <ImageIcon size={13} style={{ color: A.accent }} />}
                         <span style={{ maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.name}</span>
-                        <button onClick={(e) => { e.stopPropagation(); setFiles((p) => p.filter((_, j) => j !== i)); }} style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 0, display: "flex" }}>
+                        <button onClick={(e) => { e.stopPropagation(); setFiles((p) => p.filter((_, j) => j !== i)); }} style={{ background: "none", border: "none", color: A.muted, cursor: "pointer", padding: 0, display: "flex" }}>
                           <X size={14} />
                         </button>
                       </div>
@@ -1471,36 +1472,36 @@ Return the same JSON structure with just the post object updated.`;
             {/* Speaker Inputs */}
             {contentType === "speaker" && (
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 14, padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
                   <div>
-                    <label style={{ ...labelStyle(T), marginBottom: 4 }}>Event Title</label>
-                    <input type="text" value={speakerData.eventTitle} onChange={(e) => setSpeakerData((p) => ({ ...p, eventTitle: e.target.value }))} placeholder="e.g. AI in Finance Summit 2026" style={inputStyle(T)} />
+                    <label style={{ ...labelStyle(A), marginBottom: 4 }}>Event Title</label>
+                    <input type="text" value={speakerData.eventTitle} onChange={(e) => setSpeakerData((p) => ({ ...p, eventTitle: e.target.value }))} placeholder="e.g. AI in Finance Summit 2026" style={inputStyle(A)} />
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                     <div>
-                      <label style={{ ...labelStyle(T), marginBottom: 4 }}>Date</label>
-                      <input type="text" value={speakerData.eventDate || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, eventDate: e.target.value }))} placeholder="March 28, 2026" style={inputStyle(T)} />
+                      <label style={{ ...labelStyle(A), marginBottom: 4 }}>Date</label>
+                      <input type="text" value={speakerData.eventDate || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, eventDate: e.target.value }))} placeholder="March 28, 2026" style={inputStyle(A)} />
                     </div>
                     <div>
-                      <label style={{ ...labelStyle(T), marginBottom: 4 }}>CTA</label>
-                      <input type="text" value={speakerData.cta || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, cta: e.target.value }))} placeholder="Register now" style={inputStyle(T)} />
+                      <label style={{ ...labelStyle(A), marginBottom: 4 }}>CTA</label>
+                      <input type="text" value={speakerData.cta || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, cta: e.target.value }))} placeholder="Register now" style={inputStyle(A)} />
                     </div>
                   </div>
                   <div>
-                    <label style={{ ...labelStyle(T), marginBottom: 4 }}><Globe size={12} /> Event URL (for branding)</label>
-                    <input type="text" value={speakerData.eventUrl || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, eventUrl: e.target.value }))} placeholder="https://event-website.com" style={inputStyle(T)} />
+                    <label style={{ ...labelStyle(A), marginBottom: 4 }}><Globe size={12} /> Event URL (for branding)</label>
+                    <input type="text" value={speakerData.eventUrl || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, eventUrl: e.target.value }))} placeholder="https://event-website.com" style={inputStyle(A)} />
                   </div>
                   <div>
-                    <label style={{ ...labelStyle(T), marginBottom: 4 }}>Event Logo (URL or upload)</label>
+                    <label style={{ ...labelStyle(A), marginBottom: 4 }}>Event Logo (URL or upload)</label>
                     <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                       <input
                         type="text"
                         value={speakerData.eventLogoUrl || ""}
                         onChange={(e) => setSpeakerData((p) => ({ ...p, eventLogoUrl: e.target.value, eventLogo: e.target.value || p.eventLogo }))}
                         placeholder="https://... logo image URL"
-                        style={{ ...inputStyle(T), flex: 1, fontSize: 12 }}
+                        style={{ ...inputStyle(A), flex: 1, fontSize: 12 }}
                       />
-                      <label style={{ background: T.soft, border: `1px solid ${T.border}`, borderRadius: 10, padding: "0 12px", cursor: "pointer", display: "flex", alignItems: "center", color: T.muted, fontSize: 11, fontWeight: 600, whiteSpace: "nowrap", height: 38 }}>
+                      <label style={{ background: A.soft, border: `1px solid ${A.border}`, borderRadius: 10, padding: "0 12px", cursor: "pointer", display: "flex", alignItems: "center", color: A.muted, fontSize: 11, fontWeight: 600, whiteSpace: "nowrap", height: 38 }}>
                         <Upload size={12} style={{ marginRight: 4 }} /> File
                         <input
                           type="file"
@@ -1524,69 +1525,69 @@ Return the same JSON structure with just the post object updated.`;
                         <button
                           onClick={() => setSpeakerData((p) => ({ ...p, logoDarkBg: !p.logoDarkBg }))}
                           style={{
-                            background: speakerData.logoDarkBg ? T.accent : T.soft,
-                            border: `1px solid ${speakerData.logoDarkBg ? T.accent : T.border}`,
+                            background: speakerData.logoDarkBg ? A.accent : A.soft,
+                            border: `1px solid ${speakerData.logoDarkBg ? A.accent : A.border}`,
                             borderRadius: 6, padding: "3px 8px", fontSize: 10, fontWeight: 600,
-                            color: speakerData.logoDarkBg ? contrastText(T.accent) : T.muted,
+                            color: speakerData.logoDarkBg ? contrastText(A.accent) : A.muted,
                             cursor: "pointer", fontFamily: "'Inter', sans-serif",
                           }}
                         >
                           Dark bg
                         </button>
-                        <button onClick={() => setSpeakerData((p) => ({ ...p, eventLogo: null, eventLogoUrl: "", logoDarkBg: false }))} style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 0, fontSize: 11 }}>Remove</button>
+                        <button onClick={() => setSpeakerData((p) => ({ ...p, eventLogo: null, eventLogoUrl: "", logoDarkBg: false }))} style={{ background: "none", border: "none", color: A.muted, cursor: "pointer", padding: 0, fontSize: 11 }}>Remove</button>
                       </div>
                     )}
                   </div>
                   <div>
-                    <label style={{ ...labelStyle(T), marginBottom: 4 }}>Session / Talk Title (optional)</label>
-                    <input type="text" value={speakerData.sessionTitle || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, sessionTitle: e.target.value }))} placeholder="e.g. The Future of AI in Banking" style={inputStyle(T)} />
+                    <label style={{ ...labelStyle(A), marginBottom: 4 }}>Session / Talk Title (optional)</label>
+                    <input type="text" value={speakerData.sessionTitle || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, sessionTitle: e.target.value }))} placeholder="e.g. The Future of AI in Banking" style={inputStyle(A)} />
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                     <div>
-                      <label style={{ ...labelStyle(T), marginBottom: 4 }}>Registration URL</label>
-                      <input type="text" value={speakerData.regUrl || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, regUrl: e.target.value }))} placeholder="https://event.com/register" style={inputStyle(T)} />
+                      <label style={{ ...labelStyle(A), marginBottom: 4 }}>Registration URL</label>
+                      <input type="text" value={speakerData.regUrl || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, regUrl: e.target.value }))} placeholder="https://event.com/register" style={inputStyle(A)} />
                     </div>
                     <div>
-                      <label style={{ ...labelStyle(T), marginBottom: 4 }}>Tag Label</label>
-                      <input type="text" value={speakerData.tagLabel || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, tagLabel: e.target.value }))} placeholder="Speaker / Panelist / Keynote" style={inputStyle(T)} />
+                      <label style={{ ...labelStyle(A), marginBottom: 4 }}>Tag Label</label>
+                      <input type="text" value={speakerData.tagLabel || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, tagLabel: e.target.value }))} placeholder="Speaker / Panelist / Keynote" style={inputStyle(A)} />
                     </div>
                   </div>
                   <div>
-                    <label style={{ ...labelStyle(T), marginBottom: 4 }}>Extra Text (shown below speakers)</label>
-                    <input type="text" value={speakerData.extraText || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, extraText: e.target.value }))} placeholder="e.g. Free entry · Limited seats · Online + In-person" style={inputStyle(T)} />
+                    <label style={{ ...labelStyle(A), marginBottom: 4 }}>Extra Text (shown below speakers)</label>
+                    <input type="text" value={speakerData.extraText || ""} onChange={(e) => setSpeakerData((p) => ({ ...p, extraText: e.target.value }))} placeholder="e.g. Free entry · Limited seats · Online + In-person" style={inputStyle(A)} />
                   </div>
                 </div>
 
                 {/* Speakers */}
                 {(speakerData.speakers || []).map((speaker, si) => (
-                  <div key={si} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div key={si} style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 14, padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: T.accent }}>Speaker {si + 1}</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: A.accent }}>Speaker {si + 1}</span>
                       <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
                         {si > 0 && (
-                          <button onClick={() => setSpeakerData((p) => { const s = [...p.speakers]; [s[si-1], s[si]] = [s[si], s[si-1]]; return { ...p, speakers: s }; })} style={{ background: "none", border: `1px solid ${T.border}`, borderRadius: 4, color: T.muted, cursor: "pointer", padding: "2px 5px", fontSize: 10 }} title="Move up">
+                          <button onClick={() => setSpeakerData((p) => { const s = [...p.speakers]; [s[si-1], s[si]] = [s[si], s[si-1]]; return { ...p, speakers: s }; })} style={{ background: "none", border: `1px solid ${A.border}`, borderRadius: 4, color: A.muted, cursor: "pointer", padding: "2px 5px", fontSize: 10 }} title="Move up">
                             &#9650;
                           </button>
                         )}
                         {si < (speakerData.speakers || []).length - 1 && (
-                          <button onClick={() => setSpeakerData((p) => { const s = [...p.speakers]; [s[si], s[si+1]] = [s[si+1], s[si]]; return { ...p, speakers: s }; })} style={{ background: "none", border: `1px solid ${T.border}`, borderRadius: 4, color: T.muted, cursor: "pointer", padding: "2px 5px", fontSize: 10 }} title="Move down">
+                          <button onClick={() => setSpeakerData((p) => { const s = [...p.speakers]; [s[si], s[si+1]] = [s[si+1], s[si]]; return { ...p, speakers: s }; })} style={{ background: "none", border: `1px solid ${A.border}`, borderRadius: 4, color: A.muted, cursor: "pointer", padding: "2px 5px", fontSize: 10 }} title="Move down">
                             &#9660;
                           </button>
                         )}
                         {(speakerData.speakers || []).length > 1 && (
-                          <button onClick={() => setSpeakerData((p) => ({ ...p, speakers: p.speakers.filter((_, j) => j !== si) }))} style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 0 }}>
+                          <button onClick={() => setSpeakerData((p) => ({ ...p, speakers: p.speakers.filter((_, j) => j !== si) }))} style={{ background: "none", border: "none", color: A.muted, cursor: "pointer", padding: 0 }}>
                             <X size={14} />
                           </button>
                         )}
                       </div>
                     </div>
-                    <input type="text" value={speaker.name} onChange={(e) => { const s = [...speakerData.speakers]; s[si] = { ...s[si], name: e.target.value }; setSpeakerData((p) => ({ ...p, speakers: s })); }} placeholder="Full name" style={inputStyle(T)} />
+                    <input type="text" value={speaker.name} onChange={(e) => { const s = [...speakerData.speakers]; s[si] = { ...s[si], name: e.target.value }; setSpeakerData((p) => ({ ...p, speakers: s })); }} placeholder="Full name" style={inputStyle(A)} />
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                      <input type="text" value={speaker.title} onChange={(e) => { const s = [...speakerData.speakers]; s[si] = { ...s[si], title: e.target.value }; setSpeakerData((p) => ({ ...p, speakers: s })); }} placeholder="Title / Role" style={inputStyle(T)} />
-                      <input type="text" value={speaker.company} onChange={(e) => { const s = [...speakerData.speakers]; s[si] = { ...s[si], company: e.target.value }; setSpeakerData((p) => ({ ...p, speakers: s })); }} placeholder="Company" style={inputStyle(T)} />
+                      <input type="text" value={speaker.title} onChange={(e) => { const s = [...speakerData.speakers]; s[si] = { ...s[si], title: e.target.value }; setSpeakerData((p) => ({ ...p, speakers: s })); }} placeholder="Title / Role" style={inputStyle(A)} />
+                      <input type="text" value={speaker.company} onChange={(e) => { const s = [...speakerData.speakers]; s[si] = { ...s[si], company: e.target.value }; setSpeakerData((p) => ({ ...p, speakers: s })); }} placeholder="Company" style={inputStyle(A)} />
                     </div>
                     <div>
-                      <label style={{ ...labelStyle(T), marginBottom: 4 }}>Photo (URL or upload)</label>
+                      <label style={{ ...labelStyle(A), marginBottom: 4 }}>Photo (URL or upload)</label>
                       <div style={{ display: "flex", gap: 8 }}>
                         <input
                           type="text"
@@ -1597,9 +1598,9 @@ Return the same JSON structure with just the post object updated.`;
                             setSpeakerData((p) => ({ ...p, speakers: s }));
                           }}
                           placeholder="https://... or paste image URL"
-                          style={{ ...inputStyle(T), flex: 1, fontSize: 12 }}
+                          style={{ ...inputStyle(A), flex: 1, fontSize: 12 }}
                         />
-                        <label style={{ background: T.soft, border: `1px solid ${T.border}`, borderRadius: 10, padding: "0 12px", cursor: "pointer", display: "flex", alignItems: "center", color: T.muted, fontSize: 11, fontWeight: 600, whiteSpace: "nowrap" }}>
+                        <label style={{ background: A.soft, border: `1px solid ${A.border}`, borderRadius: 10, padding: "0 12px", cursor: "pointer", display: "flex", alignItems: "center", color: A.muted, fontSize: 11, fontWeight: 600, whiteSpace: "nowrap" }}>
                           <Upload size={12} style={{ marginRight: 4 }} /> File
                           <input
                             type="file"
@@ -1621,9 +1622,9 @@ Return the same JSON structure with just the post object updated.`;
                       </div>
                       {speaker.photo && (
                         <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 8 }}>
-                          <img src={speaker.photo} alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", border: `2px solid ${T.accent}` }} />
-                          <span style={{ fontSize: 11, color: T.muted }}>Photo set</span>
-                          <button onClick={() => { const s = [...speakerData.speakers]; s[si] = { ...s[si], photo: null, photoUrl: "" }; setSpeakerData((p) => ({ ...p, speakers: s })); }} style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 0, fontSize: 11 }}>Remove</button>
+                          <img src={speaker.photo} alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", border: `2px solid ${A.accent}` }} />
+                          <span style={{ fontSize: 11, color: A.muted }}>Photo set</span>
+                          <button onClick={() => { const s = [...speakerData.speakers]; s[si] = { ...s[si], photo: null, photoUrl: "" }; setSpeakerData((p) => ({ ...p, speakers: s })); }} style={{ background: "none", border: "none", color: A.muted, cursor: "pointer", padding: 0, fontSize: 11 }}>Remove</button>
                         </div>
                       )}
                     </div>
@@ -1633,7 +1634,7 @@ Return the same JSON structure with just the post object updated.`;
                 {(speakerData.speakers || []).length < 3 && (
                   <button
                     onClick={() => setSpeakerData((p) => ({ ...p, speakers: [...p.speakers, { name: "", title: "", company: "", photo: null }] }))}
-                    style={{ background: T.soft, border: `1px solid ${T.border}`, borderRadius: 10, padding: "10px", cursor: "pointer", color: T.accent, fontSize: 12, fontWeight: 600, fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}
+                    style={{ background: A.soft, border: `1px solid ${A.border}`, borderRadius: 10, padding: "10px", cursor: "pointer", color: A.accent, fontSize: 12, fontWeight: 600, fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}
                   >
                     <UserCircle size={14} /> Add Speaker ({(speakerData.speakers || []).length}/3)
                   </button>
@@ -1643,7 +1644,7 @@ Return the same JSON structure with just the post object updated.`;
 
             {/* Text Input */}
             {contentType !== "speaker" && <div>
-              <label style={labelStyle(T)}>
+              <label style={labelStyle(A)}>
                 <PenLine size={12} /> Source Text
                 {files.length > 0 && <span style={{ opacity: 0.5, fontWeight: 400, textTransform: "none", letterSpacing: 0 }}> (optional with files)</span>}
               </label>
@@ -1653,16 +1654,16 @@ Return the same JSON structure with just the post object updated.`;
                 placeholder="Paste your report, transcript, article, or notes..."
                 rows={hasOutput ? 5 : 8}
                 style={{
-                  width: "100%", background: T.card, color: T.text, border: `1px solid ${T.border}`,
+                  width: "100%", background: A.card, color: A.text, border: `1px solid ${A.border}`,
                   borderRadius: 12, padding: 14, fontFamily: "'Inter', sans-serif", fontSize: 14,
                   lineHeight: 1.65, resize: "vertical", transition: "border-color 0.2s",
                 }}
-                onFocus={(e) => (e.target.style.borderColor = T.accent)}
-                onBlur={(e) => (e.target.style.borderColor = T.border)}
+                onFocus={(e) => (e.target.style.borderColor = A.accent)}
+                onBlur={(e) => (e.target.style.borderColor = A.border)}
               />
               {input.length > 0 && (
                 <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 4 }}>
-                  <span style={{ fontSize: 11, color: T.muted, opacity: 0.6 }}>{input.length.toLocaleString()} chars</span>
+                  <span style={{ fontSize: 11, color: A.muted, opacity: 0.6 }}>{input.length.toLocaleString()} chars</span>
                 </div>
               )}
             </div>}
@@ -1678,9 +1679,9 @@ Return the same JSON structure with just the post object updated.`;
                   disabled={loading || !hasContent}
                   title={getMissingFieldsHint()}
                   style={{
-                    background: loading ? T.card : T.gradient || T.accent,
-                    color: loading ? T.muted : contrastText(T.accent),
-                    border: loading ? `1px solid ${T.border}` : "none",
+                    background: loading ? A.card : A.gradient || A.accent,
+                    color: loading ? A.muted : contrastText(A.accent),
+                    border: loading ? `1px solid ${A.border}` : "none",
                     borderRadius: 14, padding: "16px 24px", fontFamily: "'Inter', sans-serif",
                     fontSize: 15, fontWeight: 700, cursor: loading || !hasContent ? "not-allowed" : "pointer",
                     width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
@@ -1694,7 +1695,7 @@ Return the same JSON structure with just the post object updated.`;
                   )}
                 </motion.button>
                 {!hasContent && !loading && (
-                  <p style={{ fontSize: 11, color: T.muted, marginTop: 6, textAlign: "center", opacity: 0.7 }}>
+                  <p style={{ fontSize: 11, color: A.muted, marginTop: 6, textAlign: "center", opacity: 0.7 }}>
                     {!apiKey ? "Add your API key in Settings to generate content." : "Paste text or upload a file to get started."}
                   </p>
                 )}
@@ -1724,7 +1725,7 @@ Return the same JSON structure with just the post object updated.`;
             >
               {/* Tab bar — hidden for speaker mode */}
               {!isSpeakerMode && (
-                <div style={{ display: "flex", background: T.card, borderRadius: 12, padding: 4, border: `1px solid ${T.border}` }}>
+                <div style={{ display: "flex", background: A.card, borderRadius: 12, padding: 4, border: `1px solid ${A.border}` }}>
                   {[
                     showSlideControls && { id: "slides", icon: Eye, label: "Preview" },
                     showSlideControls && { id: "edit", icon: PenLine, label: "Edit" },
@@ -1737,8 +1738,8 @@ Return the same JSON structure with just the post object updated.`;
                         onClick={() => setActiveTab(tab.id)}
                         style={{
                           flex: 1, padding: "10px 14px", borderRadius: 9, border: "none",
-                          background: activeTab === tab.id ? T.soft : "transparent",
-                          color: activeTab === tab.id ? T.accent : T.muted,
+                          background: activeTab === tab.id ? A.soft : "transparent",
+                          color: activeTab === tab.id ? A.accent : A.muted,
                           fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, cursor: "pointer",
                           display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transition: "all 0.2s",
                         }}
@@ -1752,7 +1753,7 @@ Return the same JSON structure with just the post object updated.`;
 
               {/* Speaker mode header */}
               {isSpeakerMode && hasSpeakerContent && (
-                <div style={{ fontSize: 12, color: T.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                <div style={{ fontSize: 12, color: A.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>
                   Live Preview
                 </div>
               )}
@@ -1760,11 +1761,11 @@ Return the same JSON structure with just the post object updated.`;
               {/* Title — non-speaker modes */}
               {!isSpeakerMode && title && (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: 12, color: T.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "70%" }}>
+                  <span style={{ fontSize: 12, color: A.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "70%" }}>
                     {title}
                   </span>
                   {showSlideControls && (
-                    <span style={{ fontSize: 12, color: T.accent, fontWeight: 600, flexShrink: 0 }}>
+                    <span style={{ fontSize: 12, color: A.accent, fontWeight: 600, flexShrink: 0 }}>
                       {cur + 1} / {slides.length}
                     </span>
                   )}
@@ -1786,18 +1787,18 @@ Return the same JSON structure with just the post object updated.`;
                   <button
                     onClick={copySlideToClipboard}
                     style={{
-                      ...exportBtnStyle(T),
-                      background: copiedSlide ? T.accent : "transparent",
-                      color: copiedSlide ? contrastText(T.accent) : T.text,
-                      borderColor: copiedSlide ? T.accent : T.border,
+                      ...exportBtnStyle(A),
+                      background: copiedSlide ? A.accent : "transparent",
+                      color: copiedSlide ? contrastText(A.accent) : A.text,
+                      borderColor: copiedSlide ? A.accent : A.border,
                     }}
                   >
                     {copiedSlide ? <Check size={14} /> : <ClipboardCopy size={14} />}
                     {copiedSlide ? "Copied to clipboard!" : "Copy to clipboard"}
                   </button>
                   {/* Style customization */}
-                  <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>Customize</span>
+                  <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 14, padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: A.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>Customize</span>
                     {/* Layout */}
                     <div style={{ display: "flex", gap: 6 }}>
                       {Object.entries(SPEAKER_LAYOUTS).map(([id, label]) => (
@@ -1806,9 +1807,9 @@ Return the same JSON structure with just the post object updated.`;
                           onClick={() => setSpeakerData((p) => ({ ...p, style: { ...p.style, layout: id } }))}
                           style={{
                             flex: 1, padding: "7px 4px", borderRadius: 8, fontSize: 11, fontWeight: 600,
-                            border: `1px solid ${(speakerData.style?.layout || "classic") === id ? T.accent : T.border}`,
-                            background: (speakerData.style?.layout || "classic") === id ? T.soft : "transparent",
-                            color: (speakerData.style?.layout || "classic") === id ? T.accent : T.muted,
+                            border: `1px solid ${(speakerData.style?.layout || "classic") === id ? A.accent : A.border}`,
+                            background: (speakerData.style?.layout || "classic") === id ? A.soft : "transparent",
+                            color: (speakerData.style?.layout || "classic") === id ? A.accent : A.muted,
                             cursor: "pointer", fontFamily: "'Inter', sans-serif", textAlign: "center",
                           }}
                         >
@@ -1819,24 +1820,24 @@ Return the same JSON structure with just the post object updated.`;
                     {/* CTA color + Photo shape */}
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                       <div>
-                        <label style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4, display: "block" }}>CTA Color</label>
+                        <label style={{ fontSize: 10, fontWeight: 600, color: A.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4, display: "block" }}>CTA Color</label>
                         <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                           <input
                             type="color"
-                            value={speakerData.style?.ctaColor || T.accent}
+                            value={speakerData.style?.ctaColor || A.accent}
                             onChange={(e) => setSpeakerData((p) => ({ ...p, style: { ...p.style, ctaColor: e.target.value } }))}
                             style={{ width: 32, height: 32, border: "none", borderRadius: 6, cursor: "pointer", padding: 0, background: "transparent" }}
                           />
                           <input
                             type="text"
-                            value={speakerData.style?.ctaColor || T.accent}
+                            value={speakerData.style?.ctaColor || A.accent}
                             onChange={(e) => setSpeakerData((p) => ({ ...p, style: { ...p.style, ctaColor: e.target.value } }))}
-                            style={{ ...inputStyle(T), fontSize: 12, fontFamily: "'JetBrains Mono', monospace", flex: 1 }}
+                            style={{ ...inputStyle(A), fontSize: 12, fontFamily: "'JetBrains Mono', monospace", flex: 1 }}
                           />
                         </div>
                       </div>
                       <div>
-                        <label style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4, display: "block" }}>Photo Shape</label>
+                        <label style={{ fontSize: 10, fontWeight: 600, color: A.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4, display: "block" }}>Photo Shape</label>
                         <div style={{ display: "flex", gap: 4 }}>
                           {[
                             { id: "circle", label: "O" },
@@ -1848,9 +1849,9 @@ Return the same JSON structure with just the post object updated.`;
                               onClick={() => setSpeakerData((p) => ({ ...p, style: { ...p.style, photoShape: s.id } }))}
                               style={{
                                 flex: 1, padding: "8px 0", borderRadius: 6, fontSize: 14,
-                                border: `1px solid ${(speakerData.style?.photoShape || "circle") === s.id ? T.accent : T.border}`,
-                                background: (speakerData.style?.photoShape || "circle") === s.id ? T.soft : "transparent",
-                                color: (speakerData.style?.photoShape || "circle") === s.id ? T.accent : T.muted,
+                                border: `1px solid ${(speakerData.style?.photoShape || "circle") === s.id ? A.accent : A.border}`,
+                                background: (speakerData.style?.photoShape || "circle") === s.id ? A.soft : "transparent",
+                                color: (speakerData.style?.photoShape || "circle") === s.id ? A.accent : A.muted,
                                 cursor: "pointer", textAlign: "center",
                               }}
                             >
@@ -1862,7 +1863,7 @@ Return the same JSON structure with just the post object updated.`;
                     </div>
                     {/* Aspect ratio */}
                     <div>
-                      <label style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4, display: "block" }}>Size</label>
+                      <label style={{ fontSize: 10, fontWeight: 600, color: A.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4, display: "block" }}>Size</label>
                       <div style={{ display: "flex", gap: 4 }}>
                         {Object.keys(SPEAKER_ASPECTS).map((a) => (
                           <button
@@ -1870,9 +1871,9 @@ Return the same JSON structure with just the post object updated.`;
                             onClick={() => setSpeakerData((p) => ({ ...p, style: { ...p.style, aspect: a } }))}
                             style={{
                               flex: 1, padding: "7px 4px", borderRadius: 6, fontSize: 11, fontWeight: 600,
-                              border: `1px solid ${(speakerData.style?.aspect || "1:1") === a ? T.accent : T.border}`,
-                              background: (speakerData.style?.aspect || "1:1") === a ? T.soft : "transparent",
-                              color: (speakerData.style?.aspect || "1:1") === a ? T.accent : T.muted,
+                              border: `1px solid ${(speakerData.style?.aspect || "1:1") === a ? A.accent : A.border}`,
+                              background: (speakerData.style?.aspect || "1:1") === a ? A.soft : "transparent",
+                              color: (speakerData.style?.aspect || "1:1") === a ? A.accent : A.muted,
                               cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", textAlign: "center",
                             }}
                           >
@@ -1883,7 +1884,7 @@ Return the same JSON structure with just the post object updated.`;
                     </div>
                     {/* Background mode */}
                     <div>
-                      <label style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4, display: "block" }}>Background</label>
+                      <label style={{ fontSize: 10, fontWeight: 600, color: A.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4, display: "block" }}>Background</label>
                       <div style={{ display: "flex", gap: 4 }}>
                         {[
                           { id: "dark", label: "Dark", icon: "🌙" },
@@ -1895,9 +1896,9 @@ Return the same JSON structure with just the post object updated.`;
                             onClick={() => setSpeakerData((p) => ({ ...p, style: { ...p.style, bgMode: m.id } }))}
                             style={{
                               flex: 1, padding: "7px 4px", borderRadius: 6, fontSize: 11, fontWeight: 600,
-                              border: `1px solid ${(speakerData.style?.bgMode || "dark") === m.id ? T.accent : T.border}`,
-                              background: (speakerData.style?.bgMode || "dark") === m.id ? T.soft : "transparent",
-                              color: (speakerData.style?.bgMode || "dark") === m.id ? T.accent : T.muted,
+                              border: `1px solid ${(speakerData.style?.bgMode || "dark") === m.id ? A.accent : A.border}`,
+                              background: (speakerData.style?.bgMode || "dark") === m.id ? A.soft : "transparent",
+                              color: (speakerData.style?.bgMode || "dark") === m.id ? A.accent : A.muted,
                               cursor: "pointer", textAlign: "center", fontFamily: "'Inter', sans-serif",
                             }}
                           >
@@ -1908,7 +1909,7 @@ Return the same JSON structure with just the post object updated.`;
                     </div>
                     {/* Element visibility */}
                     <div>
-                      <label style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6, display: "block" }}>Show / Hide</label>
+                      <label style={{ fontSize: 10, fontWeight: 600, color: A.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6, display: "block" }}>Show / Hide</label>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                         {[
                           { id: "showTag", label: "Tag" },
@@ -1925,9 +1926,9 @@ Return the same JSON structure with just the post object updated.`;
                               onClick={() => setSpeakerData((p) => ({ ...p, style: { ...p.style, [el.id]: !isOn } }))}
                               style={{
                                 padding: "4px 10px", borderRadius: 6, fontSize: 10, fontWeight: 600,
-                                border: `1px solid ${isOn ? T.accent : T.border}`,
-                                background: isOn ? T.soft : "transparent",
-                                color: isOn ? T.accent : T.muted,
+                                border: `1px solid ${isOn ? A.accent : A.border}`,
+                                background: isOn ? A.soft : "transparent",
+                                color: isOn ? A.accent : A.muted,
                                 cursor: "pointer", fontFamily: "'Inter', sans-serif",
                                 opacity: isOn ? 1 : 0.5,
                               }}
@@ -1941,12 +1942,12 @@ Return the same JSON structure with just the post object updated.`;
                   </div>
 
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                    <button onClick={exportCurrentPng} disabled={exportingPng} style={exportBtnStyle(T)}>
+                    <button onClick={exportCurrentPng} disabled={exportingPng} style={exportBtnStyle(A)}>
                       {exportingPng ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <ImageDown size={14} />}
                       {exportingPng ? "..." : "Download PNG"}
                     </button>
                     {user && (
-                      <button onClick={saveToLibrary} disabled={savingToLibrary || !historyEnabled} style={exportBtnStyle(T)} title={!historyEnabled ? "Enable Cloud History in Settings to save" : ""}>
+                      <button onClick={saveToLibrary} disabled={savingToLibrary || !historyEnabled} style={exportBtnStyle(A)} title={!historyEnabled ? "Enable Cloud History in Settings to save" : ""}>
                         {savingToLibrary ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Save size={14} />}
                         {savedToLibrary ? "Saved!" : "Save to Library"}
                       </button>
@@ -1971,7 +1972,7 @@ Return the same JSON structure with just the post object updated.`;
                   {/* Dots */}
                   <div style={{ display: "flex", gap: 5, alignItems: "center", justifyContent: "center" }}>
                     {slides.map((_, i) => (
-                      <button key={i} onClick={() => setCur(i)} style={{ width: i === cur ? 24 : 8, height: 8, borderRadius: 4, background: i === cur ? T.accent : T.muted, opacity: i === cur ? 1 : 0.25, transition: "all 0.3s", cursor: "pointer", border: "none", padding: 0 }} />
+                      <button key={i} onClick={() => setCur(i)} style={{ width: i === cur ? 24 : 8, height: 8, borderRadius: 4, background: i === cur ? A.accent : A.muted, opacity: i === cur ? 1 : 0.25, transition: "all 0.3s", cursor: "pointer", border: "none", padding: 0 }} />
                     ))}
                   </div>
 
@@ -1981,14 +1982,14 @@ Return the same JSON structure with just the post object updated.`;
                       <button
                         key={i} onClick={() => setCur(i)}
                         style={{
-                          background: T.card, border: `1.5px solid ${i === cur ? T.accent : T.border}`, borderRadius: 10,
+                          background: A.card, border: `1.5px solid ${i === cur ? A.accent : A.border}`, borderRadius: 10,
                           padding: "8px 7px", cursor: "pointer", transition: "all 0.2s", opacity: i === cur ? 1 : 0.5, textAlign: "left",
                         }}
                       >
-                        <div style={{ fontSize: 10, color: T.accent, fontWeight: 700, marginBottom: 3, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>
+                        <div style={{ fontSize: 10, color: A.accent, fontWeight: 700, marginBottom: 3, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>
                           {String(i + 1).padStart(2, "0")}
                         </div>
-                        <div style={{ fontSize: 9, color: T.text, lineHeight: 1.35, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+                        <div style={{ fontSize: 9, color: A.text, lineHeight: 1.35, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
                           {s.headline}
                         </div>
                       </button>
@@ -1999,29 +2000,29 @@ Return the same JSON structure with just the post object updated.`;
                   <button
                     onClick={copySlideToClipboard}
                     style={{
-                      ...exportBtnStyle(T),
-                      background: copiedSlide ? T.accent : "transparent",
-                      color: copiedSlide ? contrastText(T.accent) : T.text,
-                      borderColor: copiedSlide ? T.accent : T.border,
+                      ...exportBtnStyle(A),
+                      background: copiedSlide ? A.accent : "transparent",
+                      color: copiedSlide ? contrastText(A.accent) : A.text,
+                      borderColor: copiedSlide ? A.accent : A.border,
                     }}
                   >
                     {copiedSlide ? <Check size={14} /> : <ClipboardCopy size={14} />}
                     {copiedSlide ? "Copied to clipboard!" : "Copy slide to clipboard"}
                   </button>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-                    <button onClick={exportCurrentPng} disabled={exportingPng} style={exportBtnStyle(T)}>
+                    <button onClick={exportCurrentPng} disabled={exportingPng} style={exportBtnStyle(A)}>
                       {exportingPng ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <ImageDown size={14} />}
                       {exportingPng ? "..." : "PNG"}
                     </button>
-                    <button onClick={exportAllPngsZip} disabled={exportingAll} style={exportBtnStyle(T)}>
+                    <button onClick={exportAllPngsZip} disabled={exportingAll} style={exportBtnStyle(A)}>
                       {exportingAll ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Archive size={14} />}
                       {exportingAll ? "..." : "ZIP All"}
                     </button>
-                    <button onClick={downloadPDF} style={exportBtnStyle(T)}>
+                    <button onClick={downloadPDF} style={exportBtnStyle(A)}>
                       <Download size={14} /> PDF
                     </button>
                   </div>
-                  <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.5, textAlign: "center" }}>
+                  <p style={{ fontSize: 11, color: A.muted, lineHeight: 1.5, textAlign: "center" }}>
                     Copy pastes directly into LinkedIn. PNG/PDF export at 2x resolution (1080x1080).
                   </p>
                 </>
@@ -2036,8 +2037,8 @@ Return the same JSON structure with just the post object updated.`;
                       <button
                         key={i} onClick={() => setCur(i)}
                         style={{
-                          padding: "6px 12px", borderRadius: 8, border: `1px solid ${i === cur ? T.accent : T.border}`,
-                          background: i === cur ? T.soft : "transparent", color: i === cur ? T.accent : T.muted,
+                          padding: "6px 12px", borderRadius: 8, border: `1px solid ${i === cur ? A.accent : A.border}`,
+                          background: i === cur ? A.soft : "transparent", color: i === cur ? A.accent : A.muted,
                           fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "'Inter', sans-serif",
                           position: "relative",
                         }}
@@ -2051,8 +2052,8 @@ Return the same JSON structure with just the post object updated.`;
                       disabled={regeneratingSlide !== null}
                       title="Regenerate this slide"
                       style={{
-                        padding: "6px 10px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.soft,
-                        color: T.accent, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter', sans-serif",
+                        padding: "6px 10px", borderRadius: 8, border: `1px solid ${A.border}`, background: A.soft,
+                        color: A.accent, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter', sans-serif",
                         display: "flex", alignItems: "center", gap: 4, whiteSpace: "nowrap", opacity: regeneratingSlide !== null ? 0.4 : 1,
                       }}
                     >
@@ -2066,35 +2067,35 @@ Return the same JSON structure with just the post object updated.`;
                   </div>
 
                   {/* Edit fields */}
-                  <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 14, padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
                     <div>
-                      <label style={{ ...labelStyle(T), marginBottom: 4 }}>Type</label>
-                      <select value={slide.type || "insight"} onChange={(e) => updateSlideField(cur, "type", e.target.value)} style={selectStyle(T)}>
+                      <label style={{ ...labelStyle(A), marginBottom: 4 }}>Type</label>
+                      <select value={slide.type || "insight"} onChange={(e) => updateSlideField(cur, "type", e.target.value)} style={selectStyle(A)}>
                         {["cover", "insight", "stat", "quote", "cta"].map((t) => <option key={t}>{t}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label style={{ ...labelStyle(T), marginBottom: 4 }}>Headline</label>
-                      <input type="text" value={slide.headline || ""} onChange={(e) => updateSlideField(cur, "headline", e.target.value)} style={inputStyle(T)} />
+                      <label style={{ ...labelStyle(A), marginBottom: 4 }}>Headline</label>
+                      <input type="text" value={slide.headline || ""} onChange={(e) => updateSlideField(cur, "headline", e.target.value)} style={inputStyle(A)} />
                     </div>
                     <div>
-                      <label style={{ ...labelStyle(T), marginBottom: 4 }}>Body</label>
-                      <textarea value={slide.body || ""} onChange={(e) => updateSlideField(cur, "body", e.target.value)} rows={3} style={{ ...inputStyle(T), resize: "vertical", lineHeight: 1.6 }} />
+                      <label style={{ ...labelStyle(A), marginBottom: 4 }}>Body</label>
+                      <textarea value={slide.body || ""} onChange={(e) => updateSlideField(cur, "body", e.target.value)} rows={3} style={{ ...inputStyle(A), resize: "vertical", lineHeight: 1.6 }} />
                     </div>
                     {slide.type === "stat" && (
                       <>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                           <div>
-                            <label style={{ ...labelStyle(T), marginBottom: 4 }}>Stat</label>
-                            <input type="text" value={slide.stat || ""} onChange={(e) => updateSlideField(cur, "stat", e.target.value)} placeholder="73%" style={inputStyle(T)} />
+                            <label style={{ ...labelStyle(A), marginBottom: 4 }}>Stat</label>
+                            <input type="text" value={slide.stat || ""} onChange={(e) => updateSlideField(cur, "stat", e.target.value)} placeholder="73%" style={inputStyle(A)} />
                           </div>
                           <div>
-                            <label style={{ ...labelStyle(T), marginBottom: 4 }}>Stat Label</label>
-                            <input type="text" value={slide.statLabel || ""} onChange={(e) => updateSlideField(cur, "statLabel", e.target.value)} placeholder="Adoption rate" style={inputStyle(T)} />
+                            <label style={{ ...labelStyle(A), marginBottom: 4 }}>Stat Label</label>
+                            <input type="text" value={slide.statLabel || ""} onChange={(e) => updateSlideField(cur, "statLabel", e.target.value)} placeholder="Adoption rate" style={inputStyle(A)} />
                           </div>
                         </div>
                         <div>
-                          <label style={{ ...labelStyle(T), marginBottom: 4 }}>Stat Font Size</label>
+                          <label style={{ ...labelStyle(A), marginBottom: 4 }}>Stat Font Size</label>
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                             <input
                               type="range"
@@ -2102,9 +2103,9 @@ Return the same JSON structure with just the post object updated.`;
                               max={140}
                               value={slide.statFontSize || (slide.stat?.length > 5 ? 70 : slide.stat?.length > 3 ? 90 : 112)}
                               onChange={(e) => updateSlideField(cur, "statFontSize", Number(e.target.value))}
-                              style={{ flex: 1, accentColor: T.accent }}
+                              style={{ flex: 1, accentColor: A.accent }}
                             />
-                            <span style={{ fontSize: 12, color: T.muted, fontFamily: "'JetBrains Mono', monospace", minWidth: 36, textAlign: "right" }}>
+                            <span style={{ fontSize: 12, color: A.muted, fontFamily: "'JetBrains Mono', monospace", minWidth: 36, textAlign: "right" }}>
                               {slide.statFontSize || (slide.stat?.length > 5 ? 70 : slide.stat?.length > 3 ? 90 : 112)}px
                             </span>
                           </div>
@@ -2112,13 +2113,13 @@ Return the same JSON structure with just the post object updated.`;
                       </>
                     )}
                     <div>
-                      <label style={{ ...labelStyle(T), marginBottom: 4 }}>Tag</label>
-                      <input type="text" value={slide.tag || ""} onChange={(e) => updateSlideField(cur, "tag", e.target.value)} style={inputStyle(T)} />
+                      <label style={{ ...labelStyle(A), marginBottom: 4 }}>Tag</label>
+                      <input type="text" value={slide.tag || ""} onChange={(e) => updateSlideField(cur, "tag", e.target.value)} style={inputStyle(A)} />
                     </div>
 
                     {/* Rewrite with instructions */}
-                    <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 12 }}>
-                      <label style={{ ...labelStyle(T), marginBottom: 4 }}>
+                    <div style={{ borderTop: `1px solid ${A.border}`, paddingTop: 12 }}>
+                      <label style={{ ...labelStyle(A), marginBottom: 4 }}>
                         <RefreshCw size={12} /> AI Rewrite
                       </label>
                       <div style={{ display: "flex", gap: 8 }}>
@@ -2127,14 +2128,14 @@ Return the same JSON structure with just the post object updated.`;
                           value={slideRewritePrompt}
                           onChange={(e) => setSlideRewritePrompt(e.target.value)}
                           placeholder="e.g. make it more provocative..."
-                          style={{ ...inputStyle(T), flex: 1, fontSize: 13 }}
+                          style={{ ...inputStyle(A), flex: 1, fontSize: 13 }}
                           onKeyDown={(e) => { if (e.key === "Enter") rewriteSlide(cur); }}
                         />
                         <button
                           onClick={() => rewriteSlide(cur)}
                           disabled={rewritingSlide || !apiKey}
                           style={{
-                            background: T.accent, color: contrastText(T.accent), border: "none", borderRadius: 10,
+                            background: A.accent, color: contrastText(A.accent), border: "none", borderRadius: 10,
                             padding: "0 14px", fontSize: 12, fontWeight: 600, cursor: "pointer",
                             fontFamily: "'Inter', sans-serif", whiteSpace: "nowrap",
                             opacity: rewritingSlide ? 0.5 : 1, display: "flex", alignItems: "center", gap: 5,
@@ -2144,7 +2145,7 @@ Return the same JSON structure with just the post object updated.`;
                           Rewrite
                         </button>
                       </div>
-                      <p style={{ fontSize: 10, color: T.muted, marginTop: 4, opacity: 0.7 }}>
+                      <p style={{ fontSize: 10, color: A.muted, marginTop: 4, opacity: 0.7 }}>
                         Leave empty for a general improvement, or describe what to change
                       </p>
                     </div>
@@ -2156,13 +2157,13 @@ Return the same JSON structure with just the post object updated.`;
               {activeTab === "post" && post && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: 13, color: T.muted, fontWeight: 600 }}>LinkedIn Post Copy</span>
+                    <span style={{ fontSize: 13, color: A.muted, fontWeight: 600 }}>LinkedIn Post Copy</span>
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={copyPost}
                       style={{
-                        background: copied ? T.accent : T.soft, border: `1px solid ${copied ? T.accent : T.border}`,
-                        color: copied ? contrastText(T.accent) : T.accent, borderRadius: 8, padding: "7px 14px",
+                        background: copied ? A.accent : A.soft, border: `1px solid ${copied ? A.accent : A.border}`,
+                        color: copied ? contrastText(A.accent) : A.accent, borderRadius: 8, padding: "7px 14px",
                         fontSize: 12, cursor: "pointer", fontWeight: 600, display: "flex", alignItems: "center", gap: 5,
                         fontFamily: "'Inter', sans-serif", transition: "all 0.2s",
                       }}
@@ -2179,14 +2180,14 @@ Return the same JSON structure with just the post object updated.`;
                       value={postRewritePrompt}
                       onChange={(e) => setPostRewritePrompt(e.target.value)}
                       placeholder="e.g. shorter, more personal, add a story..."
-                      style={{ ...inputStyle(T), flex: 1, fontSize: 13 }}
+                      style={{ ...inputStyle(A), flex: 1, fontSize: 13 }}
                       onKeyDown={(e) => { if (e.key === "Enter") rewritePost(); }}
                     />
                     <button
                       onClick={rewritePost}
                       disabled={rewritingPost || !apiKey}
                       style={{
-                        background: T.accent, color: contrastText(T.accent), border: "none", borderRadius: 10,
+                        background: A.accent, color: contrastText(A.accent), border: "none", borderRadius: 10,
                         padding: "0 14px", fontSize: 12, fontWeight: 600, cursor: "pointer",
                         fontFamily: "'Inter', sans-serif", whiteSpace: "nowrap",
                         opacity: rewritingPost ? 0.5 : 1, display: "flex", alignItems: "center", gap: 5,
@@ -2198,10 +2199,10 @@ Return the same JSON structure with just the post object updated.`;
                   </div>
 
                   {/* Editable structured post */}
-                  <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, overflow: "hidden" }}>
+                  <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 14, overflow: "hidden" }}>
                     {/* Hook */}
-                    <div style={{ padding: "16px 16px 12px", borderBottom: `1px solid ${T.border}` }}>
-                      <div style={postLabelStyle(T)}>Hook</div>
+                    <div style={{ padding: "16px 16px 12px", borderBottom: `1px solid ${A.border}` }}>
+                      <div style={postLabelStyle(A)}>Hook</div>
                       <textarea
                         value={post.hook}
                         onChange={(e) => updatePostField("hook", e.target.value)}
@@ -2211,8 +2212,8 @@ Return the same JSON structure with just the post object updated.`;
                       />
                     </div>
                     {/* Body */}
-                    <div style={{ padding: "12px 16px", borderBottom: `1px solid ${T.border}` }}>
-                      <div style={postLabelStyle(T)}>Body</div>
+                    <div style={{ padding: "12px 16px", borderBottom: `1px solid ${A.border}` }}>
+                      <div style={postLabelStyle(A)}>Body</div>
                       <textarea
                         value={post.body}
                         onChange={(e) => updatePostField("body", e.target.value)}
@@ -2222,8 +2223,8 @@ Return the same JSON structure with just the post object updated.`;
                       />
                     </div>
                     {/* CTA */}
-                    <div style={{ padding: "12px 16px", borderBottom: `1px solid ${T.border}` }}>
-                      <div style={postLabelStyle(T)}>Call to Action</div>
+                    <div style={{ padding: "12px 16px", borderBottom: `1px solid ${A.border}` }}>
+                      <div style={postLabelStyle(A)}>Call to Action</div>
                       <textarea
                         value={post.cta}
                         onChange={(e) => updatePostField("cta", e.target.value)}
@@ -2234,7 +2235,7 @@ Return the same JSON structure with just the post object updated.`;
                     </div>
                     {/* Hashtags */}
                     <div style={{ padding: "12px 16px" }}>
-                      <div style={postLabelStyle(T)}>Hashtags</div>
+                      <div style={postLabelStyle(A)}>Hashtags</div>
                       <input
                         type="text"
                         value={post.hashtags.map((h) => h.replace(/^#/, "")).join(", ")}
@@ -2243,7 +2244,7 @@ Return the same JSON structure with just the post object updated.`;
                           updatePostField("hashtags", tags);
                         }}
                         placeholder="tag1, tag2, tag3"
-                        style={{ ...inputStyle(T), fontSize: 13, color: T.accent }}
+                        style={{ ...inputStyle(A), fontSize: 13, color: A.accent }}
                       />
                       {/* Hashtag group picker */}
                       {userProfile?.profile?.hashtagGroups?.length > 0 && (
@@ -2257,13 +2258,13 @@ Return the same JSON structure with just the post object updated.`;
                                 updatePostField("hashtags", merged);
                               }}
                               style={{
-                                background: T.soft,
-                                border: `1px solid ${T.border}`,
+                                background: A.soft,
+                                border: `1px solid ${A.border}`,
                                 borderRadius: 8,
                                 padding: "5px 10px",
                                 fontSize: 11,
                                 fontWeight: 600,
-                                color: T.accent,
+                                color: A.accent,
                                 cursor: "pointer",
                                 fontFamily: "'Inter', sans-serif",
                                 display: "flex",
@@ -2271,8 +2272,8 @@ Return the same JSON structure with just the post object updated.`;
                                 gap: 4,
                                 transition: "all 0.2s",
                               }}
-                              onMouseEnter={(e) => { e.currentTarget.style.background = T.accent; e.currentTarget.style.color = contrastText(T.accent); }}
-                              onMouseLeave={(e) => { e.currentTarget.style.background = T.soft; e.currentTarget.style.color = T.accent; }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = A.accent; e.currentTarget.style.color = contrastText(A.accent); }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = A.soft; e.currentTarget.style.color = A.accent; }}
                               title={group.tags.map((t) => `#${t}`).join(" ")}
                             >
                               <Hash size={11} />
@@ -2281,7 +2282,7 @@ Return the same JSON structure with just the post object updated.`;
                           ))}
                         </div>
                       )}
-                      <p style={{ fontSize: 10, color: T.muted, marginTop: 4, opacity: 0.7 }}>
+                      <p style={{ fontSize: 10, color: A.muted, marginTop: 4, opacity: 0.7 }}>
                         {userProfile?.profile?.hashtagGroups?.length > 0
                           ? "Click a group to add its tags. Edit manually above."
                           : "Separate with commas. Save groups in Settings."}
@@ -2298,16 +2299,16 @@ Return the same JSON structure with just the post object updated.`;
                       <div style={{
                         display: "flex", justifyContent: "space-between", alignItems: "center",
                         padding: "8px 14px", borderRadius: 10,
-                        background: over ? "rgba(232,58,58,0.08)" : T.soft,
-                        border: `1px solid ${over ? "rgba(232,58,58,0.25)" : T.border}`,
+                        background: over ? "rgba(232,58,58,0.08)" : A.soft,
+                        border: `1px solid ${over ? "rgba(232,58,58,0.25)" : A.border}`,
                       }}>
-                        <span style={{ fontSize: 12, color: over ? "#E85A3A" : T.muted }}>
+                        <span style={{ fontSize: 12, color: over ? "#E85A3A" : A.muted }}>
                           {over ? "Over LinkedIn's 3,000 character limit" : "Post length"}
                         </span>
                         <span style={{
                           fontSize: 13, fontWeight: 700,
                           fontFamily: "'JetBrains Mono', monospace",
-                          color: over ? "#E85A3A" : len > 2700 ? "#D4A853" : T.accent,
+                          color: over ? "#E85A3A" : len > 2700 ? "#D4A853" : A.accent,
                         }}>
                           {len.toLocaleString()} / 3,000
                         </span>
@@ -2316,17 +2317,17 @@ Return the same JSON structure with just the post object updated.`;
                   })()}
 
                   {/* Full preview with bold rendering */}
-                  <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: 16, whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.75, color: T.text, wordBreak: "break-word" }}>
+                  <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 14, padding: 16, whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.75, color: A.text, wordBreak: "break-word" }}>
                     {renderBoldPreview(postTextRaw()).map((part, i) =>
                       typeof part === "string" ? <span key={i}>{part}</span> : <strong key={i} style={{ fontWeight: 700 }}>{part.text}</strong>
                     )}
                   </div>
-                  <p style={{ fontSize: 10, color: T.muted, textAlign: "center", opacity: 0.7 }}>
+                  <p style={{ fontSize: 10, color: A.muted, textAlign: "center", opacity: 0.7 }}>
                     Preview shows bold. Copied text uses LinkedIn-compatible Unicode bold formatting.
                   </p>
 
                   {source.trim() && (
-                    <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.5, padding: "8px 12px", background: T.soft, borderRadius: 8 }}>
+                    <p style={{ fontSize: 11, color: A.muted, lineHeight: 1.5, padding: "8px 12px", background: A.soft, borderRadius: 8 }}>
                       Tip: Paste the source line as your first comment after publishing for better reach.
                     </p>
                   )}
@@ -2365,42 +2366,42 @@ Return the same JSON structure with just the post object updated.`;
 }
 
 // ── Shared styles ──
-function labelStyle(T) {
-  return { display: "flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: T.muted, marginBottom: 6 };
+function labelStyle(A) {
+  return { display: "flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: A.muted, marginBottom: 6 };
 }
 
-function inputStyle(T) {
-  return { background: T.card, color: T.text, border: `1px solid ${T.border}`, borderRadius: 10, padding: "10px 13px", fontFamily: "'Inter', sans-serif", fontSize: 14, width: "100%", transition: "border-color 0.2s" };
+function inputStyle(A) {
+  return { background: A.card, color: A.text, border: `1px solid ${A.border}`, borderRadius: 10, padding: "10px 13px", fontFamily: "'Inter', sans-serif", fontSize: 14, width: "100%", transition: "border-color 0.2s" };
 }
 
-function selectStyle(T) {
-  return { ...inputStyle(T), cursor: "pointer", appearance: "auto" };
+function selectStyle(A) {
+  return { ...inputStyle(A), cursor: "pointer", appearance: "auto" };
 }
 
 function navBtnStyle(T, side) {
   return {
     position: "absolute", top: "50%", transform: "translateY(-50%)", [side]: 8,
-    width: 40, height: 40, borderRadius: 12, background: `${T.card}DD`, backdropFilter: "blur(8px)",
-    border: `1px solid ${T.border}`, color: T.text, display: "flex", alignItems: "center", justifyContent: "center",
+    width: 40, height: 40, borderRadius: 12, background: `${A.card}DD`, backdropFilter: "blur(8px)",
+    border: `1px solid ${A.border}`, color: A.text, display: "flex", alignItems: "center", justifyContent: "center",
     cursor: "pointer", zIndex: 10, transition: "all 0.2s",
   };
 }
 
-function exportBtnStyle(T) {
+function exportBtnStyle(A) {
   return {
-    width: "100%", background: "transparent", color: T.text, border: `1px solid ${T.border}`, borderRadius: 12,
+    width: "100%", background: "transparent", color: A.text, border: `1px solid ${A.border}`, borderRadius: 12,
     padding: "12px 16px", fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, cursor: "pointer",
     display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.2s",
   };
 }
 
-function postLabelStyle(T) {
-  return { fontSize: 10, fontWeight: 700, color: T.accent, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 };
+function postLabelStyle(A) {
+  return { fontSize: 10, fontWeight: 700, color: A.accent, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 };
 }
 
 function postEditStyle(T, bold = false) {
   return {
-    width: "100%", background: "transparent", color: T.text, border: "none", borderRadius: 0,
+    width: "100%", background: "transparent", color: A.text, border: "none", borderRadius: 0,
     padding: 0, fontFamily: "'Inter', sans-serif", fontSize: 14, lineHeight: 1.7, resize: "vertical",
     fontWeight: bold ? 600 : 400,
   };
@@ -2408,13 +2409,13 @@ function postEditStyle(T, bold = false) {
 
 function headerBtnStyle(T, primary) {
   return {
-    background: primary ? T.accent : T.soft,
-    border: `1px solid ${primary ? T.accent : T.border}`,
+    background: primary ? A.accent : A.soft,
+    border: `1px solid ${primary ? A.accent : A.border}`,
     borderRadius: 8,
     padding: "7px 12px",
     fontSize: 12,
     fontWeight: 600,
-    color: primary ? (contrastText(T.accent)) : T.muted,
+    color: primary ? (contrastText(A.accent)) : A.muted,
     cursor: "pointer",
     fontFamily: "'Inter', sans-serif",
     display: "flex",
@@ -2429,13 +2430,13 @@ function NavBtn({ T, active, onClick, children }) {
     <button
       onClick={onClick}
       style={{
-        background: active ? T.soft : "transparent",
-        border: `1px solid ${active ? T.accent : "transparent"}`,
+        background: active ? A.soft : "transparent",
+        border: `1px solid ${active ? A.accent : "transparent"}`,
         borderRadius: 8,
         padding: "7px 10px",
         fontSize: 12,
         fontWeight: 600,
-        color: active ? T.accent : T.muted,
+        color: active ? A.accent : A.muted,
         cursor: "pointer",
         fontFamily: "'Inter', sans-serif",
         display: "flex",
