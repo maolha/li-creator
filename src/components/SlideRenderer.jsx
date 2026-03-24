@@ -158,23 +158,21 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   // Background image overlay
   const activeBgMode = bgImageMode || "off";
   const BgImageOverlay = brandBgImage && activeBgMode !== "off" ? (
-    <>
+    <div style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }}>
       <div style={{
-        position: "absolute", inset: 0, zIndex: 1,
+        position: "absolute", inset: 0,
         backgroundImage: `url(${brandBgImage})`,
         backgroundSize: "cover", backgroundPosition: "center",
-        opacity: activeBgMode === "strong" ? 0.45 : 0.08,
-        pointerEvents: "none",
+        opacity: activeBgMode === "strong" ? 0.5 : 0.1,
       }} />
       <div style={{
-        position: "absolute", inset: 0, zIndex: 2,
+        position: "absolute", inset: 0,
         background: activeBgMode === "strong"
-          ? `linear-gradient(180deg, ${effectiveBg}CC 0%, ${effectiveBg}99 40%, ${effectiveBg}DD 100%)`
+          ? `linear-gradient(180deg, ${effectiveBg}DD 0%, ${effectiveBg}88 50%, ${effectiveBg}DD 100%)`
           : effectiveBg,
-        opacity: activeBgMode === "strong" ? 1 : 0.85,
-        pointerEvents: "none",
+        opacity: activeBgMode === "strong" ? 1 : 0.82,
       }} />
-    </>
+    </div>
   ) : null;
 
   const slideLabel = s.label !== undefined ? s.label : brand; // per-slide override
