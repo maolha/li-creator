@@ -1338,8 +1338,8 @@ Return the same JSON structure with just the post object updated.`;
                       {activeBrand?.logos && (activeBrand.logos.light || activeBrand.logos.dark) && (
                         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                           <span style={{ fontSize: 10, color: A.muted }}>Logo:</span>
-                          {["none", "all", "first", "last"].map((o) => (
-                            <button key={o} onClick={() => setSlideLogo((p) => ({ ...p, show: o }))} style={{ padding: "3px 6px", borderRadius: 4, fontSize: 9, fontWeight: 600, border: `1px solid ${(slideLogo?.show || "none") === o ? A.accent : A.border}`, background: (slideLogo?.show || "none") === o ? A.soft : "transparent", color: (slideLogo?.show || "none") === o ? A.accent : A.muted, cursor: "pointer", textTransform: "capitalize" }}>{o}</button>
+                          {[{id:"none",l:"Off"},{id:"all",l:"All"},{id:"first",l:"1st"},{id:"last",l:"Last"},{id:"first-last",l:"1+L"}].map((o) => (
+                            <button key={o.id} onClick={() => setSlideLogo((p) => ({ ...p, show: o.id }))} style={{ padding: "3px 5px", borderRadius: 4, fontSize: 8, fontWeight: 600, border: `1px solid ${(slideLogo?.show || "none") === o.id ? A.accent : A.border}`, background: (slideLogo?.show || "none") === o.id ? A.soft : "transparent", color: (slideLogo?.show || "none") === o.id ? A.accent : A.muted, cursor: "pointer" }}>{o.l}</button>
                           ))}
                         </div>
                       )}
@@ -2205,6 +2205,19 @@ Return the same JSON structure with just the post object updated.`;
                             const active = (slide.logoPosition || slideLogo?.position || "top-right") === pos;
                             return <button key={pos} onClick={() => updateSlideField(cur, "logoPosition", pos)} style={{ padding: "2px 5px", borderRadius: 3, fontSize: 12, border: `1px solid ${active ? A.accent : A.border}`, background: active ? A.soft : "transparent", color: active ? A.accent : A.muted, cursor: "pointer" }}>{arrow}</button>;
                           })}
+                        </div>
+                      )}
+                      {/* CTA icon toggle */}
+                      {slide.type === "cta" && (
+                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                          <span style={{ fontSize: 10, color: A.muted }}>Icon:</span>
+                          <button onClick={() => updateSlideField(cur, "hideIcon", !slide.hideIcon)} style={{
+                            padding: "3px 8px", borderRadius: 4, fontSize: 9, fontWeight: 600,
+                            border: `1px solid ${A.border}`,
+                            background: slide.hideIcon ? "transparent" : A.soft,
+                            color: slide.hideIcon ? A.muted : A.accent,
+                            cursor: "pointer",
+                          }}>{slide.hideIcon ? "Off" : "On"}</button>
                         </div>
                       )}
                       {/* Per-slide BG toggle */}

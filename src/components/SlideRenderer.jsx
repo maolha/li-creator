@@ -285,7 +285,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
           <span style={{ fontSize: 12, color: effectiveText, opacity: 0.45 }}>{!hideCounter && n > 1 ? `${i + 1} / ${n}` : ""}</span>
         </div>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" }}>
-          {spec.showIcon && (
+          {spec.showIcon && !s.hideIcon && (
             <div style={{ fontSize: spec.iconSize, lineHeight: 1, color: effectiveText, opacity: spec.iconOpacity, marginBottom: 20, fontFamily: "'DM Serif Display',serif" }}>&#9670;</div>
           )}
           <h2 style={{ fontFamily: headingFont, fontSize: spec.headlineSize, fontWeight: headingWeight, lineHeight: spec.headlineLH, color: effectiveText, margin: "0 0 20px" }}>{s.headline}</h2>
