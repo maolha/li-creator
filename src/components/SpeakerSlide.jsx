@@ -230,7 +230,7 @@ export function SpeakerSlideInner({ data, T, brand, brandFonts, brandLogos }) {
 
         {extraText && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginBottom: 14, lineHeight: 1.4, maxWidth: "80%" }}>{extraText}</div>}
 
-        {show.cta && <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>{cta || "Register now"}</div>}
+        {show.cta && cta && <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>{cta}</div>}
       </div>
     );
   }
@@ -259,7 +259,7 @@ export function SpeakerSlideInner({ data, T, brand, brandFonts, brandLogos }) {
         </div>
 
         <div style={{ padding: `0 ${sz.pad}px ${sz.padY * 0.7}px`, display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(255,255,255,0.18)", paddingTop: 10, margin: `0 ${sz.pad}px`, flexShrink: 0 }}>
-          {show.cta && <div style={{ background: "rgba(255,255,255,0.95)", color: theme.accent, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>{cta || "Register now"}</div>}
+          {show.cta && cta && <div style={{ background: "rgba(255,255,255,0.95)", color: theme.accent, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>{cta}</div>}
           {show.brand && <span style={{ fontSize: sz.brandSz, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: ct, opacity: 0.6 }}>{brand}</span>}
         </div>
       </div>
@@ -297,7 +297,7 @@ export function SpeakerSlideInner({ data, T, brand, brandFonts, brandLogos }) {
         {extraText && <div style={{ fontSize: sz.sessionSize, color: theme.muted, marginBottom: 12, lineHeight: 1.4 }}>{extraText}</div>}
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          {show.cta && <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>{cta || "Register now"}</div>}
+          {show.cta && cta && <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>{cta}</div>}
           {show.brand && <span style={{ fontSize: sz.brandSz, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: theme.accent, opacity: 0.7 }}>{brand}</span>}
         </div>
       </div>
@@ -340,7 +340,7 @@ export function SpeakerSlideInner({ data, T, brand, brandFonts, brandLogos }) {
       {/* Footer */}
       <div style={{ padding: `0 ${sz.pad}px ${sz.padY * 0.7}px`, borderTop: `1px solid ${theme.border}`, paddingTop: 10, margin: `0 ${sz.pad}px`, flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {show.cta && <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>{cta || "Register now"}</div>}
+          {show.cta && cta && <div style={{ background: ctaColor, color: ctaTextColor, padding: sz.ctaPad, borderRadius: 8, fontSize: sz.ctaSz, fontWeight: 700 }}>{cta}</div>}
           {show.date && eventDate && <span style={{ fontSize: sz.dateSz, color: theme.muted, fontWeight: 500 }}>{eventDate}</span>}
           {show.regUrl && regUrl && <span style={{ fontSize: Math.max(8, sz.dateSz - 2), color: theme.muted, opacity: 0.7 }}>{regUrl.replace(/^https?:\/\//, "")}</span>}
         </div>
