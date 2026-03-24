@@ -110,7 +110,9 @@ export function contrastText(hex) {
     const contrastBlack = (L + 0.05) / 0.05;
     // Slight bias toward white — on saturated colors white is
     // perceptually more readable when ratios are close
-    return contrastWhite > contrastBlack * 0.9 ? "#FFFFFF" : "#111111";
+    // Strong bias toward white — dark text on colored backgrounds
+    // is almost never readable. Only use dark on truly light colors.
+    return L < 0.4 ? "#FFFFFF" : "#1A1A2E";
   } catch {
     return "#F5F5F5";
   }

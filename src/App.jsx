@@ -143,7 +143,7 @@ export default function App() {
   const [sc, setSc] = useState(() => loadState("sc", 7));
   const [theme, setTheme] = useState(() => loadState("theme", "Midnight Pro"));
   const [activeBrand, setActiveBrand] = useState(() => loadState("activeBrand", null));
-  const brand = brandDisplayName(activeBrand) || "PAIA";
+  const brand = brandDisplayName(activeBrand) || "";
   const [slides, setSlides] = useState(() => loadState("slides", null));
   const [title, setTitle] = useState(() => loadState("title", ""));
   const [post, setPost] = useState(() => loadState("post", null));
@@ -842,7 +842,7 @@ Return the same JSON structure with just the post object updated.`;
         post: post || null,
         contentType: contentType || "carousel",
         theme: theme || "Midnight Pro",
-        brand: activeBrand || { name: brand || "PAIA" },
+        brand: activeBrand || { name: brand || "" },
         intensity: intensity || "clean",
         slideAspect: slideAspect || "1:1",
         slideBgMode: slideBgMode || "default",
@@ -885,7 +885,7 @@ Return the same JSON structure with just the post object updated.`;
       post: post || null,
       contentType: contentType || "carousel",
       theme: theme || "Midnight Pro",
-      brand: activeBrand || { name: brand || "PAIA" },
+      brand: activeBrand || { name: brand || "" },
       intensity: intensity || "clean",
       slideAspect: slideAspect || "1:1",
       slideBgMode: slideBgMode || "default",
@@ -1164,6 +1164,7 @@ Return the same JSON structure with just the post object updated.`;
               else setSpeakerData({ eventTitle: "", eventDate: "", cta: "", eventUrl: "", speakers: [{ name: "", title: "", company: "", photo: null, photoUrl: "" }] });
               setCur(0);
               setActiveTab(c.contentType === "speaker" ? "slides" : c.slides?.length ? "slides" : "post");
+              setLastGenFingerprint(genFingerprint());
               setPage("create");
             }}
             onDelete={async (id) => {
@@ -1271,7 +1272,7 @@ Return the same JSON structure with just the post object updated.`;
               </div>
               <div>
                 <label style={labelStyle(A)}><Type size={12} /> Label on visual</label>
-                <input type="text" value={brand} onChange={(e) => setActiveBrand((prev) => ({ ...(prev || {}), name: e.target.value }))} placeholder="Shown on slides" style={inputStyle(A)} />
+                <input type="text" value={brand} onChange={(e) => setActiveBrand((prev) => ({ ...(prev || {}), name: e.target.value }))} placeholder="Optional text on slides" style={inputStyle(A)} />
               </div>
             </div>
 
