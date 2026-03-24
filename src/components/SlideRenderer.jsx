@@ -140,13 +140,13 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   const logoPos = logoConfig?.position || "top-right";
   const logoStyle = logoUrl ? {
     position: "absolute",
-    [logoPos.includes("top") ? "top" : "bottom"]: 16,
-    [logoPos.includes("right") ? "right" : "left"]: 16,
-    height: Math.round(SH * 0.06),
-    maxWidth: Math.round(SW * 0.2),
+    [logoPos.includes("top") ? "top" : "bottom"]: logoPos.includes("top") ? 14 : 18,
+    [logoPos.includes("right") ? "right" : "left"]: 18,
+    height: Math.round(SH * 0.055),
+    maxWidth: Math.round(SW * 0.18),
     objectFit: "contain",
     zIndex: 20,
-    opacity: 0.9,
+    opacity: 0.85,
   } : null;
 
   const LogoOverlay = logoUrl ? <img src={logoUrl} alt="" style={logoStyle} /> : null;

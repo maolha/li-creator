@@ -2196,7 +2196,7 @@ Return the same JSON structure with just the post object updated.`;
 
                   {/* Mini preview */}
                   <div style={{ display: "flex", justifyContent: "center" }}>
-                    <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={Math.min(cardPx, 300)} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} />
+                    <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={Math.min(cardPx, slideAspect === "16:9" ? cardPx : 360)} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} />
                   </div>
 
                   {/* Edit fields */}
