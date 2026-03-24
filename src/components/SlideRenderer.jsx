@@ -67,7 +67,7 @@ function Bar({ brand, i, n, light, T, hideCounter }) {
 
 const WEIGHT_MAP = { light: 300, medium: 500, bold: 700, black: 900 };
 
-export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1:1", bgMode = "default", logoConfig, brandLogos, brandFonts, brandBgImage, bgImageMode = "off" }) {
+export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1:1", bgMode = "default", logoConfig, brandLogos, brandFonts, brandBgImage, bgImageMode = "off", ghostNumbers = "on" }) {
   const type = s.type || "insight";
   const { w: SW, h: SH } = SLIDE_ASPECTS[aspect] || SLIDE_ASPECTS["1:1"];
   const baseSpec = getIntensitySpec(type, intensity, T, s.headline?.length || 0);
@@ -141,7 +141,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
     return bgIsDark ? (brandLogos.light || brandLogos.dark) : (brandLogos.dark || brandLogos.light);
   })();
 
-  const logoPos = logoConfig?.position || "top-right";
+  const logoPos = s.logoPosition || logoConfig?.position || "top-right";
   const logoStyle = logoUrl ? {
     position: "absolute",
     [logoPos.includes("top") ? "top" : "bottom"]: logoPos.includes("top") ? 14 : 18,
@@ -157,7 +157,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
 
   // Background image overlay
   const activeBgMode = bgImageMode || "off";
-  const BgImageOverlay = brandBgImage && activeBgMode !== "off" ? (
+  const BgImageOverlay = brandBgImage && activeBgMode !== "off" && !s.hideBgImage ? (
     <div style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }}>
       <div style={{
         position: "absolute", inset: 0,
@@ -302,8 +302,8 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   return (
     <div style={{ width: SW, height: SH, background: effectiveBg, overflow: "hidden", display: "flex", position: "relative", boxSizing: "border-box" }}>
       <Decorations items={activeBgMode !== "off" ? [] : spec.decorations} />
-      {/* Ghost number — hidden when BG image active */}
-      {activeBgMode === "off" && (
+      {/* Ghost number */}
+      {activeBgMode === "off" && ghostNumbers !== "off" && !(ghostNumbers === "middle" && (i === 0 || i === n - 1)) && (
         <div style={{ position: "absolute", bottom: -14, right: -8, fontFamily: "'DM Serif Display',serif", fontSize: spec.ghostSize, fontWeight: 400, lineHeight: 1, color: theme.accent, opacity: spec.ghostOpacity, userSelect: "none", letterSpacing: "-0.04em", pointerEvents: "none" }}>
           {String(i + 1).padStart(2, "0")}
         </div>
@@ -321,14 +321,14 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   );
 }
 
-export function ScaledSlide({ s, brand, i, n, T, size, intensity, aspect = "1:1", bgMode = "default", logoConfig, brandLogos, brandFonts, brandBgImage, bgImageMode }) {
+export function ScaledSlide({ s, brand, i, n, T, size, intensity, aspect = "1:1", bgMode = "default", logoConfig, brandLogos, brandFonts, brandBgImage, bgImageMode, ghostNumbers }) {
   const { w, h } = SLIDE_ASPECTS[aspect] || SLIDE_ASPECTS["1:1"];
   const sc = size / w;
   const scaledH = h * sc;
   return (
     <div style={{ width: size, height: scaledH, borderRadius: 16, overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)" }}>
       <div style={{ width: w, height: h, transform: `scale(${sc})`, transformOrigin: "top left" }}>
-        <SlideInner s={s} brand={brand} i={i} n={n} T={T} intensity={intensity} aspect={aspect} bgMode={bgMode} logoConfig={logoConfig} brandLogos={brandLogos} brandFonts={brandFonts} brandBgImage={brandBgImage} bgImageMode={bgImageMode} />
+        <SlideInner s={s} brand={brand} i={i} n={n} T={T} intensity={intensity} aspect={aspect} bgMode={bgMode} logoConfig={logoConfig} brandLogos={brandLogos} brandFonts={brandFonts} brandBgImage={brandBgImage} bgImageMode={bgImageMode} ghostNumbers={ghostNumbers} />
       </div>
     </div>
   );
