@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import BrandEditor from "./BrandEditor";
 
-export default function SettingsPanel({ T, user, profile, onSave, apiKey, onApiKeySave }) {
+export default function SettingsPanel({ T, profile, onSave, apiKey, onApiKeySave }) {
   const [localProfile, setLocalProfile] = useState({
     linkedinHeadline: "",
     linkedinAbout: "",
@@ -56,7 +56,7 @@ export default function SettingsPanel({ T, user, profile, onSave, apiKey, onApiK
       <Section T={T} icon={User} title="About Me">
         <div>
           <label style={labelStyle(T)}>LinkedIn Headline</label>
-          <input type="text" value={localProfile.linkedinHeadline || ""} onChange={(e) => updateField("linkedinHeadline", e.target.value)} placeholder="e.g. CEO at PAIA | AI for Swiss Financial Services" style={inputStyle(T)} />
+          <input type="text" value={localProfile.linkedinHeadline || ""} onChange={(e) => updateField("linkedinHeadline", e.target.value)} placeholder="e.g. CEO at Acme | AI for Swiss Financial Services" style={inputStyle(T)} />
         </div>
         <div>
           <label style={labelStyle(T)}>LinkedIn About / Bio</label>

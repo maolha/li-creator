@@ -16,28 +16,6 @@ function hexToRgb(hex) {
   return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
 }
 
-// Ensure a color has enough contrast against a background
-function ensureContrastAgainst(color, bg) {
-  const colorRgb = hexToRgb(color);
-  const bgRgb = hexToRgb(bg);
-  if (!colorRgb || !bgRgb) return color;
-  // Calculate actual WCAG contrast ratio
-  function lum(rgb) {
-    const s = [rgb.r, rgb.g, rgb.b].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
-    return 0.2126 * s[0] + 0.7152 * s[1] + 0.0722 * s[2];
-  }
-  const L1 = lum(colorRgb);
-  const L2 = lum(bgRgb);
-  const ratio = (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05);
-  // WCAG AA requires 3:1 for large text, 4.5:1 for normal
-  // Use 2.5:1 as minimum — accent text is usually large/bold
-  if (ratio < 2.5) {
-    // Not enough contrast — return white or black
-    return contrastText(bg);
-  }
-  return color;
-}
-
 function makeDark(accent, gradient) {
   const { r, g, b } = hexToRgb(accent);
   return {

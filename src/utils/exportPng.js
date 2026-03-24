@@ -2,10 +2,10 @@ import { toPng } from "html-to-image";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
-export async function exportSlideAsBlob(domNode) {
+export async function exportSlideAsBlob(domNode, width = 540, height = 540) {
   const dataUrl = await toPng(domNode, {
-    width: 540,
-    height: 540,
+    width,
+    height,
     pixelRatio: 2,
     cacheBust: true,
     style: {

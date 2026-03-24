@@ -149,10 +149,6 @@ export function SpeakerSlideInner({ data, T, brand }) {
       ...T, card: "#FFFFFF", text: "#1A1A2E", muted: "#6B6B7B",
       border: "rgba(26,26,46,0.10)", soft: `rgba(${accentRgb},0.07)`,
     };
-    // Ensure accent is readable on white
-    if (contrastText(theme.accent) === "#FFFFFF") {
-      // Accent is too dark? It's fine on white. But if accent IS white-ish, darken it
-    }
   } else if (bgMode === "invert") {
     theme = {
       ...T, card: T.accent, text: accentCt,

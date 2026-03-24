@@ -42,7 +42,6 @@ import {
   LogOut,
   History,
   Save,
-  CopyPlus,
   Hash,
   UserCircle,
   FilePlus,
@@ -60,7 +59,7 @@ import {
   STAT_CARD_PROMPT,
   TEXT_POST_PROMPT,
 } from "./utils/prompts";
-import { ScaledSlide, SlideInner } from "./components/SlideRenderer";
+import { ScaledSlide, SlideInner, SLIDE_ASPECTS } from "./components/SlideRenderer";
 import { ScaledSpeakerSlide, SpeakerSlideInner, SPEAKER_LAYOUTS, SPEAKER_ASPECTS } from "./components/SpeakerSlide";
 import { buildPdf } from "./utils/buildPdf";
 import { downloadSinglePng, downloadAllPngs } from "./utils/exportPng";
@@ -86,6 +85,7 @@ import LandingPage from "./components/LandingPage";
 import OnboardingFlow from "./components/OnboardingFlow";
 
 const SS = 540;
+const CLAUDE_MODEL = "claude-sonnet-4-20250514";
 
 // Persist helpers
 function loadState(key, fallback) {
@@ -199,7 +199,7 @@ export default function App() {
   const [showDesign, setShowDesign] = useState(false);
   const [ghostNumbers, setGhostNumbers] = useState(() => loadState("ghostNumbers", "on")); // on|off|middle
   const [bgImageMode, setBgImageMode] = useState(() => loadState("bgImageMode", "off"));
-  const [genInstructions, setGenInstructions] = useState("");
+  const [genInstructions, setGenInstructions] = useState(() => loadState("genInstructions", ""));
 
   const fileRef = useRef();
   const rightRef = useRef();
@@ -325,6 +325,7 @@ export default function App() {
   useEffect(() => { saveState("slideLogo", slideLogo); }, [slideLogo]);
   useEffect(() => { saveState("bgImageMode", bgImageMode); }, [bgImageMode]);
   useEffect(() => { saveState("ghostNumbers", ghostNumbers); }, [ghostNumbers]);
+  useEffect(() => { saveState("genInstructions", genInstructions); }, [genInstructions]);
   useEffect(() => { saveState("speakerData", speakerData); }, [speakerData]);
 
   // Responsive card size
@@ -444,7 +445,7 @@ export default function App() {
         "anthropic-dangerous-direct-browser-access": "true",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: CLAUDE_MODEL,
         max_tokens: 2048,
         system: systemPrompt,
         messages: [{ role: "user", content: userText }],
@@ -490,7 +491,7 @@ export default function App() {
           "anthropic-dangerous-direct-browser-access": "true",
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
+          model: CLAUDE_MODEL,
           max_tokens: 2048,
           system: getPromptForType(contentType),
           messages: [{ role: "user", content: parts }],
@@ -645,7 +646,8 @@ Return the same JSON structure with just the post object updated.`;
       for (let i = 0; i < slides.length; i++) {
         // Create a temporary react root for each slide
         const wrapper = document.createElement("div");
-        wrapper.style.cssText = `width:${SS}px;height:${SS}px;`;
+        const _aspects = SLIDE_ASPECTS[slideAspect] || SLIDE_ASPECTS["1:1"];
+        wrapper.style.cssText = `width:${_aspects.w}px;height:${_aspects.h}px;`;
         tempContainer.appendChild(wrapper);
 
         const root = createRoot(wrapper);
@@ -657,7 +659,7 @@ Return the same JSON structure with just the post object updated.`;
           requestAnimationFrame(() => requestAnimationFrame(resolve));
         });
 
-        const dataUrl = await toPng(wrapper, { width: SS, height: SS, pixelRatio: 2, cacheBust: true });
+        const dataUrl = await toPng(wrapper, { width: _aspects.w, height: _aspects.h, pixelRatio: 2, cacheBust: true });
         const res = await fetch(dataUrl);
         const blob = await res.blob();
         folder.file(`slide-${String(i + 1).padStart(2, "0")}.png`, blob);
@@ -961,7 +963,7 @@ Return the same JSON structure with just the post object updated.`;
       {/* Hidden render target for PNG export */}
       {slide && (
         <div style={{ position: "fixed", left: -9999, top: 0, zIndex: -1 }}>
-          <div ref={hiddenSlideRef} style={{ width: SS, height: SS }}>
+          <div ref={hiddenSlideRef} style={{ width: (SLIDE_ASPECTS[slideAspect] || SLIDE_ASPECTS["1:1"]).w, height: (SLIDE_ASPECTS[slideAspect] || SLIDE_ASPECTS["1:1"]).h }}>
             <SlideInner s={slide} brand={brand} i={cur} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} bgImageMode={bgImageMode} ghostNumbers={ghostNumbers} />
           </div>
         </div>
@@ -1035,7 +1037,7 @@ Return the same JSON structure with just the post object updated.`;
             {!user && !apiKey && (
               <button
                 onClick={() => setShowApiInput(!showApiInput)}
-                style={headerBtnStyle(T, false)}
+                style={headerBtnStyle(A, false)}
               >
                 <Zap size={13} /> API Key
               </button>
@@ -1051,7 +1053,7 @@ Return the same JSON structure with just the post object updated.`;
                     referrerPolicy="no-referrer"
                   />
                 )}
-                <button onClick={logOut} style={headerBtnStyle(T, false)} title="Sign out">
+                <button onClick={logOut} style={headerBtnStyle(A, false)} title="Sign out">
                   <LogOut size={13} />
                 </button>
               </div>
@@ -1060,7 +1062,7 @@ Return the same JSON structure with just the post object updated.`;
                 onClick={async () => {
                   try { await signInWithGoogle(); } catch (e) { setError(e.message); }
                 }}
-                style={headerBtnStyle(T, true)}
+                style={headerBtnStyle(A, true)}
               >
                 <LogIn size={13} /> Sign in
               </button>
@@ -1105,7 +1107,6 @@ Return the same JSON structure with just the post object updated.`;
         {page === "settings" && user && (
           <SettingsPanel
             T={A}
-            user={user}
             profile={userProfile?.profile}
             apiKey={apiKey}
             onSave={async (profileData) => {
@@ -2335,7 +2336,7 @@ Return the same JSON structure with just the post object updated.`;
                         onChange={(e) => updatePostField("hook", e.target.value)}
                         onKeyDown={(e) => handleBoldShortcut(e, "hook")}
                         rows={2}
-                        style={postEditStyle(T, true)}
+                        style={postEditStyle(A, true)}
                       />
                     </div>
                     {/* Body */}
@@ -2346,7 +2347,7 @@ Return the same JSON structure with just the post object updated.`;
                         onChange={(e) => updatePostField("body", e.target.value)}
                         onKeyDown={(e) => handleBoldShortcut(e, "body")}
                         rows={5}
-                        style={postEditStyle(T)}
+                        style={postEditStyle(A)}
                       />
                     </div>
                     {/* CTA */}
@@ -2357,7 +2358,7 @@ Return the same JSON structure with just the post object updated.`;
                         onChange={(e) => updatePostField("cta", e.target.value)}
                         onKeyDown={(e) => handleBoldShortcut(e, "cta")}
                         rows={2}
-                        style={postEditStyle(T, true)}
+                        style={postEditStyle(A, true)}
                       />
                     </div>
                     {/* Hashtags */}
@@ -2374,9 +2375,9 @@ Return the same JSON structure with just the post object updated.`;
                         style={{ ...inputStyle(A), fontSize: 13, color: A.accent }}
                       />
                       {/* Hashtag group picker */}
-                      {userProfile?.profile?.hashtagGroups?.length > 0 && (
+                      {activeBrand?.hashtagGroups?.length > 0 && (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 8 }}>
-                          {userProfile.profile.hashtagGroups.map((group, gi) => (
+                          {activeBrand.hashtagGroups.map((group, gi) => (
                             <button
                               key={gi}
                               onClick={() => {
@@ -2410,7 +2411,7 @@ Return the same JSON structure with just the post object updated.`;
                         </div>
                       )}
                       <p style={{ fontSize: 10, color: A.muted, marginTop: 4, opacity: 0.7 }}>
-                        {userProfile?.profile?.hashtagGroups?.length > 0
+                        {activeBrand?.hashtagGroups?.length > 0
                           ? "Click a group to add its tags. Edit manually above."
                           : "Separate with commas. Save groups in Settings."}
                       </p>

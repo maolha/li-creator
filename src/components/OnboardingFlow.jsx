@@ -124,7 +124,7 @@ export default function OnboardingFlow({ T, user, onComplete }) {
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 <div>
                   <label style={labelStyle}>LinkedIn Headline</label>
-                  <input type="text" value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="e.g. CEO at PAIA | AI for Swiss Finance" style={inputStyle} />
+                  <input type="text" value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="e.g. CEO at Acme | AI for Swiss Finance" style={inputStyle} />
                 </div>
                 <div>
                   <label style={labelStyle}>About / Bio</label>
@@ -132,7 +132,7 @@ export default function OnboardingFlow({ T, user, onComplete }) {
                 </div>
                 <div>
                   <label style={labelStyle}>Brand Name (shown on slides)</label>
-                  <input type="text" value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="e.g. PAIA" style={inputStyle} />
+                  <input type="text" value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="e.g. Acme" style={inputStyle} />
                 </div>
               </div>
             )}
