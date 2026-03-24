@@ -1776,6 +1776,27 @@ Return the same JSON structure with just the post object updated.`;
                 </div>
               )}
 
+              {/* Save to Library — always visible when logged in + has output */}
+              {user && historyEnabled && (
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button
+                    onClick={saveToLibrary}
+                    disabled={savingToLibrary}
+                    style={{
+                      ...exportBtnStyle(A),
+                      flex: 1,
+                      background: savedToLibrary ? "#22c55e" : A.soft,
+                      color: savedToLibrary ? "#fff" : A.accent,
+                      borderColor: savedToLibrary ? "#22c55e" : A.border,
+                    }}
+                  >
+                    {savingToLibrary ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> :
+                     savedToLibrary ? <Check size={14} /> : <Save size={14} />}
+                    {savingToLibrary ? "Saving..." : savedToLibrary ? "Saved!" : "Save to Library"}
+                  </button>
+                </div>
+              )}
+
               {/* ── SPEAKER PREVIEW ── */}
               {contentType === "speaker" && hasSpeakerContent && (
                 <>
