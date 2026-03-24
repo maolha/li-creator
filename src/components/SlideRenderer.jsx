@@ -162,7 +162,8 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
       <div style={{
         position: "absolute", inset: 0,
         backgroundImage: `url(${brandBgImage})`,
-        backgroundSize: "cover", backgroundPosition: "center",
+        backgroundSize: "contain", backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         opacity: activeBgMode === "strong" ? 0.5 : 0.1,
       }} />
       <div style={{
