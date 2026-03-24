@@ -239,7 +239,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
         <Decorations items={spec.decorations} />
         {LogoOverlay}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", flexShrink: 0 }}>
-          <Pill tag={s.tag} type={type} variant="light" T={theme} />
+          <Pill tag={s.tag} type={type} variant={bgMode === "light" ? "default" : "light"} T={theme} />
           <span style={{ fontSize: 12, color: effectiveText, opacity: 0.45 }}>{n > 1 ? `${i + 1} / ${n}` : ""}</span>
         </div>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" }}>
