@@ -197,6 +197,7 @@ export default function App() {
   const [extractingBrand, setExtractingBrand] = useState(false);
   const [brandUrl, setBrandUrl] = useState("");
   const [showDesign, setShowDesign] = useState(false);
+  const [bgImageMode, setBgImageMode] = useState(() => loadState("bgImageMode", "off"));
   const [genInstructions, setGenInstructions] = useState("");
 
   const fileRef = useRef();
@@ -321,6 +322,7 @@ export default function App() {
   useEffect(() => { saveState("slideAspect", slideAspect); }, [slideAspect]);
   useEffect(() => { saveState("slideBgMode", slideBgMode); }, [slideBgMode]);
   useEffect(() => { saveState("slideLogo", slideLogo); }, [slideLogo]);
+  useEffect(() => { saveState("bgImageMode", bgImageMode); }, [bgImageMode]);
   useEffect(() => { saveState("speakerData", speakerData); }, [speakerData]);
 
   // Responsive card size
@@ -648,7 +650,7 @@ Return the same JSON structure with just the post object updated.`;
 
         await new Promise((resolve) => {
           root.render(
-            <SlideInner s={slides[i]} brand={brand} i={i} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} />
+            <SlideInner s={slides[i]} brand={brand} i={i} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} bgImageMode={bgImageMode} />
           );
           requestAnimationFrame(() => requestAnimationFrame(resolve));
         });
@@ -958,7 +960,7 @@ Return the same JSON structure with just the post object updated.`;
       {slide && (
         <div style={{ position: "fixed", left: -9999, top: 0, zIndex: -1 }}>
           <div ref={hiddenSlideRef} style={{ width: SS, height: SS }}>
-            <SlideInner s={slide} brand={brand} i={cur} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} />
+            <SlideInner s={slide} brand={brand} i={cur} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} bgImageMode={bgImageMode} />
           </div>
         </div>
       )}
@@ -1340,6 +1342,21 @@ Return the same JSON structure with just the post object updated.`;
                         </div>
                       )}
                     </div>
+                    {/* BG image mode */}
+                    {activeBrand?.backgroundImage && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <span style={{ fontSize: 10, color: A.muted, flexShrink: 0 }}>BG Image:</span>
+                        {["off", "subtle", "strong"].map((m) => (
+                          <button key={m} onClick={() => setBgImageMode(m)} style={{
+                            padding: "3px 8px", borderRadius: 4, fontSize: 9, fontWeight: 600, textTransform: "capitalize",
+                            border: `1px solid ${bgImageMode === m ? A.accent : A.border}`,
+                            background: bgImageMode === m ? A.soft : "transparent",
+                            color: bgImageMode === m ? A.accent : A.muted,
+                            cursor: "pointer",
+                          }}>{m}</button>
+                        ))}
+                      </div>
+                    )}
                     {/* Global slide label */}
                     <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
                       <span style={{ fontSize: 10, color: A.muted, flexShrink: 0 }}>Label:</span>
@@ -1960,7 +1977,7 @@ Return the same JSON structure with just the post object updated.`;
                   <div ref={slideContainerRef} style={{ position: "relative" }}>
                     <AnimatePresence mode="wait">
                       <motion.div key={cur} initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.2 }}>
-                        <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={cardPx} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} />
+                        <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={cardPx} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} bgImageMode={bgImageMode} />
                       </motion.div>
                     </AnimatePresence>
                     {cur > 0 && <button onClick={() => setCur((c) => c - 1)} style={navBtnStyle(T, "left")}><ChevronLeft size={20} /></button>}
@@ -2061,7 +2078,7 @@ Return the same JSON structure with just the post object updated.`;
 
                   {/* Mini preview */}
                   <div style={{ display: "flex", justifyContent: "center" }}>
-                    <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={Math.min(cardPx, slideAspect === "16:9" ? cardPx : 360)} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} />
+                    <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={Math.min(cardPx, slideAspect === "16:9" ? cardPx : 360)} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} bgImageMode={bgImageMode} />
                   </div>
 
                   {/* Edit fields */}

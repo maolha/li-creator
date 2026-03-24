@@ -67,7 +67,7 @@ function Bar({ brand, i, n, light, T, hideCounter }) {
 
 const WEIGHT_MAP = { light: 300, medium: 500, bold: 700, black: 900 };
 
-export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1:1", bgMode = "default", logoConfig, brandLogos, brandFonts, brandBgImage }) {
+export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1:1", bgMode = "default", logoConfig, brandLogos, brandFonts, brandBgImage, bgImageMode = "off" }) {
   const type = s.type || "insight";
   const { w: SW, h: SH } = SLIDE_ASPECTS[aspect] || SLIDE_ASPECTS["1:1"];
   const baseSpec = getIntensitySpec(type, intensity, T, s.headline?.length || 0);
@@ -156,10 +156,24 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   const LogoOverlay = logoUrl ? <img src={logoUrl} alt="" style={logoStyle} /> : null;
 
   // Background image overlay
-  const BgImageOverlay = brandBgImage ? (
+  const activeBgMode = bgImageMode || "off";
+  const BgImageOverlay = brandBgImage && activeBgMode !== "off" ? (
     <>
-      <div style={{ position: "absolute", inset: 0, zIndex: 1, backgroundImage: `url(${brandBgImage})`, backgroundSize: "cover", backgroundPosition: "center", opacity: 0.08, pointerEvents: "none" }} />
-      <div style={{ position: "absolute", inset: 0, zIndex: 2, background: effectiveBg, opacity: 0.85, pointerEvents: "none" }} />
+      <div style={{
+        position: "absolute", inset: 0, zIndex: 1,
+        backgroundImage: `url(${brandBgImage})`,
+        backgroundSize: "cover", backgroundPosition: "center",
+        opacity: activeBgMode === "strong" ? 0.45 : 0.08,
+        pointerEvents: "none",
+      }} />
+      <div style={{
+        position: "absolute", inset: 0, zIndex: 2,
+        background: activeBgMode === "strong"
+          ? `linear-gradient(180deg, ${effectiveBg}CC 0%, ${effectiveBg}99 40%, ${effectiveBg}DD 100%)`
+          : effectiveBg,
+        opacity: activeBgMode === "strong" ? 1 : 0.85,
+        pointerEvents: "none",
+      }} />
     </>
   ) : null;
 
@@ -306,14 +320,14 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   );
 }
 
-export function ScaledSlide({ s, brand, i, n, T, size, intensity, aspect = "1:1", bgMode = "default", logoConfig, brandLogos, brandFonts, brandBgImage }) {
+export function ScaledSlide({ s, brand, i, n, T, size, intensity, aspect = "1:1", bgMode = "default", logoConfig, brandLogos, brandFonts, brandBgImage, bgImageMode }) {
   const { w, h } = SLIDE_ASPECTS[aspect] || SLIDE_ASPECTS["1:1"];
   const sc = size / w;
   const scaledH = h * sc;
   return (
     <div style={{ width: size, height: scaledH, borderRadius: 16, overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)" }}>
       <div style={{ width: w, height: h, transform: `scale(${sc})`, transformOrigin: "top left" }}>
-        <SlideInner s={s} brand={brand} i={i} n={n} T={T} intensity={intensity} aspect={aspect} bgMode={bgMode} logoConfig={logoConfig} brandLogos={brandLogos} brandFonts={brandFonts} brandBgImage={brandBgImage} />
+        <SlideInner s={s} brand={brand} i={i} n={n} T={T} intensity={intensity} aspect={aspect} bgMode={bgMode} logoConfig={logoConfig} brandLogos={brandLogos} brandFonts={brandFonts} brandBgImage={brandBgImage} bgImageMode={bgImageMode} />
       </div>
     </div>
   );
