@@ -41,7 +41,7 @@ function Pill({ tag, type, variant, T }) {
   );
 }
 
-function Bar({ brand, i, n, light, T }) {
+function Bar({ brand, i, n, light, T, hideCounter }) {
   const ct = contrastText(T.accent);
   return (
     <div
@@ -59,7 +59,7 @@ function Bar({ brand, i, n, light, T }) {
         {brand}
       </span>
       <span style={{ fontSize: 12, color: light ? ct : T.muted, opacity: light ? 0.45 : 0.6 }}>
-        {n > 1 ? `${i + 1} / ${n}` : ""}
+        {!hideCounter && n > 1 ? `${i + 1} / ${n}` : ""}
       </span>
     </div>
   );
@@ -160,6 +160,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   ) : null;
 
   const slideLabel = s.label !== undefined ? s.label : brand; // per-slide override
+  const hideCounter = !!logoUrl; // hide slide counter when logo is showing
   const hideBrandText = !!logoUrl && !s.label; // logo replaces brand text unless slide has custom label
 
   // Brand fonts
@@ -177,7 +178,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
         <div style={{ paddingLeft: spec.accentBarW > 0 ? spec.accentBarW + 2 : 0, display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", flexShrink: 0 }}>
           {!hideBrandText && <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: effectiveText === ct ? ct : theme.accent, opacity: effectiveText === ct ? 0.8 : 1 }}>{slideLabel}</span>}
           {hideBrandText && <span />}
-          <span style={{ fontSize: 12, color: effectiveText, opacity: 0.5 }}>{n > 1 ? `${i + 1} / ${n}` : ""}</span>
+          <span style={{ fontSize: 12, color: effectiveText, opacity: 0.5 }}>{!hideCounter && n > 1 ? `${i + 1} / ${n}` : ""}</span>
         </div>
         <div style={{ paddingLeft: spec.accentBarW > 0 ? spec.accentBarW + 2 : 0, position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
           <Pill tag={s.tag} type={type} variant={spec.pillVariant} T={theme} />
@@ -211,7 +212,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
             <h2 style={{ fontFamily: headingFont, fontSize: spec.headlineSize, fontWeight: headingWeight, lineHeight: 1.25, color: theme.text, margin: `0 0 ${Math.round(16 * vScale)}px` }}>{s.headline}</h2>
             <p style={{ fontSize: spec.bodySize, lineHeight: 1.72, color: theme.muted, margin: 0 }}>{s.body}</p>
           </div>
-          <Bar brand={hideBrandText ? "" : brand} i={i} n={n} T={theme} />
+          <Bar brand={hideBrandText ? "" : brand} i={i} n={n} T={theme} hideCounter={hideCounter} />
         </div>
       </div>
     );
@@ -234,7 +235,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
         ) : (
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
             <div style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.quoteMarkSize, lineHeight: 0.78, color: effectiveBg === theme.card ? theme.accent : qText, opacity: spec.quoteMarkOpacity, userSelect: "none", marginLeft: -10, marginTop: -8 }}>&ldquo;</div>
-            <span style={{ fontSize: 12, color: effectiveBg === theme.card ? theme.muted : qText, paddingTop: 8, opacity: 0.6 }}>{n > 1 ? `${i + 1} / ${n}` : ""}</span>
+            <span style={{ fontSize: 12, color: effectiveBg === theme.card ? theme.muted : qText, paddingTop: 8, opacity: 0.6 }}>{!hideCounter && n > 1 ? `${i + 1} / ${n}` : ""}</span>
           </div>
         )}
         <div style={{ flex: isCentered ? undefined : 1, display: "flex", flexDirection: "column", justifyContent: "center", marginTop: isCentered ? 0 : -26, position: "relative", zIndex: 1 }}>
@@ -264,7 +265,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
         {LogoOverlay}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", flexShrink: 0 }}>
           <Pill tag={s.tag} type={type} variant={bgMode === "light" ? "default" : "light"} T={theme} />
-          <span style={{ fontSize: 12, color: effectiveText, opacity: 0.45 }}>{n > 1 ? `${i + 1} / ${n}` : ""}</span>
+          <span style={{ fontSize: 12, color: effectiveText, opacity: 0.45 }}>{!hideCounter && n > 1 ? `${i + 1} / ${n}` : ""}</span>
         </div>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" }}>
           {spec.showIcon && (
@@ -295,7 +296,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
           <h2 style={{ fontFamily: headingFont, fontSize: spec.headlineSize, fontWeight: headingWeight, lineHeight: spec.headlineLH, color: effectiveText, margin: `0 0 ${Math.round(18 * vScale)}px` }}>{s.headline}</h2>
           <p style={{ fontSize: spec.bodySize, lineHeight: 1.72, color: effectiveBody, margin: 0, opacity: spec.bodyOpacity || 1 }}>{s.body}</p>
         </div>
-        <Bar brand={hideBrandText ? "" : brand} i={i} n={n} T={theme} />
+        <Bar brand={hideBrandText ? "" : brand} i={i} n={n} T={theme} hideCounter={hideCounter} />
       </div>
     </div>
   );
