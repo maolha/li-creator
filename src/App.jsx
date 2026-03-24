@@ -2065,59 +2065,51 @@ Return the same JSON structure with just the post object updated.`;
                   </div>
 
                   {/* Edit fields */}
-                  <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 14, padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
-                    <div>
-                      <label style={{ ...labelStyle(A), marginBottom: 4 }}>Type</label>
-                      <select value={slide.type || "insight"} onChange={(e) => updateSlideField(cur, "type", e.target.value)} style={selectStyle(A)}>
-                        {["cover", "insight", "stat", "quote", "cta"].map((t) => <option key={t}>{t}</option>)}
-                      </select>
+                  <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 14, padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+                    {/* Row 1: Type + Tag */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                      <div>
+                        <label style={{ ...labelStyle(A), marginBottom: 3 }}>Type</label>
+                        <select value={slide.type || "insight"} onChange={(e) => updateSlideField(cur, "type", e.target.value)} style={{ ...selectStyle(A), padding: "7px 10px" }}>
+                          {["cover", "insight", "stat", "quote", "cta"].map((t) => <option key={t}>{t}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ ...labelStyle(A), marginBottom: 3 }}>Tag</label>
+                        <input type="text" value={slide.tag || ""} onChange={(e) => updateSlideField(cur, "tag", e.target.value)} style={{ ...inputStyle(A), padding: "7px 10px" }} />
+                      </div>
                     </div>
+                    {/* Headline */}
                     <div>
-                      <label style={{ ...labelStyle(A), marginBottom: 4 }}>Headline</label>
+                      <label style={{ ...labelStyle(A), marginBottom: 3 }}>Headline</label>
                       <input type="text" value={slide.headline || ""} onChange={(e) => updateSlideField(cur, "headline", e.target.value)} style={inputStyle(A)} />
                     </div>
+                    {/* Body */}
                     <div>
-                      <label style={{ ...labelStyle(A), marginBottom: 4 }}>Body</label>
-                      <textarea value={slide.body || ""} onChange={(e) => updateSlideField(cur, "body", e.target.value)} rows={3} style={{ ...inputStyle(A), resize: "vertical", lineHeight: 1.6 }} />
+                      <label style={{ ...labelStyle(A), marginBottom: 3 }}>Body</label>
+                      <textarea value={slide.body || ""} onChange={(e) => updateSlideField(cur, "body", e.target.value)} rows={2} style={{ ...inputStyle(A), resize: "vertical", lineHeight: 1.6 }} />
                     </div>
+                    {/* Stat fields */}
                     {slide.type === "stat" && (
-                      <>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                          <div>
-                            <label style={{ ...labelStyle(A), marginBottom: 4 }}>Stat</label>
-                            <input type="text" value={slide.stat || ""} onChange={(e) => updateSlideField(cur, "stat", e.target.value)} placeholder="73%" style={inputStyle(A)} />
-                          </div>
-                          <div>
-                            <label style={{ ...labelStyle(A), marginBottom: 4 }}>Stat Label</label>
-                            <input type="text" value={slide.statLabel || ""} onChange={(e) => updateSlideField(cur, "statLabel", e.target.value)} placeholder="Adoption rate" style={inputStyle(A)} />
-                          </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8, alignItems: "end" }}>
+                        <div>
+                          <label style={{ ...labelStyle(A), marginBottom: 3 }}>Stat</label>
+                          <input type="text" value={slide.stat || ""} onChange={(e) => updateSlideField(cur, "stat", e.target.value)} placeholder="73%" style={{ ...inputStyle(A), padding: "7px 10px" }} />
                         </div>
                         <div>
-                          <label style={{ ...labelStyle(A), marginBottom: 4 }}>Stat Font Size</label>
-                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <input
-                              type="range"
-                              min={40}
-                              max={140}
-                              value={slide.statFontSize || (slide.stat?.length > 5 ? 70 : slide.stat?.length > 3 ? 90 : 112)}
-                              onChange={(e) => updateSlideField(cur, "statFontSize", Number(e.target.value))}
-                              style={{ flex: 1, accentColor: A.accent }}
-                            />
-                            <span style={{ fontSize: 12, color: A.muted, fontFamily: "'JetBrains Mono', monospace", minWidth: 36, textAlign: "right" }}>
-                              {slide.statFontSize || (slide.stat?.length > 5 ? 70 : slide.stat?.length > 3 ? 90 : 112)}px
-                            </span>
-                          </div>
+                          <label style={{ ...labelStyle(A), marginBottom: 3 }}>Label</label>
+                          <input type="text" value={slide.statLabel || ""} onChange={(e) => updateSlideField(cur, "statLabel", e.target.value)} placeholder="Adoption" style={{ ...inputStyle(A), padding: "7px 10px" }} />
                         </div>
-                      </>
+                        <div style={{ display: "flex", alignItems: "center", gap: 4, paddingBottom: 2 }}>
+                          <input type="range" min={40} max={140} value={slide.statFontSize || (slide.stat?.length > 5 ? 70 : slide.stat?.length > 3 ? 90 : 112)} onChange={(e) => updateSlideField(cur, "statFontSize", Number(e.target.value))} style={{ width: 60, accentColor: A.accent }} />
+                          <span style={{ fontSize: 10, color: A.muted, fontFamily: "'JetBrains Mono', monospace" }}>{slide.statFontSize || "auto"}</span>
+                        </div>
+                      </div>
                     )}
+                    {/* Row: Label */}
                     <div>
-                      <label style={{ ...labelStyle(A), marginBottom: 4 }}>Tag</label>
-                      <input type="text" value={slide.tag || ""} onChange={(e) => updateSlideField(cur, "tag", e.target.value)} style={inputStyle(A)} />
-                    </div>
-                    <div>
-                      <label style={{ ...labelStyle(A), marginBottom: 4 }}>Slide Label</label>
-                      <input type="text" value={slide.label ?? brand} onChange={(e) => updateSlideField(cur, "label", e.target.value)} placeholder={brand || "Optional text on slide"} style={inputStyle(A)} />
-                      <p style={{ fontSize: 9, color: A.muted, marginTop: 2, opacity: 0.6 }}>Custom text shown on this slide (e.g. source, URL, tagline)</p>
+                      <label style={{ ...labelStyle(A), marginBottom: 3 }}>Slide Label</label>
+                      <input type="text" value={slide.label ?? brand} onChange={(e) => updateSlideField(cur, "label", e.target.value)} placeholder={brand || "Source, URL, tagline..."} style={{ ...inputStyle(A), padding: "7px 10px" }} />
                     </div>
 
                     {/* Per-slide toggles */}
