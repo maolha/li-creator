@@ -142,13 +142,18 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   })();
 
   const logoPos = s.logoPosition || logoConfig?.position || "top-right";
-  // Logo padding matches slide content padding
-  const logoPadX = isWide ? 36 : isTall ? 50 : 46;
-  const logoPadY = isWide ? 28 : isTall ? 48 : 40;
+  // Logo padding matches slide content edges
+  const padParts = (spec.padding || "44px 50px").split(" ").map((p) => parseInt(p));
+  const contentPadTop = padParts[0] || 44;
+  const contentPadRight = padParts[1] || padParts[0] || 50;
+  const contentPadLeft = padParts[3] || padParts[1] || padParts[0] || 50;
+  const contentPadBottom = padParts[2] || padParts[0] || 44;
+  // Add accent bar offset for left positioning
+  const barOffset = (spec.accentBarW || spec.barW || 0) > 0 ? (spec.accentBarW || spec.barW) + 2 : 0;
   const logoStyle = logoUrl ? {
     position: "absolute",
-    [logoPos.includes("top") ? "top" : "bottom"]: logoPadY,
-    [logoPos.includes("right") ? "right" : "left"]: logoPadX,
+    [logoPos.includes("top") ? "top" : "bottom"]: logoPos.includes("top") ? contentPadTop : contentPadBottom,
+    [logoPos.includes("right") ? "right" : "left"]: logoPos.includes("left") ? contentPadLeft + barOffset : contentPadRight,
     height: Math.round(SH * 0.055),
     maxWidth: Math.round(SW * 0.18),
     objectFit: "contain",
