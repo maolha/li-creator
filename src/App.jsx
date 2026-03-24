@@ -138,7 +138,7 @@ export default function App() {
   const [cur, setCur] = useState(() => loadState("cur", 0));
   const [contentType, setContentType] = useState(() => loadState("contentType", "carousel"));
   const [customThemes, setCustomThemes] = useState(() => loadState("custom_themes", {}));
-  const [appMode, setAppMode] = useState(() => loadState("appMode", "dark")); // app shell only
+  const [appMode, setAppMode] = useState(() => loadState("appMode", "light")); // app shell only
   const [activeTab, setActiveTab] = useState(() => loadState("activeTab", "slides"));
   const [tone, setTone] = useState(() => loadState("tone", "professional"));
   const [intensity, setIntensity] = useState(() => loadState("intensity", "clean"));
