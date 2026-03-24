@@ -190,6 +190,7 @@ export default function App() {
   const [loading, setLoad] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState(null); // { message, resolve }
   const [cardPx, setCardPx] = useState(480);
   const [apiKey, setApiKey] = useState("");
   const [showApiInput, setShowApiInput] = useState(false);
@@ -825,8 +826,12 @@ Return the same JSON structure with just the post object updated.`;
     }
   }
 
-  function resetToNew() {
-    if (hasOutput && !window.confirm("Current content will be lost. Continue?")) return;
+  function appConfirm(message) {
+    return new Promise((resolve) => setConfirmDialog({ message, resolve }));
+  }
+
+  async function resetToNew() {
+    if (hasOutput && !(await appConfirm("Current content will be lost. Continue?"))) return;
     setInput("");
     setSource("");
     setFiles([]);
@@ -2524,6 +2529,62 @@ Return the same JSON structure with just the post object updated.`;
           .cf-brand-sub { display: none !important; }
         }
       `}</style>
+
+      {/* Themed confirm dialog */}
+      <AnimatePresence>
+        {confirmDialog && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: "fixed", inset: 0, zIndex: 9999,
+              background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+            onClick={() => { confirmDialog.resolve(false); setConfirmDialog(null); }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: "spring", damping: 28, stiffness: 400 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                background: A.card, border: `1px solid ${A.border}`, borderRadius: 18,
+                padding: "28px 32px", maxWidth: 380, width: "90%",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+              }}
+            >
+              <p style={{ fontSize: 15, fontWeight: 500, color: A.text, lineHeight: 1.5, marginBottom: 24 }}>
+                {confirmDialog.message}
+              </p>
+              <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+                <button
+                  onClick={() => { confirmDialog.resolve(false); setConfirmDialog(null); }}
+                  style={{
+                    background: A.soft, border: `1px solid ${A.border}`, borderRadius: 10,
+                    padding: "9px 20px", fontSize: 13, fontWeight: 600, color: A.muted,
+                    cursor: "pointer", fontFamily: "'Inter', sans-serif",
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => { confirmDialog.resolve(true); setConfirmDialog(null); }}
+                  style={{
+                    background: A.accent, border: `1px solid ${A.accent}`, borderRadius: 10,
+                    padding: "9px 20px", fontSize: 13, fontWeight: 600, color: contrastText(A.accent),
+                    cursor: "pointer", fontFamily: "'Inter', sans-serif",
+                  }}
+                >
+                  Continue
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
