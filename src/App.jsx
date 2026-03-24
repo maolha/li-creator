@@ -138,7 +138,7 @@ export default function App() {
   const [cur, setCur] = useState(() => loadState("cur", 0));
   const [contentType, setContentType] = useState(() => loadState("contentType", "carousel"));
   const [customThemes, setCustomThemes] = useState(() => loadState("custom_themes", {}));
-  const [brandMode, setBrandMode] = useState(() => loadState("brandMode", "dark"));
+  const [appMode, setAppMode] = useState(() => loadState("appMode", "dark")); // app shell only
   const [activeTab, setActiveTab] = useState(() => loadState("activeTab", "slides"));
   const [tone, setTone] = useState(() => loadState("tone", "professional"));
   const [intensity, setIntensity] = useState(() => loadState("intensity", "clean"));
@@ -188,15 +188,16 @@ export default function App() {
   const hiddenSlideRef = useRef();
 
   // App shell theme (fixed dark/light, independent of output preset)
-  const A = APP_THEMES[brandMode] || APP_THEMES.dark;
+  const A = APP_THEMES[appMode] || APP_THEMES.dark;
   const appBg = A.bg;
   const appText = A.text;
 
   // Output preset (accent colors for slides + UI accents)
-  const builtInPresets = getThemes(brandMode);
+  // Output presets are always dark-base (slideBgMode handles light/invert on output)
+  const builtInPresets = getThemes("dark");
   const customResolved = {};
   for (const [name, val] of Object.entries(customThemes)) {
-    customResolved[name] = val[brandMode] || val.dark || val;
+    customResolved[name] = val.dark || val;
   }
   const allPresets = { ...builtInPresets, ...customResolved };
   const T = allPresets[theme] || builtInPresets["Midnight Pro"];
@@ -294,7 +295,7 @@ export default function App() {
   useEffect(() => { saveState("cur", cur); }, [cur]);
   useEffect(() => { saveState("contentType", contentType); }, [contentType]);
   useEffect(() => { saveState("custom_themes", customThemes); }, [customThemes]);
-  useEffect(() => { saveState("brandMode", brandMode); }, [brandMode]);
+  useEffect(() => { saveState("appMode", appMode); }, [appMode]);
   useEffect(() => { saveState("activeTab", activeTab); }, [activeTab]);
   useEffect(() => { saveState("tone", tone); }, [tone]);
   useEffect(() => { saveState("audience", audience); }, [audience]);
@@ -822,7 +823,7 @@ Return the same JSON structure with just the post object updated.`;
         post: post || null,
         contentType,
         theme,
-        brandMode,
+        appMode,
         brand: activeBrand || { name: brand },
         intensity,
         slideAspect,
@@ -854,7 +855,7 @@ Return the same JSON structure with just the post object updated.`;
       post: post || null,
       contentType,
       theme,
-      brandMode,
+      appMode,
       brand: activeBrand || { name: brand },
       intensity,
       slideAspect,
@@ -981,6 +982,18 @@ Return the same JSON structure with just the post object updated.`;
                 </NavBtn>
               </>
             )}
+            {/* App dark/light toggle */}
+            <button
+              onClick={() => setAppMode(appMode === "dark" ? "light" : "dark")}
+              title={appMode === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              style={{
+                background: "none", border: `1px solid ${A.border}`, borderRadius: 8,
+                padding: "6px 8px", cursor: "pointer", color: A.muted, display: "flex",
+                alignItems: "center", transition: "all 0.2s",
+              }}
+            >
+              {appMode === "dark" ? <Sun size={14} /> : <Moon size={14} />}
+            </button>
             {!user && !apiKey && (
               <button
                 onClick={() => setShowApiInput(!showApiInput)}
@@ -1104,7 +1117,7 @@ Return the same JSON structure with just the post object updated.`;
               setTitle(c.title || "");
               setPost(c.post || null);
               setContentType(c.contentType || "carousel");
-              setBrandMode(c.brandMode || "dark");
+              setAppMode(c.appMode || c.brandMode || "dark");
               if (c.theme) setTheme(c.theme);
               // Restore brand (object or legacy string)
               if (c.brand && typeof c.brand === "object") setActiveBrand(c.brand);
@@ -1389,16 +1402,6 @@ Return the same JSON structure with just the post object updated.`;
                     }
                   }}
                 />
-                <button
-                  onClick={() => brandMode === "dark" ? setBrandMode("light") : setBrandMode("dark")}
-                  title={`${brandMode === "dark" ? "Dark" : "Light"} mode`}
-                  style={{
-                    background: T.soft, border: `1px solid ${T.border}`, borderRadius: 10, padding: "0 10px",
-                    cursor: "pointer", color: T.muted, display: "flex", alignItems: "center",
-                  }}
-                >
-                  {brandMode === "dark" ? <Moon size={14} /> : <Sun size={14} />}
-                </button>
                 <button
                   onClick={() => {
                     if (brandUrl.match(/^#[0-9a-fA-F]{6}$/)) addCustomThemeFromColor(brandUrl);
