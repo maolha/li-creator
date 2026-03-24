@@ -227,7 +227,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
           {BgImageOverlay}
         <Decorations items={activeBgMode !== "off" ? [] : spec.decorations} />
         {LogoOverlay}
-          <div style={{ fontFamily: "'DM Serif Display',serif", fontSize: sf, fontWeight: 400, color: ct, lineHeight: 1, textAlign: "center", whiteSpace: "nowrap", position: "relative", zIndex: 1 }}>{sn}</div>
+          <div style={{ fontFamily: headingFont, fontSize: sf, fontWeight: headingWeight, color: ct, lineHeight: 1, textAlign: "center", whiteSpace: "nowrap", position: "relative", zIndex: 1 }}>{sn}</div>
           {s.statLabel && <div style={{ fontSize: spec.labelSize, fontWeight: 600, color: ct, opacity: 0.7, marginTop: Math.round(14 * vScale), textAlign: "center", textTransform: "uppercase", letterSpacing: spec.labelSpacing || "0.06em", position: "relative", zIndex: 1 }}>{s.statLabel}</div>}
         </div>
         <div style={{ flex: 1, padding: `${Math.round(44 * vScale)}px 42px ${Math.round(40 * vScale)}px 36px`, display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
