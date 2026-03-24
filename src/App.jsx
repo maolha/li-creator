@@ -2378,7 +2378,7 @@ function selectStyle(A) {
   return { ...inputStyle(A), cursor: "pointer", appearance: "auto" };
 }
 
-function navBtnStyle(T, side) {
+function navBtnStyle(A, side) {
   return {
     position: "absolute", top: "50%", transform: "translateY(-50%)", [side]: 8,
     width: 40, height: 40, borderRadius: 12, background: `${A.card}DD`, backdropFilter: "blur(8px)",
@@ -2399,7 +2399,7 @@ function postLabelStyle(A) {
   return { fontSize: 10, fontWeight: 700, color: A.accent, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 };
 }
 
-function postEditStyle(T, bold = false) {
+function postEditStyle(A, bold = false) {
   return {
     width: "100%", background: "transparent", color: A.text, border: "none", borderRadius: 0,
     padding: 0, fontFamily: "'Inter', sans-serif", fontSize: 14, lineHeight: 1.7, resize: "vertical",
@@ -2407,7 +2407,7 @@ function postEditStyle(T, bold = false) {
   };
 }
 
-function headerBtnStyle(T, primary) {
+function headerBtnStyle(A, primary) {
   return {
     background: primary ? A.accent : A.soft,
     border: `1px solid ${primary ? A.accent : A.border}`,
@@ -2425,7 +2425,7 @@ function headerBtnStyle(T, primary) {
   };
 }
 
-function NavBtn({ T, active, onClick, children }) {
+function NavBtn({ T: A, active, onClick, children }) {
   return (
     <button
       onClick={onClick}
