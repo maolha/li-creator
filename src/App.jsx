@@ -647,7 +647,7 @@ Return the same JSON structure with just the post object updated.`;
 
         await new Promise((resolve) => {
           root.render(
-            <SlideInner s={slides[i]} brand={brand} i={i} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} />
+            <SlideInner s={slides[i]} brand={brand} i={i} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} />
           );
           requestAnimationFrame(() => requestAnimationFrame(resolve));
         });
@@ -957,7 +957,7 @@ Return the same JSON structure with just the post object updated.`;
       {slide && (
         <div style={{ position: "fixed", left: -9999, top: 0, zIndex: -1 }}>
           <div ref={hiddenSlideRef} style={{ width: SS, height: SS }}>
-            <SlideInner s={slide} brand={brand} i={cur} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} />
+            <SlideInner s={slide} brand={brand} i={cur} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} />
           </div>
         </div>
       )}
@@ -1338,6 +1338,17 @@ Return the same JSON structure with just the post object updated.`;
                           ))}
                         </div>
                       )}
+                    </div>
+                    {/* Global slide label */}
+                    <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                      <span style={{ fontSize: 10, color: A.muted, flexShrink: 0 }}>Label:</span>
+                      <input
+                        type="text"
+                        value={brand}
+                        onChange={(e) => setActiveBrand((prev) => ({ ...(prev || {}), name: e.target.value }))}
+                        placeholder="Text on all slides (optional)"
+                        style={{ ...inputStyle(A), padding: "4px 8px", fontSize: 11, flex: 1 }}
+                      />
                     </div>
                   </div>
                 )}
@@ -1932,7 +1943,7 @@ Return the same JSON structure with just the post object updated.`;
                   <div ref={slideContainerRef} style={{ position: "relative" }}>
                     <AnimatePresence mode="wait">
                       <motion.div key={cur} initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.2 }}>
-                        <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={cardPx} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} />
+                        <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={cardPx} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} />
                       </motion.div>
                     </AnimatePresence>
                     {cur > 0 && <button onClick={() => setCur((c) => c - 1)} style={navBtnStyle(T, "left")}><ChevronLeft size={20} /></button>}
@@ -2033,7 +2044,7 @@ Return the same JSON structure with just the post object updated.`;
 
                   {/* Mini preview */}
                   <div style={{ display: "flex", justifyContent: "center" }}>
-                    <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={Math.min(cardPx, slideAspect === "16:9" ? cardPx : 360)} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} />
+                    <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={Math.min(cardPx, slideAspect === "16:9" ? cardPx : 360)} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} />
                   </div>
 
                   {/* Edit fields */}

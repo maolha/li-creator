@@ -91,6 +91,34 @@ export default function BrandEditor({ T, brands, onChange }) {
                   </div>
                 </div>
 
+                {/* Background Image */}
+                <div>
+                  <label style={lbl(T)}><Image size={10} /> Background Texture</label>
+                  <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                    <input type="text" value={brand.backgroundImage && !brand.backgroundImage.startsWith?.("data:") ? brand.backgroundImage : ""} onChange={(e) => updateBrand(brand.id, { backgroundImage: e.target.value })} placeholder="Image URL..." style={{ ...inp(T), flex: 1, fontSize: 11 }} />
+                    <label style={{ background: T.soft, border: `1px solid ${T.border}`, borderRadius: 6, padding: "0 8px", cursor: "pointer", display: "flex", alignItems: "center", color: T.muted, fontSize: 10, fontWeight: 600, height: 32 }}>
+                      <Image size={11} />
+                      <input type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = () => updateBrand(brand.id, { backgroundImage: reader.result });
+                        reader.readAsDataURL(file);
+                      }} />
+                    </label>
+                  </div>
+                  {brand.backgroundImage && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+                      <div style={{ width: 48, height: 32, borderRadius: 4, overflow: "hidden", border: `1px solid ${T.border}` }}>
+                        <img src={brand.backgroundImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      </div>
+                      <span style={{ fontSize: 10, color: T.muted }}>Set</span>
+                      <button onClick={() => updateBrand(brand.id, { backgroundImage: null })} style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", fontSize: 10 }}>Remove</button>
+                    </div>
+                  )}
+                  <p style={hint(T)}>Subtle texture or photo used as slide background overlay.</p>
+                </div>
+
                 {/* Fonts */}
                 <div>
                   <label style={lbl(T)}><Type size={10} /> Fonts</label>

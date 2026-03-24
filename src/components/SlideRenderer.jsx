@@ -67,7 +67,7 @@ function Bar({ brand, i, n, light, T }) {
 
 const WEIGHT_MAP = { light: 300, medium: 500, bold: 700, black: 900 };
 
-export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1:1", bgMode = "default", logoConfig, brandLogos, brandFonts }) {
+export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1:1", bgMode = "default", logoConfig, brandLogos, brandFonts, brandBgImage }) {
   const type = s.type || "insight";
   const { w: SW, h: SH } = SLIDE_ASPECTS[aspect] || SLIDE_ASPECTS["1:1"];
   const baseSpec = getIntensitySpec(type, intensity, T, s.headline?.length || 0);
@@ -150,6 +150,15 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   } : null;
 
   const LogoOverlay = logoUrl ? <img src={logoUrl} alt="" style={logoStyle} /> : null;
+
+  // Background image overlay
+  const BgImageOverlay = brandBgImage ? (
+    <>
+      <div style={{ position: "absolute", inset: 0, zIndex: 1, backgroundImage: `url(${brandBgImage})`, backgroundSize: "cover", backgroundPosition: "center", opacity: 0.08, pointerEvents: "none" }} />
+      <div style={{ position: "absolute", inset: 0, zIndex: 2, background: effectiveBg, opacity: 0.85, pointerEvents: "none" }} />
+    </>
+  ) : null;
+
   const slideLabel = s.label !== undefined ? s.label : brand; // per-slide override
   const hideBrandText = !!logoUrl && !s.label; // logo replaces brand text unless slide has custom label
 
@@ -162,6 +171,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   if (type === "cover") {
     return (
       <div style={{ width: SW, height: SH, background: effectiveBg, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: spec.padding, boxSizing: "border-box" }}>
+        {BgImageOverlay}
         <Decorations items={spec.decorations} />
         {LogoOverlay}
         <div style={{ paddingLeft: spec.accentBarW > 0 ? spec.accentBarW + 2 : 0, display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", flexShrink: 0 }}>
@@ -188,7 +198,8 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
     return (
       <div style={{ width: SW, height: SH, background: theme.card, overflow: "hidden", display: "flex", boxSizing: "border-box" }}>
         <div style={{ width: spec.panelW, flexShrink: 0, background: spec.panelBg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: `${Math.round(32 * vScale)}px 18px`, position: "relative", overflow: "hidden" }}>
-          <Decorations items={spec.decorations} />
+          {BgImageOverlay}
+        <Decorations items={spec.decorations} />
         {LogoOverlay}
           <div style={{ fontFamily: "'DM Serif Display',serif", fontSize: sf, fontWeight: 400, color: ct, lineHeight: 1, textAlign: "center", whiteSpace: "nowrap", position: "relative", zIndex: 1 }}>{sn}</div>
           {s.statLabel && <div style={{ fontSize: spec.labelSize, fontWeight: 600, color: ct, opacity: 0.7, marginTop: Math.round(14 * vScale), textAlign: "center", textTransform: "uppercase", letterSpacing: spec.labelSpacing || "0.06em", position: "relative", zIndex: 1 }}>{s.statLabel}</div>}
@@ -214,6 +225,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
     const isCentered = spec.centered;
     return (
       <div style={{ width: SW, height: SH, background: qBg, overflow: "hidden", display: "flex", flexDirection: "column", padding: spec.padding, boxSizing: "border-box", justifyContent: isCentered ? "center" : undefined, alignItems: isCentered ? "center" : undefined, textAlign: isCentered ? "center" : undefined, position: "relative" }}>
+        {BgImageOverlay}
         <Decorations items={spec.decorations} />
         {LogoOverlay}
         {/* Quote mark */}
@@ -247,6 +259,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   if (type === "cta") {
     return (
       <div style={{ width: SW, height: SH, background: effectiveBg, overflow: "hidden", position: "relative", display: "flex", flexDirection: "column", padding: spec.padding, boxSizing: "border-box" }}>
+        {BgImageOverlay}
         <Decorations items={spec.decorations} />
         {LogoOverlay}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", flexShrink: 0 }}>
@@ -288,14 +301,14 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   );
 }
 
-export function ScaledSlide({ s, brand, i, n, T, size, intensity, aspect = "1:1", bgMode = "default", logoConfig, brandLogos, brandFonts }) {
+export function ScaledSlide({ s, brand, i, n, T, size, intensity, aspect = "1:1", bgMode = "default", logoConfig, brandLogos, brandFonts, brandBgImage }) {
   const { w, h } = SLIDE_ASPECTS[aspect] || SLIDE_ASPECTS["1:1"];
   const sc = size / w;
   const scaledH = h * sc;
   return (
     <div style={{ width: size, height: scaledH, borderRadius: 16, overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)" }}>
       <div style={{ width: w, height: h, transform: `scale(${sc})`, transformOrigin: "top left" }}>
-        <SlideInner s={s} brand={brand} i={i} n={n} T={T} intensity={intensity} aspect={aspect} bgMode={bgMode} logoConfig={logoConfig} brandLogos={brandLogos} brandFonts={brandFonts} />
+        <SlideInner s={s} brand={brand} i={i} n={n} T={T} intensity={intensity} aspect={aspect} bgMode={bgMode} logoConfig={logoConfig} brandLogos={brandLogos} brandFonts={brandFonts} brandBgImage={brandBgImage} />
       </div>
     </div>
   );

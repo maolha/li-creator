@@ -12,6 +12,7 @@ export function createBrand(overrides = {}) {
       light: null,  // logo URL/base64 for dark backgrounds
       dark: null,    // logo URL/base64 for light backgrounds
     },
+    backgroundImage: null, // URL for slide background texture/photo
     fonts: {
       heading: "",   // empty = use default DM Serif Display
       body: "",      // empty = use default Inter
