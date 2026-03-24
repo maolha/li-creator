@@ -1,15 +1,25 @@
 import { contrastText } from "./themes";
 
+function esc(str) {
+  if (!str) return str;
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export function buildPdf(slides, brand, T) {
   const ct = contrastText(T.accent);
   const { accent: a, card: c, text: tx, muted: mu, border: bo, soft: so } = T;
 
   const pill = (tag, type, light = false) =>
-    `<div style="display:inline-flex;align-items:center;background:${light ? "rgba(255,255,255,0.15)" : so};border:1px solid ${light ? "rgba(255,255,255,0.2)" : bo};border-radius:100pt;padding:3pt 11pt;font-size:8pt;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:${light ? "rgba(255,255,255,0.9)" : a}">${tag || type}</div>`;
+    `<div style="display:inline-flex;align-items:center;background:${light ? "rgba(255,255,255,0.15)" : so};border:1px solid ${light ? "rgba(255,255,255,0.2)" : bo};border-radius:100pt;padding:3pt 11pt;font-size:8pt;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:${light ? "rgba(255,255,255,0.9)" : a}">${esc(tag) || esc(type)}</div>`;
 
   const bar = (brand, i, n, light = false) =>
     `<div style="display:flex;justify-content:space-between;align-items:center;border-top:1pt solid ${light ? "rgba(255,255,255,0.18)" : bo};padding-top:5.5mm;margin-top:auto;flex-shrink:0">
-      <span style="font-size:8pt;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:${light ? ct : a};opacity:${light ? 0.65 : 0.85}">${brand}</span>
+      <span style="font-size:8pt;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:${light ? ct : a};opacity:${light ? 0.65 : 0.85}">${esc(brand)}</span>
       <span style="font-size:8pt;color:${light ? ct : mu};opacity:${light ? 0.45 : 0.6}">${n > 1 ? `${i + 1} / ${n}` : ""}</span>
     </div>`;
 
@@ -27,14 +37,14 @@ export function buildPdf(slides, brand, T) {
   <div style="position:absolute;bottom:-38mm;left:-21mm;width:148mm;height:148mm;border-radius:50%;border:1.5pt solid ${a};opacity:.06"></div>
   <div style="position:absolute;top:0;left:0;width:2.5mm;height:190mm;background:${a}"></div>
   <div style="padding-left:3.5mm;display:flex;justify-content:space-between;align-items:center;margin-bottom:auto">
-    <span style="font-size:8pt;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:${a}">${brand}</span>
+    <span style="font-size:8pt;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:${a}">${esc(brand)}</span>
     <span style="font-size:8pt;color:${mu}">${n > 1 ? `${i + 1} / ${n}` : ""}</span>
   </div>
   <div style="padding-left:3.5mm">
     ${pill(s.tag, type)}
     <div style="width:22mm;height:1.5pt;background:${a};border-radius:1pt;margin:8mm 0 7.5mm"></div>
-    <h1 style="font-family:'DM Serif Display',serif;font-size:${fs};font-weight:400;line-height:1.08;color:${tx};font-style:italic;margin:0 0 7mm">${s.headline}</h1>
-    <p style="font-size:11pt;line-height:1.65;color:${mu};margin:0">${s.body}</p>
+    <h1 style="font-family:'DM Serif Display',serif;font-size:${fs};font-weight:400;line-height:1.08;color:${tx};font-style:italic;margin:0 0 7mm">${esc(s.headline)}</h1>
+    <p style="font-size:11pt;line-height:1.65;color:${mu};margin:0">${esc(s.body)}</p>
   </div>
 </div>`;
       } else if (type === "stat") {
@@ -44,15 +54,15 @@ export function buildPdf(slides, brand, T) {
   <div style="width:78mm;flex-shrink:0;background:${a};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11mm 6mm;position:relative;overflow:hidden">
     <div style="position:absolute;top:-18mm;right:-18mm;width:60mm;height:60mm;border-radius:50%;background:rgba(255,255,255,0.08)"></div>
     <div style="position:absolute;bottom:-11mm;left:-11mm;width:46mm;height:46mm;border-radius:50%;background:rgba(0,0,0,0.07)"></div>
-    <div style="font-family:'DM Serif Display',serif;font-size:${sf};font-weight:400;color:${ct};line-height:1;text-align:center;position:relative;z-index:1;white-space:nowrap">${sn}</div>
-    ${s.statLabel ? `<div style="font-size:8pt;font-weight:600;color:${ct};opacity:.7;margin-top:4mm;text-align:center;text-transform:uppercase;letter-spacing:.06em;position:relative;z-index:1">${s.statLabel}</div>` : ""}
+    <div style="font-family:'DM Serif Display',serif;font-size:${sf};font-weight:400;color:${ct};line-height:1;text-align:center;position:relative;z-index:1;white-space:nowrap">${esc(sn)}</div>
+    ${s.statLabel ? `<div style="font-size:8pt;font-weight:600;color:${ct};opacity:.7;margin-top:4mm;text-align:center;text-transform:uppercase;letter-spacing:.06em;position:relative;z-index:1">${esc(s.statLabel)}</div>` : ""}
   </div>
   <div style="flex:1;padding:15mm 15mm 14mm 13mm;display:flex;flex-direction:column;box-sizing:border-box">
     ${pill(s.tag, type)}
     <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:7mm 0">
       <div style="width:15mm;height:1.5pt;background:${a};border-radius:1pt;margin-bottom:7mm"></div>
-      <h2 style="font-family:'DM Serif Display',serif;font-size:27pt;font-weight:400;line-height:1.25;color:${tx};margin:0 0 5mm">${s.headline}</h2>
-      <p style="font-size:10pt;line-height:1.7;color:${mu};margin:0">${s.body}</p>
+      <h2 style="font-family:'DM Serif Display',serif;font-size:27pt;font-weight:400;line-height:1.25;color:${tx};margin:0 0 5mm">${esc(s.headline)}</h2>
+      <p style="font-size:10pt;line-height:1.7;color:${mu};margin:0">${esc(s.body)}</p>
     </div>
     ${bar(brand, i, n)}
   </div>
@@ -66,12 +76,12 @@ export function buildPdf(slides, brand, T) {
     <span style="font-size:8pt;color:${mu};padding-top:3mm">${n > 1 ? `${i + 1} / ${n}` : ""}</span>
   </div>
   <div style="flex:1;display:flex;flex-direction:column;justify-content:center;margin-top:-9mm">
-    <h2 style="font-family:'DM Serif Display',serif;font-size:${fs};font-weight:400;line-height:1.33;color:${tx};font-style:italic;margin:0 0 7mm">${s.headline}</h2>
-    <p style="font-size:10pt;line-height:1.7;color:${mu};margin:0">${s.body}</p>
+    <h2 style="font-family:'DM Serif Display',serif;font-size:${fs};font-weight:400;line-height:1.33;color:${tx};font-style:italic;margin:0 0 7mm">${esc(s.headline)}</h2>
+    <p style="font-size:10pt;line-height:1.7;color:${mu};margin:0">${esc(s.body)}</p>
   </div>
   <div style="display:flex;justify-content:space-between;align-items:center;border-top:1pt solid ${bo};padding-top:5.5mm;flex-shrink:0">
     ${pill(s.tag, type)}
-    <span style="font-size:8pt;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:${a}">${brand}</span>
+    <span style="font-size:8pt;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:${a}">${esc(brand)}</span>
   </div>
 </div>`;
       } else if (type === "cta") {
@@ -86,11 +96,11 @@ export function buildPdf(slides, brand, T) {
   </div>
   <div style="flex:1;display:flex;flex-direction:column;justify-content:center;position:relative">
     <div style="font-size:54pt;line-height:1;color:${ct};opacity:.55;margin-bottom:6mm;font-family:'DM Serif Display',serif">&#9670;</div>
-    <h2 style="font-family:'DM Serif Display',serif;font-size:${fs};font-weight:400;line-height:1.12;color:${ct};margin:0 0 6mm">${s.headline}</h2>
-    <p style="font-size:11pt;line-height:1.65;color:${ct};opacity:.78;margin:0">${s.body}</p>
+    <h2 style="font-family:'DM Serif Display',serif;font-size:${fs};font-weight:400;line-height:1.12;color:${ct};margin:0 0 6mm">${esc(s.headline)}</h2>
+    <p style="font-size:11pt;line-height:1.65;color:${ct};opacity:.78;margin:0">${esc(s.body)}</p>
   </div>
   <div style="border-top:1pt solid rgba(255,255,255,0.18);padding-top:5.5mm;position:relative;flex-shrink:0">
-    <span style="font-size:8pt;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:${ct};opacity:.6">${brand}</span>
+    <span style="font-size:8pt;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:${ct};opacity:.6">${esc(brand)}</span>
   </div>
 </div>`;
       } else {
@@ -102,8 +112,8 @@ export function buildPdf(slides, brand, T) {
     ${pill(s.tag, type)}
     <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:6mm 0">
       <div style="width:17mm;height:1.5pt;background:${a};border-radius:1pt;margin-bottom:8mm"></div>
-      <h2 style="font-family:'DM Serif Display',serif;font-size:${fs};font-weight:400;line-height:1.18;color:${tx};margin:0 0 6mm">${s.headline}</h2>
-      <p style="font-size:11pt;line-height:1.72;color:${mu};margin:0">${s.body}</p>
+      <h2 style="font-family:'DM Serif Display',serif;font-size:${fs};font-weight:400;line-height:1.18;color:${tx};margin:0 0 6mm">${esc(s.headline)}</h2>
+      <p style="font-size:11pt;line-height:1.72;color:${mu};margin:0">${esc(s.body)}</p>
     </div>
     ${bar(brand, i, n)}
   </div>
@@ -114,7 +124,7 @@ export function buildPdf(slides, brand, T) {
     .join("");
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:#fff}

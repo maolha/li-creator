@@ -161,7 +161,7 @@ const PAGE_LIGHT = {
   featureCardBg: "#ffffff", featureBorder: "rgba(0,0,0,0.06)",
   feedBg: "linear-gradient(to bottom, #f4f5f7, #eceef2, #f4f5f7)",
   avatarBoring: "#d0d3da", textBoring: "rgba(10,12,16,0.4)",
-  textFeatured: "rgba(10,12,16,0.8)", ctaGlow: "rgba(0,119,181,0.04)",
+  textFeatured: "#0a0c10", ctaGlow: "rgba(0,119,181,0.04)",
 };
 
 // Sun/Moon icons
@@ -284,7 +284,8 @@ export default function LandingPage({ onSignIn }) {
               <p style={{ fontSize: 11, color: P.mutedWeak, marginTop: 12 }}>Your API key. Cloud history optional. Privacy controls in settings.</p>
             </motion.div>
 
-            {/* Mockup */}
+            {/* Mockup — Note: animation continues running when CSS-hidden on mobile (display:none).
+               This is a minor perf trade-off vs. the complexity of a JS-based visibility check. */}
             <motion.div className="cf-hero-mockup" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }} style={{ flex: "0 1 380px", position: "relative" }}>
               <motion.div animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}>
                 <div style={{ background: darkMode ? "#151820" : "#fff", borderRadius: 16, padding: 14, border: `1px solid ${darkMode ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)"}`, boxShadow: darkMode ? "0 20px 60px rgba(0,0,0,0.5)" : "0 20px 60px rgba(0,0,0,0.1)", transition: "background 0.4s, border 0.4s, box-shadow 0.4s" }}>

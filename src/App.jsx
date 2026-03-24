@@ -50,7 +50,7 @@ import {
 
 import { getThemes, contrastText, makeCustomVariants } from "./utils/themes";
 import { APP_THEMES } from "./utils/appTheme";
-import { brandDisplayName, brandAccent } from "./utils/brandSchema";
+import { createBrand, brandDisplayName, brandAccent } from "./utils/brandSchema";
 import { ACCEPTED_FILE_TYPES, toBase64 } from "./utils/constants";
 import {
   CAROUSEL_PROMPT,
@@ -136,6 +136,8 @@ const CONTENT_TYPES = [
   { id: "speaker", label: "Speaker", icon: UserCircle, desc: "Event visual" },
 ];
 
+const SPEAKER_DEFAULTS = { eventTitle: "", eventDate: "", cta: "", eventUrl: "", sessionTitle: "", extraText: "", tagLabel: "", speakers: [{ name: "", title: "", company: "", photo: null, photoUrl: "" }], style: {} };
+
 export default function App() {
   // Persisted state (survives F5)
   const [input, setInput] = useState(() => loadState("input", ""));
@@ -162,15 +164,14 @@ export default function App() {
   const [audience, setAudience] = useState(() => loadState("audience", "general"));
   const [speakerData, setSpeakerData] = useState(() => {
     const saved = loadState("speakerData", null);
-    const defaults = { eventTitle: "", eventDate: "", cta: "", eventUrl: "", speakers: [{ name: "", title: "", company: "", photo: null, photoUrl: "" }] };
-    if (!saved) return defaults;
+    if (!saved) return { ...SPEAKER_DEFAULTS };
     // Ensure speakers array is valid
     return {
-      ...defaults,
+      ...SPEAKER_DEFAULTS,
       ...saved,
       speakers: Array.isArray(saved.speakers) && saved.speakers.length > 0
         ? saved.speakers.map((s) => ({ name: "", title: "", company: "", photo: null, photoUrl: "", ...s }))
-        : defaults.speakers,
+        : SPEAKER_DEFAULTS.speakers,
     };
   });
 
@@ -291,7 +292,10 @@ export default function App() {
       await saveApiKeyToFirebase(user.uid, data.apiKey);
     }
     // Apply defaults from onboarding
-    if (data.profile.defaultBrand) setActiveBrand({ name: data.profile.defaultBrand });
+    if (data.profile.defaultBrand) {
+      const newBrand = createBrand({ name: data.profile.defaultBrand });
+      setActiveBrand(newBrand);
+    }
     setNeedsOnboarding(false);
   }
 
@@ -340,7 +344,7 @@ export default function App() {
     const obs = new ResizeObserver(([e]) => setCardPx(Math.min(Math.floor(e.contentRect.width), 540)));
     obs.observe(rightRef.current);
     return () => obs.disconnect();
-  }, [slides]);
+  }, []);
 
   // Keyboard navigation
   useEffect(() => {
@@ -812,6 +816,7 @@ Return the same JSON structure with just the post object updated.`;
   }
 
   function resetToNew() {
+    if (hasOutput && !window.confirm("Current content will be lost. Continue?")) return;
     setInput("");
     setSource("");
     setFiles([]);
@@ -819,7 +824,7 @@ Return the same JSON structure with just the post object updated.`;
     setTitle("");
     setPost(null);
     setCur(0);
-    setSpeakerData({ eventTitle: "", eventDate: "", cta: "", eventUrl: "", sessionTitle: "", extraText: "", tagLabel: "", speakers: [{ name: "", title: "", company: "", photo: null, photoUrl: "" }], style: {} });
+    setSpeakerData({ ...SPEAKER_DEFAULTS });
     setActiveTab("slides");
     setError("");
     setPage("create");
@@ -1182,7 +1187,7 @@ Return the same JSON structure with just the post object updated.`;
               setAudience(c.audience || "general");
               setSc(c.sc || 7);
               if (c.speakerData) setSpeakerData(c.speakerData);
-              else setSpeakerData({ eventTitle: "", eventDate: "", cta: "", eventUrl: "", speakers: [{ name: "", title: "", company: "", photo: null, photoUrl: "" }] });
+              else setSpeakerData({ ...SPEAKER_DEFAULTS });
               setCur(0);
               setActiveTab(c.contentType === "speaker" ? "slides" : c.slides?.length ? "slides" : "post");
               setLastGenFingerprint(genFingerprint());
@@ -1289,6 +1294,9 @@ Return the same JSON structure with just the post object updated.`;
                   <option key={b.id} value={b.id}>{b.name}{b.isDefault ? " ★" : ""}</option>
                 ))}
               </select>
+              {(userProfile?.profile?.brands || []).length === 0 && (
+                <a onClick={() => setPage("settings")} style={{ fontSize: 11, color: A.accent, cursor: "pointer", marginTop: 4, display: "inline-block", textDecoration: "none" }}>Create a brand in Settings &rarr;</a>
+              )}
             </div>
 
             {/* Design — collapsible */}
@@ -2040,11 +2048,12 @@ Return the same JSON structure with just the post object updated.`;
                   </div>
 
                   {/* Thumbnails */}
-                  <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(slides.length, 5)}, 1fr)`, gap: 6 }}>
+                  <div style={{ display: "flex", gap: 6, overflowX: "auto" }}>
                     {slides.map((s, i) => (
                       <button
                         key={i} onClick={() => setCur(i)}
                         style={{
+                          flexShrink: 0, width: 64,
                           background: A.card, border: `1.5px solid ${i === cur ? A.accent : A.border}`, borderRadius: 10,
                           padding: "8px 7px", cursor: "pointer", transition: "all 0.2s", opacity: i === cur ? 1 : 0.5, textAlign: "left",
                         }}
@@ -2181,7 +2190,7 @@ Return the same JSON structure with just the post object updated.`;
                     {/* Row: Label */}
                     <div>
                       <label style={{ ...labelStyle(A), marginBottom: 3 }}>Slide Label</label>
-                      <input type="text" value={slide.label ?? brand} onChange={(e) => updateSlideField(cur, "label", e.target.value)} placeholder={brand || "Source, URL, tagline..."} style={{ ...inputStyle(A), padding: "7px 10px" }} />
+                      <input type="text" value={slide.label ?? brand} onChange={(e) => updateSlideField(cur, "label", e.target.value || undefined)} placeholder={brand || "Source, URL, tagline..."} style={{ ...inputStyle(A), padding: "7px 10px" }} />
                     </div>
 
                     {/* Per-slide toggles */}
