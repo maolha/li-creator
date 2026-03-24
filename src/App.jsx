@@ -801,6 +801,18 @@ Return the same JSON structure with just the post object updated.`;
     try {
       // Save custom theme definition if using one
       const customThemeDef = customThemes[theme] || null;
+      // Strip large base64 data from speaker photos to stay under Firestore 1MB limit
+      let savedSpeakerData = undefined;
+      if (isSpeakerMode && speakerData) {
+        savedSpeakerData = {
+          ...speakerData,
+          eventLogo: speakerData.eventLogo?.startsWith?.("data:") ? null : speakerData.eventLogo,
+          speakers: (speakerData.speakers || []).map((s) => ({
+            ...s,
+            photo: s.photo?.startsWith?.("data:") ? null : s.photo,
+          })),
+        };
+      }
       await saveCreation(user.uid, {
         title: title || speakerData?.eventTitle || "Untitled",
         slides: slides || [],
@@ -817,7 +829,7 @@ Return the same JSON structure with just the post object updated.`;
         sc,
         input: input || "",
         source: source || "",
-        speakerData: isSpeakerMode ? speakerData : undefined,
+        speakerData: savedSpeakerData,
         customThemeDef,
       });
       const updated = await getCreations(user.uid);
@@ -849,7 +861,14 @@ Return the same JSON structure with just the post object updated.`;
       sc,
       input: input || "",
       source: source || "",
-      speakerData: isSpeakerMode ? speakerData : undefined,
+      speakerData: isSpeakerMode && speakerData ? {
+        ...speakerData,
+        eventLogo: speakerData.eventLogo?.startsWith?.("data:") ? null : speakerData.eventLogo,
+        speakers: (speakerData.speakers || []).map((s) => ({
+          ...s,
+          photo: s.photo?.startsWith?.("data:") ? null : s.photo,
+        })),
+      } : undefined,
       customThemeDef,
     });
     const updated = await getCreations(user.uid);
