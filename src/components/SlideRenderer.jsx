@@ -65,10 +65,21 @@ function Bar({ brand, i, n, light, T }) {
   );
 }
 
-export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1:1", bgMode = "default" }) {
+export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1:1", bgMode = "default", logoConfig, brandLogos }) {
   const type = s.type || "insight";
   const { w: SW, h: SH } = SLIDE_ASPECTS[aspect] || SLIDE_ASPECTS["1:1"];
   const baseSpec = getIntensitySpec(type, intensity, T, s.headline?.length || 0);
+
+  // Logo visibility
+  const showLogo = (() => {
+    const cfg = logoConfig?.show || "none";
+    if (cfg === "none") return false;
+    if (cfg === "all") return true;
+    if (cfg === "first") return i === 0;
+    if (cfg === "last") return i === n - 1;
+    if (cfg === "first-last") return i === 0 || i === n - 1;
+    return false;
+  })();
 
   // Scale spec values for non-square aspects
   const isWide = aspect === "16:9";
@@ -108,11 +119,34 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
 
   const ct = contrastText(theme.accent);
 
+  // Logo overlay
+  const logoUrl = (() => {
+    if (!showLogo || !brandLogos) return null;
+    // Pick light logo for dark bg, dark logo for light bg
+    const bgIsDark = contrastText(effectiveBg || theme.card) === "#FFFFFF";
+    return bgIsDark ? (brandLogos.light || brandLogos.dark) : (brandLogos.dark || brandLogos.light);
+  })();
+
+  const logoPos = logoConfig?.position || "top-right";
+  const logoStyle = logoUrl ? {
+    position: "absolute",
+    [logoPos.includes("top") ? "top" : "bottom"]: 16,
+    [logoPos.includes("right") ? "right" : "left"]: 16,
+    height: Math.round(SH * 0.06),
+    maxWidth: Math.round(SW * 0.2),
+    objectFit: "contain",
+    zIndex: 20,
+    opacity: 0.9,
+  } : null;
+
+  const LogoOverlay = logoUrl ? <img src={logoUrl} alt="" style={logoStyle} /> : null;
+
   /* COVER */
   if (type === "cover") {
     return (
       <div style={{ width: SW, height: SH, background: effectiveBg, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: spec.padding, boxSizing: "border-box" }}>
         <Decorations items={spec.decorations} />
+        {LogoOverlay}
         <div style={{ paddingLeft: spec.accentBarW > 0 ? spec.accentBarW + 2 : 0, display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", flexShrink: 0 }}>
           <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: effectiveText === ct ? ct : theme.accent, opacity: effectiveText === ct ? 0.8 : 1 }}>{brand}</span>
           <span style={{ fontSize: 12, color: effectiveText, opacity: 0.5 }}>{n > 1 ? `${i + 1} / ${n}` : ""}</span>
@@ -137,6 +171,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
       <div style={{ width: SW, height: SH, background: theme.card, overflow: "hidden", display: "flex", boxSizing: "border-box" }}>
         <div style={{ width: spec.panelW, flexShrink: 0, background: spec.panelBg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: `${Math.round(32 * vScale)}px 18px`, position: "relative", overflow: "hidden" }}>
           <Decorations items={spec.decorations} />
+        {LogoOverlay}
           <div style={{ fontFamily: "'DM Serif Display',serif", fontSize: sf, fontWeight: 400, color: ct, lineHeight: 1, textAlign: "center", whiteSpace: "nowrap", position: "relative", zIndex: 1 }}>{sn}</div>
           {s.statLabel && <div style={{ fontSize: spec.labelSize, fontWeight: 600, color: ct, opacity: 0.7, marginTop: Math.round(14 * vScale), textAlign: "center", textTransform: "uppercase", letterSpacing: spec.labelSpacing || "0.06em", position: "relative", zIndex: 1 }}>{s.statLabel}</div>}
         </div>
@@ -162,6 +197,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
     return (
       <div style={{ width: SW, height: SH, background: qBg, overflow: "hidden", display: "flex", flexDirection: "column", padding: spec.padding, boxSizing: "border-box", justifyContent: isCentered ? "center" : undefined, alignItems: isCentered ? "center" : undefined, textAlign: isCentered ? "center" : undefined, position: "relative" }}>
         <Decorations items={spec.decorations} />
+        {LogoOverlay}
         {/* Quote mark */}
         {spec.quoteMarkPosition === "center" ? (
           <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", fontFamily: "'DM Serif Display',serif", fontSize: spec.quoteMarkSize, lineHeight: 0.8, color: qText, opacity: spec.quoteMarkOpacity, userSelect: "none", pointerEvents: "none" }}>&ldquo;</div>
@@ -194,6 +230,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
     return (
       <div style={{ width: SW, height: SH, background: effectiveBg, overflow: "hidden", position: "relative", display: "flex", flexDirection: "column", padding: spec.padding, boxSizing: "border-box" }}>
         <Decorations items={spec.decorations} />
+        {LogoOverlay}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", flexShrink: 0 }}>
           <Pill tag={s.tag} type={type} variant="light" T={theme} />
           <span style={{ fontSize: 12, color: effectiveText, opacity: 0.45 }}>{n > 1 ? `${i + 1} / ${n}` : ""}</span>
@@ -233,14 +270,14 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   );
 }
 
-export function ScaledSlide({ s, brand, i, n, T, size, intensity, aspect = "1:1", bgMode = "default" }) {
+export function ScaledSlide({ s, brand, i, n, T, size, intensity, aspect = "1:1", bgMode = "default", logoConfig, brandLogos }) {
   const { w, h } = SLIDE_ASPECTS[aspect] || SLIDE_ASPECTS["1:1"];
   const sc = size / w;
   const scaledH = h * sc;
   return (
     <div style={{ width: size, height: scaledH, borderRadius: 16, overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)" }}>
       <div style={{ width: w, height: h, transform: `scale(${sc})`, transformOrigin: "top left" }}>
-        <SlideInner s={s} brand={brand} i={i} n={n} T={T} intensity={intensity} aspect={aspect} bgMode={bgMode} />
+        <SlideInner s={s} brand={brand} i={i} n={n} T={T} intensity={intensity} aspect={aspect} bgMode={bgMode} logoConfig={logoConfig} brandLogos={brandLogos} />
       </div>
     </div>
   );

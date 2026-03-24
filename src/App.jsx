@@ -157,6 +157,7 @@ export default function App() {
   const [intensity, setIntensity] = useState(() => loadState("intensity", "clean"));
   const [slideAspect, setSlideAspect] = useState(() => loadState("slideAspect", "1:1"));
   const [slideBgMode, setSlideBgMode] = useState(() => loadState("slideBgMode", "default"));
+  const [slideLogo, setSlideLogo] = useState(() => loadState("slideLogo", { show: "none", position: "top-right" })); // show: none|all|first|last|first-last
   const [audience, setAudience] = useState(() => loadState("audience", "general"));
   const [speakerData, setSpeakerData] = useState(() => {
     const saved = loadState("speakerData", null);
@@ -316,6 +317,7 @@ export default function App() {
   useEffect(() => { saveState("intensity", intensity); }, [intensity]);
   useEffect(() => { saveState("slideAspect", slideAspect); }, [slideAspect]);
   useEffect(() => { saveState("slideBgMode", slideBgMode); }, [slideBgMode]);
+  useEffect(() => { saveState("slideLogo", slideLogo); }, [slideLogo]);
   useEffect(() => { saveState("speakerData", speakerData); }, [speakerData]);
 
   // Responsive card size
@@ -643,7 +645,7 @@ Return the same JSON structure with just the post object updated.`;
 
         await new Promise((resolve) => {
           root.render(
-            <SlideInner s={slides[i]} brand={brand} i={i} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} />
+            <SlideInner s={slides[i]} brand={brand} i={i} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} />
           );
           requestAnimationFrame(() => requestAnimationFrame(resolve));
         });
@@ -953,7 +955,7 @@ Return the same JSON structure with just the post object updated.`;
       {slide && (
         <div style={{ position: "fixed", left: -9999, top: 0, zIndex: -1 }}>
           <div ref={hiddenSlideRef} style={{ width: SS, height: SS }}>
-            <SlideInner s={slide} brand={brand} i={cur} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} />
+            <SlideInner s={slide} brand={brand} i={cur} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} />
           </div>
         </div>
       )}
@@ -1371,6 +1373,51 @@ Return the same JSON structure with just the post object updated.`;
                   </div>
                 </div>
               </div>
+
+              {/* Logo on slides */}
+              {activeBrand?.logos && (activeBrand.logos.light || activeBrand.logos.dark) && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div>
+                    <label style={labelStyle(A)}>Logo on slides</label>
+                    <div style={{ display: "flex", gap: 4 }}>
+                      {[
+                        { id: "none", label: "None" },
+                        { id: "all", label: "All" },
+                        { id: "first", label: "First" },
+                        { id: "last", label: "Last" },
+                        { id: "first-last", label: "1st+Last" },
+                      ].map((o) => (
+                        <button key={o.id} onClick={() => setSlideLogo((p) => ({ ...p, show: o.id }))} style={{
+                          flex: 1, padding: "6px 2px", borderRadius: 6, fontSize: 9, fontWeight: 600,
+                          border: `1px solid ${(slideLogo?.show || "none") === o.id ? A.accent : A.border}`,
+                          background: (slideLogo?.show || "none") === o.id ? A.soft : "transparent",
+                          color: (slideLogo?.show || "none") === o.id ? A.accent : A.muted,
+                          cursor: "pointer", fontFamily: "'Inter', sans-serif", textAlign: "center",
+                        }}>{o.label}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label style={labelStyle(A)}>Position</label>
+                    <div style={{ display: "flex", gap: 4 }}>
+                      {[
+                        { id: "top-right", label: "↗" },
+                        { id: "top-left", label: "↖" },
+                        { id: "bottom-right", label: "↘" },
+                        { id: "bottom-left", label: "↙" },
+                      ].map((o) => (
+                        <button key={o.id} onClick={() => setSlideLogo((p) => ({ ...p, position: o.id }))} style={{
+                          flex: 1, padding: "6px 4px", borderRadius: 6, fontSize: 14,
+                          border: `1px solid ${(slideLogo?.position || "top-right") === o.id ? A.accent : A.border}`,
+                          background: (slideLogo?.position || "top-right") === o.id ? A.soft : "transparent",
+                          color: (slideLogo?.position || "top-right") === o.id ? A.accent : A.muted,
+                          cursor: "pointer", textAlign: "center",
+                        }}>{o.label}</button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </>)}
 
             {/* Theme swatches */}
@@ -2047,7 +2094,7 @@ Return the same JSON structure with just the post object updated.`;
                   <div ref={slideContainerRef} style={{ position: "relative" }}>
                     <AnimatePresence mode="wait">
                       <motion.div key={cur} initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.2 }}>
-                        <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={cardPx} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} />
+                        <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={cardPx} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} />
                       </motion.div>
                     </AnimatePresence>
                     {cur > 0 && <button onClick={() => setCur((c) => c - 1)} style={navBtnStyle(T, "left")}><ChevronLeft size={20} /></button>}
@@ -2148,7 +2195,7 @@ Return the same JSON structure with just the post object updated.`;
 
                   {/* Mini preview */}
                   <div style={{ display: "flex", justifyContent: "center" }}>
-                    <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={Math.min(cardPx, 300)} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} />
+                    <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={Math.min(cardPx, 300)} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} />
                   </div>
 
                   {/* Edit fields */}
