@@ -1232,10 +1232,15 @@ Return the same JSON structure with just the post object updated.`;
               <div>
                 <label style={labelStyle(A)}>Brand</label>
                 <select
-                  value={activeBrand?.id || "_custom"}
+                  value={(() => {
+                    if (!activeBrand?.id) return "_custom";
+                    const brands = userProfile?.profile?.brands || [];
+                    if (brands.some((b) => b.id === activeBrand.id)) return activeBrand.id;
+                    return "_custom";
+                  })()}
                   onChange={(e) => {
                     if (e.target.value === "_custom") {
-                      setActiveBrand({ name: brand || "Custom" });
+                      setActiveBrand({ name: "Custom" });
                       return;
                     }
                     const brands = userProfile?.profile?.brands || [];

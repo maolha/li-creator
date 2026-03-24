@@ -6,7 +6,12 @@
       "Bash(node:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(ls:*)",
+      "Bash(grep -oE '.{0,30}Kt.{0,30}')",
+      "Bash(grep -oE '[,;]Kt[= ].{0,80}')",
+      "Bash(grep -oE 'const Kt.{0,60}')"
     ]
   }
 }
