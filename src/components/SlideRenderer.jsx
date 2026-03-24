@@ -142,10 +142,13 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   })();
 
   const logoPos = s.logoPosition || logoConfig?.position || "top-right";
+  // Logo padding matches slide content padding
+  const logoPadX = isWide ? 36 : isTall ? 50 : 46;
+  const logoPadY = isWide ? 28 : isTall ? 48 : 40;
   const logoStyle = logoUrl ? {
     position: "absolute",
-    [logoPos.includes("top") ? "top" : "bottom"]: logoPos.includes("top") ? 14 : 18,
-    [logoPos.includes("right") ? "right" : "left"]: 18,
+    [logoPos.includes("top") ? "top" : "bottom"]: logoPadY,
+    [logoPos.includes("right") ? "right" : "left"]: logoPadX,
     height: Math.round(SH * 0.055),
     maxWidth: Math.round(SW * 0.18),
     objectFit: "contain",
