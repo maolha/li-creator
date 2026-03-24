@@ -46,6 +46,7 @@ import {
   Hash,
   UserCircle,
   FilePlus,
+  ChevronDown,
 } from "lucide-react";
 
 import { getThemes, contrastText, makeCustomVariants } from "./utils/themes";
@@ -195,6 +196,7 @@ export default function App() {
   const [exportingAll, setExportingAll] = useState(false);
   const [extractingBrand, setExtractingBrand] = useState(false);
   const [brandUrl, setBrandUrl] = useState("");
+  const [showDesign, setShowDesign] = useState(false);
 
   const fileRef = useRef();
   const rightRef = useRef();
@@ -1230,282 +1232,117 @@ Return the same JSON structure with just the post object updated.`;
               </div>
             </div>
 
-            {/* Brand + Label */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-              <div>
-                <label style={labelStyle(A)}>Brand</label>
-                <select
-                  value={(() => {
-                    if (!activeBrand?.id) return "_custom";
-                    const brands = userProfile?.profile?.brands || [];
-                    if (brands.some((b) => b.id === activeBrand.id)) return activeBrand.id;
-                    return "_custom";
-                  })()}
-                  onChange={(e) => {
-                    if (e.target.value === "_custom") {
-                      setActiveBrand({ name: "Custom" });
-                      return;
-                    }
-                    const brands = userProfile?.profile?.brands || [];
-                    const selected = brands.find((b) => b.id === e.target.value);
-                    if (selected) {
-                      setActiveBrand(selected);
-                      if (selected.voice?.tone) setTone(selected.voice.tone);
-                      if (selected.voice?.audience) setAudience(selected.voice.audience);
-                      if (brandAccent(selected)) {
-                        const variants = makeCustomVariants(brandAccent(selected));
-                        if (variants) {
-                          const themeName = `brand-${selected.id}`;
-                          setCustomThemes((prev) => ({ ...prev, [themeName]: variants }));
-                          setTheme(themeName);
-                        }
-                      }
-                    }
-                  }}
-                  style={selectStyle(A)}
-                >
-                  <option value="_custom">Custom</option>
-                  {(userProfile?.profile?.brands || []).map((b) => (
-                    <option key={b.id} value={b.id}>{b.name}{b.isDefault ? " ★" : ""}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label style={labelStyle(A)}><Type size={12} /> Label on visual</label>
-                <input type="text" value={brand} onChange={(e) => setActiveBrand((prev) => ({ ...(prev || {}), name: e.target.value }))} placeholder="Optional text on slides" style={inputStyle(A)} />
-              </div>
-            </div>
-
-            {/* Theme + Slides */}
-            <div style={{ display: "grid", gridTemplateColumns: contentType === "carousel" ? "1fr 72px" : "1fr", gap: 10 }}>
-              <div>
-                <label style={labelStyle(A)}><Palette size={12} /> Preset</label>
-                <select value={theme} onChange={(e) => setTheme(e.target.value)} style={selectStyle(A)}>
-                  {Object.keys(allPresets).filter((t) => !t.startsWith("brand-") && !t.startsWith("Custom #")).map((t) => <option key={t}>{t}</option>)}
-                </select>
-              </div>
-              {contentType === "carousel" && (
-                <div>
-                  <label style={labelStyle(A)}><LayoutGrid size={12} /> Slides</label>
-                  <select value={sc} onChange={(e) => setSc(Number(e.target.value))} style={selectStyle(A)}>
-                    {[5, 6, 7, 8, 9, 10].map((n) => <option key={n}>{n}</option>)}
-                  </select>
-                </div>
-              )}
-            </div>
-
-            {/* Tone + Audience */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-              <div>
-                <label style={labelStyle(A)}><Mic size={12} /> Tone</label>
-                <select value={tone} onChange={(e) => setTone(e.target.value)} style={selectStyle(A)}>
-                  {TONES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
-                </select>
-              </div>
-              <div>
-                <label style={labelStyle(A)}><Users size={12} /> Audience</label>
-                <select value={audience} onChange={(e) => setAudience(e.target.value)} style={selectStyle(A)}>
-                  {AUDIENCES.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
-                </select>
-              </div>
-            </div>
-
-            {/* Visual Intensity */}
-            {contentType !== "speaker" && contentType !== "text-post" && (<>
-              <div>
-                <label style={labelStyle(A)}><Sparkles size={12} /> Visual Style</label>
-                <div style={{ display: "flex", gap: 6 }}>
-                  {[
-                    { id: "clean", label: "Clean", desc: "Professional" },
-                    { id: "bold", label: "Bold", desc: "Stand out" },
-                    { id: "dramatic", label: "Dramatic", desc: "Editorial" },
-                  ].map((v) => (
-                    <button
-                      key={v.id}
-                      onClick={() => setIntensity(v.id)}
-                      style={{
-                        flex: 1, padding: "8px 6px", borderRadius: 10, cursor: "pointer",
-                        border: `1.5px solid ${intensity === v.id ? A.accent : A.border}`,
-                        background: intensity === v.id ? A.soft : "transparent",
-                        color: intensity === v.id ? A.accent : A.muted,
-                        fontFamily: "'Inter', sans-serif", textAlign: "center",
-                        transition: "all 0.2s",
-                      }}
-                    >
-                      <div style={{ fontSize: 12, fontWeight: 700 }}>{v.label}</div>
-                      <div style={{ fontSize: 9, opacity: 0.6, marginTop: 2 }}>{v.desc}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Aspect ratio + Background mode */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                <div>
-                  <label style={labelStyle(A)}>Size</label>
-                  <div style={{ display: "flex", gap: 4 }}>
-                    {["1:1", "4:5", "16:9"].map((a) => (
-                      <button key={a} onClick={() => setSlideAspect(a)} style={{
-                        flex: 1, padding: "7px 4px", borderRadius: 6, fontSize: 11, fontWeight: 600,
-                        border: `1px solid ${slideAspect === a ? A.accent : A.border}`,
-                        background: slideAspect === a ? A.soft : "transparent",
-                        color: slideAspect === a ? A.accent : A.muted,
-                        cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", textAlign: "center",
-                      }}>{a}</button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label style={labelStyle(A)}>Background</label>
-                  <div style={{ display: "flex", gap: 4 }}>
-                    {[
-                      { id: "default", label: "Default" },
-                      { id: "light", label: "Light" },
-                      { id: "invert", label: "Invert" },
-                    ].map((m) => (
-                      <button key={m.id} onClick={() => setSlideBgMode(m.id)} style={{
-                        flex: 1, padding: "7px 4px", borderRadius: 6, fontSize: 10, fontWeight: 600,
-                        border: `1px solid ${slideBgMode === m.id ? A.accent : A.border}`,
-                        background: slideBgMode === m.id ? A.soft : "transparent",
-                        color: slideBgMode === m.id ? A.accent : A.muted,
-                        cursor: "pointer", fontFamily: "'Inter', sans-serif", textAlign: "center",
-                      }}>{m.label}</button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Logo on slides */}
-              {activeBrand?.logos && (activeBrand.logos.light || activeBrand.logos.dark) && (
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  <div>
-                    <label style={labelStyle(A)}>Logo on slides</label>
-                    <div style={{ display: "flex", gap: 4 }}>
-                      {[
-                        { id: "none", label: "None" },
-                        { id: "all", label: "All" },
-                        { id: "first", label: "First" },
-                        { id: "last", label: "Last" },
-                        { id: "first-last", label: "1st+Last" },
-                      ].map((o) => (
-                        <button key={o.id} onClick={() => setSlideLogo((p) => ({ ...p, show: o.id }))} style={{
-                          flex: 1, padding: "6px 2px", borderRadius: 6, fontSize: 9, fontWeight: 600,
-                          border: `1px solid ${(slideLogo?.show || "none") === o.id ? A.accent : A.border}`,
-                          background: (slideLogo?.show || "none") === o.id ? A.soft : "transparent",
-                          color: (slideLogo?.show || "none") === o.id ? A.accent : A.muted,
-                          cursor: "pointer", fontFamily: "'Inter', sans-serif", textAlign: "center",
-                        }}>{o.label}</button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <label style={labelStyle(A)}>Position</label>
-                    <div style={{ display: "flex", gap: 4 }}>
-                      {[
-                        { id: "top-right", label: "↗" },
-                        { id: "top-left", label: "↖" },
-                        { id: "bottom-right", label: "↘" },
-                        { id: "bottom-left", label: "↙" },
-                      ].map((o) => (
-                        <button key={o.id} onClick={() => setSlideLogo((p) => ({ ...p, position: o.id }))} style={{
-                          flex: 1, padding: "6px 4px", borderRadius: 6, fontSize: 14,
-                          border: `1px solid ${(slideLogo?.position || "top-right") === o.id ? A.accent : A.border}`,
-                          background: (slideLogo?.position || "top-right") === o.id ? A.soft : "transparent",
-                          color: (slideLogo?.position || "top-right") === o.id ? A.accent : A.muted,
-                          cursor: "pointer", textAlign: "center",
-                        }}>{o.label}</button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>)}
-
-            {/* Theme swatches */}
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-              {Object.entries(allPresets).filter(([name]) => !name.startsWith("brand-") && !name.startsWith("Custom #")).map(([name, t]) => (
-                <button
-                  key={name}
-                  onClick={() => setTheme(name)}
-                  title={name}
-                  style={{
-                    width: 28, height: 28, borderRadius: 8,
-                    border: `2px solid ${name === theme ? t.accent : "transparent"}`,
-                    background: t.card, cursor: "pointer", position: "relative", overflow: "hidden", padding: 0, transition: "all 0.2s",
-                  }}
-                >
-                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "40%", background: t.accent }} />
-                </button>
-              ))}
-            </div>
-
-            {/* Brand color quick-switch */}
-            {activeBrand?.colors && activeBrand.id && (
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-                <span style={{ fontSize: 10, color: A.muted, marginRight: 4 }}>Brand colors:</span>
-                {Object.entries(activeBrand.colors).filter(([_, v]) => v && v.startsWith("#")).map(([key, color]) => (
-                  <button
-                    key={key}
-                    onClick={() => {
-                      const variants = makeCustomVariants(color);
+            {/* Brand */}
+            <div>
+              <label style={labelStyle(A)}>Brand</label>
+              <select
+                value={(() => {
+                  if (!activeBrand?.id) return "_custom";
+                  const brands = userProfile?.profile?.brands || [];
+                  if (brands.some((b) => b.id === activeBrand.id)) return activeBrand.id;
+                  return "_custom";
+                })()}
+                onChange={(e) => {
+                  if (e.target.value === "_custom") {
+                    setActiveBrand({ name: "" });
+                    return;
+                  }
+                  const brands = userProfile?.profile?.brands || [];
+                  const selected = brands.find((b) => b.id === e.target.value);
+                  if (selected) {
+                    setActiveBrand(selected);
+                    if (selected.voice?.tone) setTone(selected.voice.tone);
+                    if (selected.voice?.audience) setAudience(selected.voice.audience);
+                    if (brandAccent(selected)) {
+                      const variants = makeCustomVariants(brandAccent(selected));
                       if (variants) {
-                        const themeName = `brand-${activeBrand.id}-${key}`;
+                        const themeName = `brand-${selected.id}`;
                         setCustomThemes((prev) => ({ ...prev, [themeName]: variants }));
                         setTheme(themeName);
                       }
-                    }}
-                    title={`${key}: ${color}`}
-                    style={{
-                      width: 28, height: 28, borderRadius: 8,
-                      border: `2px solid ${A.accent === color ? color : "transparent"}`,
-                      background: color, cursor: "pointer", padding: 0, transition: "all 0.2s",
-                      position: "relative",
-                    }}
-                  >
-                    <span style={{ position: "absolute", bottom: 1, right: 2, fontSize: 7, color: "rgba(255,255,255,0.6)" }}>{key[0].toUpperCase()}</span>
-                  </button>
+                    }
+                  }
+                }}
+                style={selectStyle(A)}
+              >
+                <option value="_custom">Custom</option>
+                {(userProfile?.profile?.brands || []).map((b) => (
+                  <option key={b.id} value={b.id}>{b.name}{b.isDefault ? " ★" : ""}</option>
                 ))}
+              </select>
+            </div>
+
+            {/* Design — collapsible */}
+            {contentType !== "speaker" && contentType !== "text-post" && (
+              <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 12, overflow: "hidden" }}>
+                <button
+                  onClick={() => setShowDesign((p) => !p)}
+                  style={{ width: "100%", padding: "10px 14px", background: "none", border: "none", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", color: A.text, fontFamily: "'Inter', sans-serif" }}
+                >
+                  <span style={{ fontSize: 12, fontWeight: 700 }}>
+                    <Palette size={12} style={{ marginRight: 6, verticalAlign: -2 }} />
+                    Design
+                    <span style={{ fontWeight: 400, color: A.muted, marginLeft: 8, fontSize: 11 }}>
+                      {intensity} · {slideAspect} · {slideBgMode}
+                    </span>
+                  </span>
+                  <ChevronDown size={14} style={{ color: A.muted, transform: showDesign ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+                </button>
+                {showDesign && (
+                  <div style={{ padding: "0 14px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
+                    {/* Preset swatches */}
+                    <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                      {Object.entries(allPresets).filter(([name]) => !name.startsWith("brand-") && !name.startsWith("Custom #")).map(([name, t]) => (
+                        <button key={name} onClick={() => setTheme(name)} title={name} style={{ width: 26, height: 26, borderRadius: 7, border: `2px solid ${name === theme ? t.accent : "transparent"}`, background: t.card, cursor: "pointer", position: "relative", overflow: "hidden", padding: 0, transition: "all 0.2s" }}>
+                          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "40%", background: t.accent }} />
+                        </button>
+                      ))}
+                      {/* Brand colors inline */}
+                      {activeBrand?.colors && activeBrand.id && Object.entries(activeBrand.colors).filter(([_, v]) => v?.startsWith?.("#")).map(([key, color]) => (
+                        <button key={key} onClick={() => { const v = makeCustomVariants(color); if (v) { setCustomThemes((p) => ({ ...p, [`brand-${activeBrand.id}-${key}`]: v })); setTheme(`brand-${activeBrand.id}-${key}`); } }} title={`${key}: ${color}`} style={{ width: 26, height: 26, borderRadius: 7, border: "2px solid transparent", background: color, cursor: "pointer", padding: 0 }} />
+                      ))}
+                    </div>
+                    {/* Style + Size + Bg in compact rows */}
+                    <div style={{ display: "flex", gap: 4 }}>
+                      {["clean", "bold", "dramatic"].map((v) => (
+                        <button key={v} onClick={() => setIntensity(v)} style={{ flex: 1, padding: "6px 4px", borderRadius: 6, fontSize: 10, fontWeight: 700, border: `1px solid ${intensity === v ? A.accent : A.border}`, background: intensity === v ? A.soft : "transparent", color: intensity === v ? A.accent : A.muted, cursor: "pointer", textTransform: "capitalize", fontFamily: "'Inter', sans-serif" }}>{v}</button>
+                      ))}
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                      <div style={{ display: "flex", gap: 3 }}>
+                        {["1:1", "4:5", "16:9"].map((a) => (
+                          <button key={a} onClick={() => setSlideAspect(a)} style={{ flex: 1, padding: "5px 2px", borderRadius: 5, fontSize: 10, fontWeight: 600, border: `1px solid ${slideAspect === a ? A.accent : A.border}`, background: slideAspect === a ? A.soft : "transparent", color: slideAspect === a ? A.accent : A.muted, cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", textAlign: "center" }}>{a}</button>
+                        ))}
+                      </div>
+                      <div style={{ display: "flex", gap: 3 }}>
+                        {[{ id: "default", l: "Dark" }, { id: "light", l: "Light" }, { id: "invert", l: "Invert" }].map((m) => (
+                          <button key={m.id} onClick={() => setSlideBgMode(m.id)} style={{ flex: 1, padding: "5px 2px", borderRadius: 5, fontSize: 10, fontWeight: 600, border: `1px solid ${slideBgMode === m.id ? A.accent : A.border}`, background: slideBgMode === m.id ? A.soft : "transparent", color: slideBgMode === m.id ? A.accent : A.muted, cursor: "pointer", fontFamily: "'Inter', sans-serif", textAlign: "center" }}>{m.l}</button>
+                        ))}
+                      </div>
+                    </div>
+                    {/* Logo + Slides count */}
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                      {contentType === "carousel" && (
+                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                          <span style={{ fontSize: 10, color: A.muted }}>Slides:</span>
+                          <select value={sc} onChange={(e) => setSc(Number(e.target.value))} style={{ ...selectStyle(A), width: 52, padding: "4px 6px", fontSize: 12 }}>
+                            {[5, 6, 7, 8, 9, 10].map((n) => <option key={n}>{n}</option>)}
+                          </select>
+                        </div>
+                      )}
+                      {activeBrand?.logos && (activeBrand.logos.light || activeBrand.logos.dark) && (
+                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                          <span style={{ fontSize: 10, color: A.muted }}>Logo:</span>
+                          {["none", "all", "first", "last"].map((o) => (
+                            <button key={o} onClick={() => setSlideLogo((p) => ({ ...p, show: o }))} style={{ padding: "3px 6px", borderRadius: 4, fontSize: 9, fontWeight: 600, border: `1px solid ${(slideLogo?.show || "none") === o ? A.accent : A.border}`, background: (slideLogo?.show || "none") === o ? A.soft : "transparent", color: (slideLogo?.show || "none") === o ? A.accent : A.muted, cursor: "pointer", textTransform: "capitalize" }}>{o}</button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
-
-            {/* Brand Domain Grabber */}
-            <div>
-              <label style={labelStyle(A)}><Globe size={12} /> Brand from Website</label>
-              <div style={{ display: "flex", gap: 8 }}>
-                <input
-                  type="text"
-                  value={brandUrl}
-                  onChange={(e) => setBrandUrl(e.target.value)}
-                  placeholder="example.com or #FF5722"
-                  style={{ ...inputStyle(A), flex: 1 }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      if (brandUrl.match(/^#[0-9a-fA-F]{6}$/)) addCustomThemeFromColor(brandUrl);
-                      else extractBrand();
-                    }
-                  }}
-                />
-                <button
-                  onClick={() => {
-                    if (brandUrl.match(/^#[0-9a-fA-F]{6}$/)) addCustomThemeFromColor(brandUrl);
-                    else extractBrand();
-                  }}
-                  disabled={extractingBrand || !brandUrl.trim()}
-                  style={{
-                    background: A.accent, color: contrastText(A.accent), border: "none", borderRadius: 10,
-                    padding: "0 14px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter', sans-serif",
-                    opacity: extractingBrand || !brandUrl.trim() ? 0.4 : 1, whiteSpace: "nowrap",
-                    display: "flex", alignItems: "center", gap: 5,
-                  }}
-                >
-                  {extractingBrand ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Globe size={13} />}
-                  {extractingBrand ? "..." : "Apply"}
-                </button>
-              </div>
-              <p style={{ fontSize: 10, color: A.muted, marginTop: 4, opacity: 0.7 }}>
-                Enter a domain to grab colors, or paste a hex code like #4F8EF7
-              </p>
-            </div>
 
             {/* Source — not for speaker mode */}
             {!isSpeakerMode && (
