@@ -197,6 +197,7 @@ export default function App() {
   const [extractingBrand, setExtractingBrand] = useState(false);
   const [brandUrl, setBrandUrl] = useState("");
   const [showDesign, setShowDesign] = useState(false);
+  const [genInstructions, setGenInstructions] = useState("");
 
   const fileRef = useRef();
   const rightRef = useRef();
@@ -456,7 +457,7 @@ export default function App() {
 
   // Fingerprint of inputs that affect generation
   function genFingerprint() {
-    return JSON.stringify([input, files.map((f) => f.name), sc, contentType, tone, audience, source, activeBrand?.id]);
+    return JSON.stringify([input, files.map((f) => f.name), sc, contentType, tone, audience, source, activeBrand?.id, genInstructions]);
   }
   // Note: isOutputStale computed later, after hasOutput is defined
 
@@ -473,7 +474,7 @@ export default function App() {
         ),
         {
           type: "text",
-          text: `Generate ${getGenerateText(contentType)}${files.length ? " from attached file(s)" : ""}${files.length && input.trim() ? " and" : ""}${input.trim() ? " from:\n\n" + input : ""}${source.trim() ? `\n\nSOURCE/REFERENCE: "${source.trim()}" — Reference this source naturally in the post body to add credibility. Attribute key insights to it.` : ""}`,
+          text: `Generate ${getGenerateText(contentType)}${files.length ? " from attached file(s)" : ""}${files.length && input.trim() ? " and" : ""}${input.trim() ? " from:\n\n" + input : ""}${source.trim() ? `\n\nSOURCE/REFERENCE: "${source.trim()}" — Reference this source naturally in the post body to add credibility. Attribute key insights to it.` : ""}${genInstructions.trim() ? `\n\nSPECIAL INSTRUCTIONS FOR THIS GENERATION: ${genInstructions.trim()}` : ""}`,
         },
       ];
       const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -1598,7 +1599,23 @@ Return the same JSON structure with just the post object updated.`;
               )}
             </div>}
 
-            {/* Generate */}
+            {/* Generation instructions */}
+            {!isSpeakerMode && (
+              <div>
+                <label style={labelStyle(A)}>
+                  <Sparkles size={12} /> Instructions for AI
+                  <span style={{ opacity: 0.5, fontWeight: 400, textTransform: "none", letterSpacing: 0 }}> (optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={genInstructions}
+                  onChange={(e) => setGenInstructions(e.target.value)}
+                  placeholder="e.g. focus on ROI data, make it provocative, add a personal story..."
+                  style={inputStyle(A)}
+                />
+              </div>
+            )}
+
             {/* Generate button — hidden for speaker mode (live preview) */}
             {!isSpeakerMode && (
               <div style={{ position: "relative" }}>
