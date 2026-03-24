@@ -945,8 +945,8 @@ Return the same JSON structure with just the post object updated.`;
           style={{
             maxWidth: 1200,
             margin: "0 auto",
-            padding: "0 20px",
-            height: 64,
+            padding: "0 clamp(12px, 3vw, 20px)",
+            height: 56,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -958,7 +958,7 @@ Return the same JSON structure with just the post object updated.`;
               <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: 18, fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.2 }}>
                 ContentForge
               </div>
-              <div style={{ fontSize: 11, color: A.muted, lineHeight: 1.2 }}>
+              <div className="cf-brand-sub" style={{ fontSize: 11, color: A.muted, lineHeight: 1.2 }}>
                 LinkedIn Content Studio
               </div>
             </div>
@@ -968,13 +968,13 @@ Return the same JSON structure with just the post object updated.`;
             {user && (
               <>
                 <NavBtn T={T} active={false} onClick={resetToNew}>
-                  <FilePlus size={13} /> New
+                  <FilePlus size={13} /> <span className="cf-nav-label">New</span>
                 </NavBtn>
                 <NavBtn T={T} active={page === "create"} onClick={() => setPage("create")}>
-                  <Sparkles size={13} /> Create
+                  <Sparkles size={13} /> <span className="cf-nav-label">Create</span>
                 </NavBtn>
                 {historyEnabled && <NavBtn T={T} active={page === "history"} onClick={() => setPage("history")}>
-                  <History size={13} /> Library
+                  <History size={13} /> <span className="cf-nav-label">Library</span>
                 </NavBtn>}
                 <NavBtn T={T} active={page === "settings"} onClick={() => setPage("settings")}>
                   <Settings size={13} />
@@ -1048,7 +1048,7 @@ Return the same JSON structure with just the post object updated.`;
       </AnimatePresence>
 
       {/* MAIN */}
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px 20px 80px" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(16px, 3vw, 24px) clamp(12px, 3vw, 20px) 80px" }}>
 
         {/* Settings Page */}
         {page === "settings" && user && (
@@ -1134,7 +1134,7 @@ Return the same JSON structure with just the post object updated.`;
           style={{
             display: "grid",
             gridTemplateColumns: hasOutput ? "minmax(0,420px) minmax(0,1fr)" : "minmax(0,600px)",
-            gap: 32,
+            gap: "clamp(16px, 3vw, 32px)",
             alignItems: "start",
             justifyContent: "center",
           }}
@@ -2337,8 +2337,24 @@ Return the same JSON structure with just the post object updated.`;
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @media (max-width: 768px) {
+          /* Main layout: stack to single column */
           div[style*="grid-template-columns: minmax(0,420px) minmax(0,1fr)"] { grid-template-columns: 1fr !important; }
+          /* Content type: 2x2 grid */
           div[style*="grid-template-columns: repeat(4, 1fr)"] { grid-template-columns: repeat(2, 1fr) !important; }
+          /* Settings rows: stack */
+          div[style*="grid-template-columns: 1fr 1fr 72px"] { grid-template-columns: 1fr 1fr !important; }
+          div[style*="grid-template-columns: 1fr 72px"] { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 480px) {
+          /* Extra small: tighter padding */
+          div[style*="padding: 24px 20px"] { padding: 16px 12px !important; }
+          /* Brand + label: stack */
+          div[style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+        }
+        /* Header nav: hide text labels on small screens */
+        @media (max-width: 640px) {
+          .cf-nav-label { display: none !important; }
+          .cf-brand-sub { display: none !important; }
         }
       `}</style>
     </div>

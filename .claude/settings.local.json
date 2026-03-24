@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(find /c/Users/march/cc/li-creator/src -type f -name *.jsx -o -name *.js -o -name *.css)"
+      "Bash(find /c/Users/march/cc/li-creator/src -type f -name *.jsx -o -name *.js -o -name *.css)",
+      "Bash(npx vite:*)",
+      "Bash(node:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
