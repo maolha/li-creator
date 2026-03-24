@@ -58,7 +58,7 @@ export default function HistoryPanel({ T, creations, onLoad, onDelete, loading }
         {creations.map((c) => {
           const Icon = TYPE_ICONS[c.contentType] || Layers;
           const date = c.createdAt?.toDate
-            ? c.createdAt.toDate().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+            ? c.createdAt.toDate().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
             : "";
           const slideCount = c.slides?.length || 0;
 

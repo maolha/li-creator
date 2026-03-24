@@ -148,6 +148,7 @@ export default function App() {
   const [title, setTitle] = useState(() => loadState("title", ""));
   const [post, setPost] = useState(() => loadState("post", null));
   const [cur, setCur] = useState(() => loadState("cur", 0));
+  const [lastGenFingerprint, setLastGenFingerprint] = useState("");
   const [contentType, setContentType] = useState(() => loadState("contentType", "carousel"));
   const [customThemes, setCustomThemes] = useState(() => loadState("custom_themes", {}));
   const [appMode, setAppMode] = useState(() => loadState("appMode", "light")); // app shell only
@@ -449,6 +450,12 @@ export default function App() {
     return JSON.parse(raw.replace(/```json|```/g, "").trim());
   }
 
+  // Fingerprint of inputs that affect generation
+  function genFingerprint() {
+    return JSON.stringify([input, files.map((f) => f.name), sc, contentType, tone, audience, source, activeBrand?.id]);
+  }
+  const isOutputStale = hasOutput && !isSpeakerMode && lastGenFingerprint && lastGenFingerprint !== genFingerprint();
+
   async function generate() {
     if (!input.trim() && !files.length) return;
     if (!apiKey) { setShowApiInput(true); setError("Please add your Anthropic API key."); return; }
@@ -493,6 +500,7 @@ export default function App() {
       if (contentType === "text-post") setActiveTab("post");
       else setActiveTab("slides");
 
+      setLastGenFingerprint(genFingerprint());
       // No auto-save — user saves manually via "Save to Library"
     } catch (e) {
       setError(e.message || "Generation failed. Please try again.");
@@ -1791,6 +1799,35 @@ Return the same JSON structure with just the post object updated.`;
                     </span>
                   )}
                 </div>
+              )}
+
+              {/* Stale output indicator */}
+              {isOutputStale && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    padding: "10px 14px", borderRadius: 10,
+                    background: `rgba(${A.accent === "#0077b5" ? "0,119,181" : "124,92,252"},0.08)`,
+                    border: `1px solid ${A.accent}33`,
+                  }}
+                >
+                  <span style={{ fontSize: 12, color: A.accent, fontWeight: 600 }}>
+                    Inputs changed — regenerate to update
+                  </span>
+                  <button
+                    onClick={generate}
+                    disabled={loading}
+                    style={{
+                      background: A.accent, color: "#fff", border: "none", borderRadius: 8,
+                      padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                      fontFamily: "'Inter', sans-serif", display: "flex", alignItems: "center", gap: 5,
+                    }}
+                  >
+                    <Sparkles size={12} /> Regenerate
+                  </button>
+                </motion.div>
               )}
 
               {/* Save to Library — always visible when logged in + has output */}
