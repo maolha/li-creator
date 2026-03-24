@@ -1278,7 +1278,7 @@ Return the same JSON structure with just the post object updated.`;
               <div>
                 <label style={labelStyle(A)}><Palette size={12} /> Preset</label>
                 <select value={theme} onChange={(e) => setTheme(e.target.value)} style={selectStyle(A)}>
-                  {Object.keys(allPresets).map((t) => <option key={t}>{t}</option>)}
+                  {Object.keys(allPresets).filter((t) => !t.startsWith("brand-") && !t.startsWith("Custom #")).map((t) => <option key={t}>{t}</option>)}
                 </select>
               </div>
               {contentType === "carousel" && (
@@ -1375,7 +1375,7 @@ Return the same JSON structure with just the post object updated.`;
 
             {/* Theme swatches */}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-              {Object.entries(allPresets).map(([name, t]) => (
+              {Object.entries(allPresets).filter(([name]) => !name.startsWith("brand-") && !name.startsWith("Custom #")).map(([name, t]) => (
                 <button
                   key={name}
                   onClick={() => setTheme(name)}
