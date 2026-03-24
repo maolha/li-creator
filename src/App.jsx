@@ -805,14 +805,23 @@ Return the same JSON structure with just the post object updated.`;
     });
   }
 
-  function downloadPDF() {
+  async function downloadPDF() {
     if (!slides) return;
-    const html = buildPdf(slides, brand, T);
-    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const win = window.open(url, "_blank");
-    if (!win) { setError("Pop-up blocked. Allow pop-ups."); return; }
-    setTimeout(() => URL.revokeObjectURL(url), 90000);
+    try {
+      await buildPdf(slides, brand, T, {
+        intensity,
+        bgMode: slideBgMode,
+        slideAspect,
+        brandFonts: activeBrand?.fonts,
+        brandBgImage: activeBrand?.backgroundImage,
+        bgImageMode,
+        logoConfig: slideLogo,
+        brandLogos: activeBrand?.logos,
+        ghostNumbers,
+      });
+    } catch (e) {
+      setError("PDF export failed: " + e.message);
+    }
   }
 
   function resetToNew() {
