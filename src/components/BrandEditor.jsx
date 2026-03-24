@@ -98,10 +98,12 @@ export default function BrandEditor({ T, brands, onChange }) {
                     <div>
                       <span style={{ fontSize: 9, color: T.muted, opacity: 0.7 }}>Heading</span>
                       <FontPicker value={brand.fonts?.heading || ""} onChange={(v) => updateNested(brand.id, "fonts", "heading", v)} type="heading" T={T} />
+                      <WeightPicker value={brand.fonts?.headingWeight || "bold"} onChange={(v) => updateNested(brand.id, "fonts", "headingWeight", v)} T={T} />
                     </div>
                     <div>
                       <span style={{ fontSize: 9, color: T.muted, opacity: 0.7 }}>Body</span>
                       <FontPicker value={brand.fonts?.body || ""} onChange={(v) => updateNested(brand.id, "fonts", "body", v)} type="body" T={T} />
+                      <WeightPicker value={brand.fonts?.bodyWeight || "medium"} onChange={(v) => updateNested(brand.id, "fonts", "bodyWeight", v)} T={T} />
                     </div>
                   </div>
                 </div>
@@ -222,6 +224,36 @@ function HashtagGroupInput({ T, onAdd }) {
       <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Group" style={{ ...inp(T), width: 80, fontSize: 11 }} />
       <input type="text" value={tags} onChange={(e) => setTags(e.target.value)} placeholder="tag1, tag2" style={{ ...inp(T), flex: 1, fontSize: 11 }} onKeyDown={(e) => { if (e.key === "Enter" && name && tags) { onAdd(name, tags.split(",").map((t) => t.trim()).filter(Boolean)); setName(""); setTags(""); } }} />
       <button onClick={() => { if (name && tags) { onAdd(name, tags.split(",").map((t) => t.trim()).filter(Boolean)); setName(""); setTags(""); } }} style={{ background: T.soft, border: `1px solid ${T.border}`, borderRadius: 6, padding: "0 8px", cursor: "pointer", color: T.accent }}><Plus size={12} /></button>
+    </div>
+  );
+}
+
+const WEIGHTS = [
+  { id: "light", label: "Light", value: 300 },
+  { id: "medium", label: "Medium", value: 500 },
+  { id: "bold", label: "Bold", value: 700 },
+  { id: "black", label: "Black", value: 900 },
+];
+
+function WeightPicker({ value, onChange, T }) {
+  return (
+    <div style={{ display: "flex", gap: 3, marginTop: 4 }}>
+      {WEIGHTS.map((w) => (
+        <button
+          key={w.id}
+          onClick={() => onChange(w.id)}
+          style={{
+            flex: 1, padding: "4px 2px", borderRadius: 5, fontSize: 9,
+            fontWeight: w.value,
+            border: `1px solid ${value === w.id ? T.accent : T.border}`,
+            background: value === w.id ? T.soft : "transparent",
+            color: value === w.id ? T.accent : T.muted,
+            cursor: "pointer", fontFamily: "'Inter', sans-serif", textAlign: "center",
+          }}
+        >
+          {w.label}
+        </button>
+      ))}
     </div>
   );
 }

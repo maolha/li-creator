@@ -65,7 +65,9 @@ function Bar({ brand, i, n, light, T }) {
   );
 }
 
-export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1:1", bgMode = "default", logoConfig, brandLogos }) {
+const WEIGHT_MAP = { light: 300, medium: 500, bold: 700, black: 900 };
+
+export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1:1", bgMode = "default", logoConfig, brandLogos, brandFonts }) {
   const type = s.type || "insight";
   const { w: SW, h: SH } = SLIDE_ASPECTS[aspect] || SLIDE_ASPECTS["1:1"];
   const baseSpec = getIntensitySpec(type, intensity, T, s.headline?.length || 0);
@@ -141,6 +143,11 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
 
   const LogoOverlay = logoUrl ? <img src={logoUrl} alt="" style={logoStyle} /> : null;
 
+  // Brand fonts
+  const headingFont = brandFonts?.heading ? `'${brandFonts.heading}', sans-serif` : "'DM Serif Display',serif";
+  const headingWeight = WEIGHT_MAP[brandFonts?.headingWeight] || 400;
+  const headingItalic = !brandFonts?.heading; // only italic for default DM Serif
+
   /* COVER */
   if (type === "cover") {
     return (
@@ -154,7 +161,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
         <div style={{ paddingLeft: spec.accentBarW > 0 ? spec.accentBarW + 2 : 0, position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
           <Pill tag={s.tag} type={type} variant={spec.pillVariant} T={theme} />
           <div style={{ width: 64, height: 4, background: effectiveText === ct ? ct : theme.accent, borderRadius: 2, margin: `${Math.round(26 * vScale)}px 0 ${Math.round(22 * vScale)}px`, opacity: effectiveText === ct ? 0.4 : 1 }} />
-          <h1 style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.headlineSize, fontWeight: 400, lineHeight: spec.headlineLH, color: effectiveText, fontStyle: spec.headlineItalic ? "italic" : "normal", margin: `0 0 ${Math.round(22 * vScale)}px` }}>
+          <h1 style={{ fontFamily: headingFont, fontSize: spec.headlineSize, fontWeight: headingWeight, lineHeight: spec.headlineLH, color: effectiveText, fontStyle: headingItalic && spec.headlineItalic ? "italic" : "normal", margin: `0 0 ${Math.round(22 * vScale)}px` }}>
             {s.headline}
           </h1>
           <p style={{ fontSize: spec.bodySize, lineHeight: 1.65, color: effectiveBody, margin: 0, opacity: spec.bodyOpacity || 1 }}>{s.body}</p>
@@ -179,7 +186,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
           <Pill tag={s.tag} type={type} variant="default" T={theme} />
           <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: `${Math.round(22 * vScale)}px 0` }}>
             <div style={{ width: 44, height: 4, background: theme.accent, borderRadius: 2, marginBottom: Math.round(20 * vScale) }} />
-            <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.headlineSize, fontWeight: 400, lineHeight: 1.25, color: theme.text, margin: `0 0 ${Math.round(16 * vScale)}px` }}>{s.headline}</h2>
+            <h2 style={{ fontFamily: headingFont, fontSize: spec.headlineSize, fontWeight: headingWeight, lineHeight: 1.25, color: theme.text, margin: `0 0 ${Math.round(16 * vScale)}px` }}>{s.headline}</h2>
             <p style={{ fontSize: spec.bodySize, lineHeight: 1.72, color: theme.muted, margin: 0 }}>{s.body}</p>
           </div>
           <Bar brand={brand} i={i} n={n} T={theme} />
@@ -208,7 +215,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
           </div>
         )}
         <div style={{ flex: isCentered ? undefined : 1, display: "flex", flexDirection: "column", justifyContent: "center", marginTop: isCentered ? 0 : -26, position: "relative", zIndex: 1 }}>
-          <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.headlineSize, fontWeight: 400, lineHeight: spec.headlineLH, color: qText, fontStyle: "italic", margin: `0 0 ${Math.round(20 * vScale)}px` }}>{s.headline}</h2>
+          <h2 style={{ fontFamily: headingFont, fontSize: spec.headlineSize, fontWeight: headingWeight, lineHeight: spec.headlineLH, color: qText, fontStyle: headingItalic ? "italic" : "normal", margin: `0 0 ${Math.round(20 * vScale)}px` }}>{s.headline}</h2>
           {spec.showAccentUnderline && <div style={{ width: "40%", height: 3, background: theme.accent, borderRadius: 2, marginBottom: Math.round(16 * vScale), marginLeft: isCentered ? "auto" : 0, marginRight: isCentered ? "auto" : undefined }} />}
           <p style={{ fontSize: spec.bodySize, lineHeight: 1.72, color: qBody, margin: 0, opacity: spec.bodyOpacity || 1 }}>{s.body}</p>
         </div>
@@ -239,7 +246,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
           {spec.showIcon && (
             <div style={{ fontSize: spec.iconSize, lineHeight: 1, color: effectiveText, opacity: spec.iconOpacity, marginBottom: 20, fontFamily: "'DM Serif Display',serif" }}>&#9670;</div>
           )}
-          <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.headlineSize, fontWeight: 400, lineHeight: spec.headlineLH, color: effectiveText, margin: "0 0 20px" }}>{s.headline}</h2>
+          <h2 style={{ fontFamily: headingFont, fontSize: spec.headlineSize, fontWeight: headingWeight, lineHeight: spec.headlineLH, color: effectiveText, margin: "0 0 20px" }}>{s.headline}</h2>
           <p style={{ fontSize: spec.bodySize, lineHeight: 1.65, color: effectiveText, opacity: spec.bodyOpacity, margin: 0 }}>{s.body}</p>
         </div>
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.18)", paddingTop: 20, position: "relative", flexShrink: 0 }}>
@@ -261,7 +268,7 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
         <Pill tag={s.tag} type={type} variant={intensity === "dramatic" ? "light" : "default"} T={theme} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: `${Math.round(18 * vScale)}px 0` }}>
           <div style={{ width: spec.dividerW, height: spec.dividerH, background: theme.accent, borderRadius: 2, marginBottom: Math.round(22 * vScale) }} />
-          <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.headlineSize, fontWeight: 400, lineHeight: spec.headlineLH, color: effectiveText, margin: `0 0 ${Math.round(18 * vScale)}px` }}>{s.headline}</h2>
+          <h2 style={{ fontFamily: headingFont, fontSize: spec.headlineSize, fontWeight: headingWeight, lineHeight: spec.headlineLH, color: effectiveText, margin: `0 0 ${Math.round(18 * vScale)}px` }}>{s.headline}</h2>
           <p style={{ fontSize: spec.bodySize, lineHeight: 1.72, color: effectiveBody, margin: 0, opacity: spec.bodyOpacity || 1 }}>{s.body}</p>
         </div>
         <Bar brand={brand} i={i} n={n} T={theme} />
@@ -270,14 +277,14 @@ export function SlideInner({ s, brand, i, n, T, intensity = "clean", aspect = "1
   );
 }
 
-export function ScaledSlide({ s, brand, i, n, T, size, intensity, aspect = "1:1", bgMode = "default", logoConfig, brandLogos }) {
+export function ScaledSlide({ s, brand, i, n, T, size, intensity, aspect = "1:1", bgMode = "default", logoConfig, brandLogos, brandFonts }) {
   const { w, h } = SLIDE_ASPECTS[aspect] || SLIDE_ASPECTS["1:1"];
   const sc = size / w;
   const scaledH = h * sc;
   return (
     <div style={{ width: size, height: scaledH, borderRadius: 16, overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)" }}>
       <div style={{ width: w, height: h, transform: `scale(${sc})`, transformOrigin: "top left" }}>
-        <SlideInner s={s} brand={brand} i={i} n={n} T={T} intensity={intensity} aspect={aspect} bgMode={bgMode} logoConfig={logoConfig} brandLogos={brandLogos} />
+        <SlideInner s={s} brand={brand} i={i} n={n} T={T} intensity={intensity} aspect={aspect} bgMode={bgMode} logoConfig={logoConfig} brandLogos={brandLogos} brandFonts={brandFonts} />
       </div>
     </div>
   );
