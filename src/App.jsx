@@ -872,6 +872,15 @@ Return the same JSON structure with just the post object updated.`;
           })),
         };
       }
+      // Strip large base64 data from brand to stay under Firestore 1MB limit
+      const savedBrand = activeBrand ? {
+        ...activeBrand,
+        backgroundImage: activeBrand.backgroundImage?.startsWith?.("data:") ? null : (activeBrand.backgroundImage || null),
+        logos: activeBrand.logos ? {
+          light: activeBrand.logos.light?.startsWith?.("data:") ? null : (activeBrand.logos.light || null),
+          dark: activeBrand.logos.dark?.startsWith?.("data:") ? null : (activeBrand.logos.dark || null),
+        } : null,
+      } : { name: brand || "" };
       // Firestore rejects undefined values — use null instead
       const payload = {
         title: title || speakerData?.eventTitle || "Untitled",
@@ -879,10 +888,11 @@ Return the same JSON structure with just the post object updated.`;
         post: post || null,
         contentType: contentType || "carousel",
         theme: theme || "Midnight Pro",
-        brand: activeBrand || { name: brand || "" },
+        brand: savedBrand,
         intensity: intensity || "clean",
         slideAspect: slideAspect || "1:1",
         slideBgMode: slideBgMode || "default",
+        bgImageMode: bgImageMode || "off",
         tone: tone || "professional",
         audience: audience || "general",
         sc: sc || 7,
@@ -892,6 +902,7 @@ Return the same JSON structure with just the post object updated.`;
         customThemeDef: customThemeDef || null,
         slideLogo: slideLogo || { show: "none", position: "top-right" },
         ghostNumbers: ghostNumbers || "on",
+        genInstructions: genInstructions || "",
       };
       await saveCreation(user.uid, cleanForFirestore(payload));
       const updated = await getCreations(user.uid);
@@ -918,16 +929,25 @@ Return the same JSON structure with just the post object updated.`;
         })),
       };
     }
+    const copySavedBrand = activeBrand ? {
+      ...activeBrand,
+      backgroundImage: activeBrand.backgroundImage?.startsWith?.("data:") ? null : (activeBrand.backgroundImage || null),
+      logos: activeBrand.logos ? {
+        light: activeBrand.logos.light?.startsWith?.("data:") ? null : (activeBrand.logos.light || null),
+        dark: activeBrand.logos.dark?.startsWith?.("data:") ? null : (activeBrand.logos.dark || null),
+      } : null,
+    } : { name: brand || "" };
     const copyPayload = {
       title: (title || speakerData?.eventTitle || "Untitled") + " (copy)",
       slides: slides || [],
       post: post || null,
       contentType: contentType || "carousel",
       theme: theme || "Midnight Pro",
-      brand: activeBrand || { name: brand || "" },
+      brand: copySavedBrand,
       intensity: intensity || "clean",
       slideAspect: slideAspect || "1:1",
       slideBgMode: slideBgMode || "default",
+      bgImageMode: bgImageMode || "off",
       tone: tone || "professional",
       audience: audience || "general",
       sc: sc || 7,
@@ -937,6 +957,7 @@ Return the same JSON structure with just the post object updated.`;
       customThemeDef: customThemeDef || null,
       slideLogo: slideLogo || { show: "none", position: "top-right" },
       ghostNumbers: ghostNumbers || "on",
+      genInstructions: genInstructions || "",
     };
     await saveCreation(user.uid, cleanForFirestore(copyPayload));
     const updated = await getCreations(user.uid);
@@ -1199,6 +1220,8 @@ Return the same JSON structure with just the post object updated.`;
               setSlideBgMode(c.slideBgMode || "default");
               setSlideLogo(c.slideLogo || { show: "none", position: "top-right" });
               setGhostNumbers(c.ghostNumbers || "on");
+              setBgImageMode(c.bgImageMode || "off");
+              setGenInstructions(c.genInstructions || "");
               setTone(c.tone || "professional");
               setAudience(c.audience || "general");
               setSc(c.sc || 7);
