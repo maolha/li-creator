@@ -82,6 +82,7 @@ import {
 import Logo from "./components/Logo";
 import SettingsPanel from "./components/SettingsPanel";
 import HistoryPanel from "./components/HistoryPanel";
+import FontPicker from "./components/FontPicker";
 import LandingPage from "./components/LandingPage";
 import OnboardingFlow from "./components/OnboardingFlow";
 
@@ -1347,6 +1348,82 @@ Return the same JSON structure with just the post object updated.`;
                       {activeBrand?.colors && activeBrand.id && Object.entries(activeBrand.colors).filter(([_, v]) => v?.startsWith?.("#")).map(([key, color]) => (
                         <button key={key} onClick={() => { const v = makeCustomVariants(color); if (v) { setCustomThemes((p) => ({ ...p, [`brand-${activeBrand.id}-${key}`]: v })); setTheme(`brand-${activeBrand.id}-${key}`); } }} title={`${key}: ${color}`} style={{ width: 26, height: 26, borderRadius: 7, border: "2px solid transparent", background: color, cursor: "pointer", padding: 0 }} />
                       ))}
+                    </div>
+                    {/* Custom colors */}
+                    <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                      <span style={{ fontSize: 10, color: A.muted, flexShrink: 0 }}>Colors:</span>
+                      {[0, 1].map((ci) => {
+                        const colorKey = ci === 0 ? "primary" : "secondary";
+                        const currentColor = activeBrand?.colors?.[colorKey] || (ci === 0 ? T.accent : "");
+                        return (
+                          <div key={ci} style={{ display: "flex", alignItems: "center", gap: 3, flex: 1 }}>
+                            <label style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${A.border}`, overflow: "hidden", cursor: "pointer", flexShrink: 0, background: currentColor || A.soft, position: "relative" }}>
+                              <input
+                                type="color"
+                                value={currentColor || "#4F8EF7"}
+                                onChange={(e) => {
+                                  const color = e.target.value;
+                                  setActiveBrand((prev) => ({
+                                    ...(prev || {}),
+                                    colors: { ...(prev?.colors || {}), [colorKey]: color },
+                                  }));
+                                  if (ci === 0) {
+                                    const v = makeCustomVariants(color, activeBrand?.colors?.secondary);
+                                    if (v) {
+                                      const tid = `Custom #${color}`;
+                                      setCustomThemes((p) => ({ ...p, [tid]: v }));
+                                      setTheme(tid);
+                                    }
+                                  }
+                                }}
+                                style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%", height: "100%" }}
+                              />
+                            </label>
+                            <input
+                              type="text"
+                              value={currentColor || ""}
+                              placeholder={ci === 0 ? "#accent" : "#2nd (opt)"}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setActiveBrand((prev) => ({
+                                  ...(prev || {}),
+                                  colors: { ...(prev?.colors || {}), [colorKey]: val },
+                                }));
+                                if (/^#[0-9a-fA-F]{6}$/.test(val) && ci === 0) {
+                                  const v = makeCustomVariants(val, activeBrand?.colors?.secondary);
+                                  if (v) {
+                                    const tid = `Custom #${val}`;
+                                    setCustomThemes((p) => ({ ...p, [tid]: v }));
+                                    setTheme(tid);
+                                  }
+                                }
+                              }}
+                              style={{ ...inputStyle(A), padding: "3px 6px", fontSize: 10, fontFamily: "'JetBrains Mono', monospace", flex: 1, minWidth: 0 }}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {/* Fonts */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        <span style={{ fontSize: 9, color: A.muted, fontWeight: 600 }}>Heading</span>
+                        <FontPicker
+                          value={activeBrand?.fonts?.heading || ""}
+                          onChange={(f) => setActiveBrand((prev) => ({ ...(prev || {}), fonts: { ...(prev?.fonts || {}), heading: f } }))}
+                          type="heading"
+                          T={A}
+                        />
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        <span style={{ fontSize: 9, color: A.muted, fontWeight: 600 }}>Body</span>
+                        <FontPicker
+                          value={activeBrand?.fonts?.body || ""}
+                          onChange={(f) => setActiveBrand((prev) => ({ ...(prev || {}), fonts: { ...(prev?.fonts || {}), body: f } }))}
+                          type="body"
+                          T={A}
+                        />
+                      </div>
                     </div>
                     {/* Style + Size + Bg in compact rows */}
                     <div style={{ display: "flex", gap: 4 }}>
