@@ -46,6 +46,7 @@ import {
   UserCircle,
   FilePlus,
   ChevronDown,
+  Undo2,
 } from "lucide-react";
 
 import { getThemes, contrastText, makeCustomVariants } from "./utils/themes";
@@ -557,6 +558,41 @@ export default function App() {
     setRegeneratingSlide(null);
   }
 
+  // Undo history for rewrites
+  const [undoSlides, setUndoSlides] = useState([]); // stack of { slides, index }
+  const [undoPost, setUndoPost] = useState([]); // stack of post snapshots
+
+  function undoSlideRewrite() {
+    if (!undoSlides.length) return;
+    const prev = undoSlides[undoSlides.length - 1];
+    setSlides(prev.slides);
+    setCur(prev.index);
+    setUndoSlides((s) => s.slice(0, -1));
+  }
+
+  function undoPostRewrite() {
+    if (!undoPost.length) return;
+    const prev = undoPost[undoPost.length - 1];
+    setPost(prev);
+    setUndoPost((s) => s.slice(0, -1));
+  }
+
+  // Ctrl+Z handler for undo
+  useEffect(() => {
+    function handler(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+        // Don't intercept if user is typing in an input/textarea
+        const tag = document.activeElement?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        e.preventDefault();
+        if (activeTab === "post" && undoPost.length) undoPostRewrite();
+        else if (undoSlides.length) undoSlideRewrite();
+      }
+    }
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [activeTab, undoSlides, undoPost]);
+
   // Rewrite slide with instructions
   const [slideRewritePrompt, setSlideRewritePrompt] = useState("");
   const [rewritingSlide, setRewritingSlide] = useState(false);
@@ -564,6 +600,8 @@ export default function App() {
     if (!apiKey || rewritingSlide) return;
     setRewritingSlide(true);
     try {
+      // Save current state for undo
+      setUndoSlides((prev) => [...prev, { slides: [...slides], index }]);
       const s = slides[index];
       const context = `Rewrite this LinkedIn carousel slide. Keep the same type "${s.type || "insight"}".
 Current headline: "${s.headline}"
@@ -579,6 +617,8 @@ ${input.trim() ? `\nOriginal source context:\n${input.slice(0, 500)}` : ""}`;
       });
       setSlideRewritePrompt("");
     } catch (e) {
+      // Remove the undo entry if rewrite failed
+      setUndoSlides((prev) => prev.slice(0, -1));
       setError(`Rewrite failed: ${e.message}`);
     }
     setRewritingSlide(false);
@@ -591,6 +631,8 @@ ${input.trim() ? `\nOriginal source context:\n${input.slice(0, 500)}` : ""}`;
     if (!apiKey || !post || rewritingPost) return;
     setRewritingPost(true);
     try {
+      // Save current state for undo
+      setUndoPost((prev) => [...prev, { ...post }]);
       const prompt = getPromptForType(contentType);
       const context = `Rewrite this LinkedIn post copy. Keep the same topic and structure.
 Current hook: "${post.hook}"
@@ -606,6 +648,8 @@ Return the same JSON structure with just the post object updated.`;
       if (result.post) setPost(result.post);
       setPostRewritePrompt("");
     } catch (e) {
+      // Remove the undo entry if rewrite failed
+      setUndoPost((prev) => prev.slice(0, -1));
       setError(`Rewrite failed: ${e.message}`);
     }
     setRewritingPost(false);
@@ -2418,9 +2462,24 @@ Return the same JSON structure with just the post object updated.`;
 
                     {/* Rewrite with instructions */}
                     <div style={{ borderTop: `1px solid ${A.border}`, paddingTop: 12 }}>
-                      <label style={{ ...labelStyle(A), marginBottom: 4 }}>
-                        <RefreshCw size={12} /> AI Rewrite
-                      </label>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                        <label style={{ ...labelStyle(A), margin: 0 }}>
+                          <RefreshCw size={12} /> AI Rewrite
+                        </label>
+                        {undoSlides.length > 0 && (
+                          <button
+                            onClick={undoSlideRewrite}
+                            style={{
+                              background: A.soft, border: `1px solid ${A.border}`, borderRadius: 6,
+                              padding: "3px 8px", fontSize: 10, fontWeight: 600, cursor: "pointer",
+                              fontFamily: "'Inter', sans-serif", color: A.accent,
+                              display: "flex", alignItems: "center", gap: 4,
+                            }}
+                          >
+                            <Undo2 size={11} /> Undo {undoSlides.length > 1 ? `(${undoSlides.length})` : ""}
+                          </button>
+                        )}
+                      </div>
                       <div style={{ display: "flex", gap: 8 }}>
                         <input
                           type="text"
@@ -2445,7 +2504,7 @@ Return the same JSON structure with just the post object updated.`;
                         </button>
                       </div>
                       <p style={{ fontSize: 10, color: A.muted, marginTop: 4, opacity: 0.7 }}>
-                        Leave empty for a general improvement, or describe what to change
+                        Leave empty for a general improvement, or describe what to change. <span style={{ color: A.text, opacity: 0.5 }}>Ctrl+Z to undo</span>
                       </p>
                     </div>
                   </div>
@@ -2473,7 +2532,7 @@ Return the same JSON structure with just the post object updated.`;
                   </div>
 
                   {/* Rewrite post */}
-                  <div style={{ display: "flex", gap: 8 }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                     <input
                       type="text"
                       value={postRewritePrompt}
@@ -2495,6 +2554,20 @@ Return the same JSON structure with just the post object updated.`;
                       {rewritingPost ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <RefreshCw size={13} />}
                       Rewrite
                     </button>
+                    {undoPost.length > 0 && (
+                      <button
+                        onClick={undoPostRewrite}
+                        title="Undo rewrite (Ctrl+Z)"
+                        style={{
+                          background: A.soft, border: `1px solid ${A.border}`, borderRadius: 8,
+                          padding: "8px 10px", cursor: "pointer", color: A.accent,
+                          display: "flex", alignItems: "center", gap: 4, flexShrink: 0,
+                          fontSize: 11, fontWeight: 600, fontFamily: "'Inter', sans-serif",
+                        }}
+                      >
+                        <Undo2 size={13} />
+                      </button>
+                    )}
                   </div>
 
                   {/* Editable structured post */}
