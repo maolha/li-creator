@@ -18,6 +18,26 @@ function hexLighten(hex, amount = 0.15) {
   return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }
 
+function luminance(hex) {
+  const h = (hex || "#000000").replace("#", "");
+  const num = parseInt(h.length === 3 ? h[0]+h[0]+h[1]+h[1]+h[2]+h[2] : h, 16);
+  const r = ((num >> 16) & 255) / 255;
+  const g = ((num >> 8) & 255) / 255;
+  const b = (num & 255) / 255;
+  const toLinear = (c) => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+}
+
+function getContrastRatio(hex1, hex2) {
+  // Handle non-hex values (rgba, gradients) gracefully
+  if (!hex1?.startsWith?.("#") || !hex2?.startsWith?.("#")) return 10;
+  const l1 = luminance(hex1);
+  const l2 = luminance(hex2);
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 function hexDarken(hex, amount = 0.25) {
   const h = (hex || "#000000").replace("#", "");
   const num = parseInt(h, 16);
@@ -283,26 +303,37 @@ export function SlideInner({
   const effectiveBorder = resolved.border || T.border;
   const bodyOpacity = resolved.bodyOpacity || spec.bodyOpacity || 1;
 
+  // Ensure accent has good contrast against bg — if not, flip to contrast color
+  let safeAccent = effectiveAccent;
+  if (effectiveAccent?.startsWith?.("#") && effectiveBg?.startsWith?.("#")) {
+    const ratio = getContrastRatio(effectiveAccent, effectiveBg);
+    if (ratio < 2.5) {
+      // Accent is too close to bg — use the text color or a contrasting version
+      safeAccent = effectiveText;
+    }
+  }
+
   // Construct a theme-like object for sub-components
   const slideTheme = {
     ...T,
     card: effectiveBg,
     text: effectiveText,
     muted: effectiveBody,
-    accent: effectiveAccent,
+    accent: safeAccent,
     border: effectiveBorder,
-    soft: `rgba(${hexToRgb(effectiveAccent)},0.08)`,
+    soft: `rgba(${hexToRgb(safeAccent)},0.08)`,
   };
 
-  const ct = contrastText(effectiveAccent);
+  const ct = contrastText(safeAccent);
   const isLightBg = resolved.isLight || contrastText(effectiveBg) !== "#FFFFFF";
 
   // Headline scale from DNA
   const hScale2 = dna?.headlineScale || 1.0;
   const headlineSize = Math.round(spec.headlineSize * hScale2);
 
-  // Accent text from DNA
-  const headlineColor = dna?.accentText ? effectiveAccent : effectiveText;
+  // Accent text from DNA — but only if it has good contrast against the bg
+  const accentOnBgContrast = getContrastRatio(safeAccent, effectiveBg);
+  const headlineColor = dna?.accentText && accentOnBgContrast > 3.0 ? safeAccent : effectiveText;
 
   // Alignment from DNA
   const align = dna?.align || (layout === "centered" ? "center" : "left");
@@ -385,11 +416,11 @@ export function SlideInner({
       {BgImageOverlay}
       {GradientOverlay}
       {useDnaDecos ? (
-        <DnaDecorations deco={dna.deco} accent={effectiveAccent} SW={SW} SH={SH} slideIndex={i} textColor={effectiveText} />
+        <DnaDecorations deco={dna.deco} accent={safeAccent} SW={SW} SH={SH} slideIndex={i} textColor={effectiveText} />
       ) : (
         <Decorations items={fallbackDecos} />
       )}
-      {dna && <DnaFrame frame={dna.frame} accent={effectiveAccent} SW={SW} SH={SH} />}
+      {dna && <DnaFrame frame={dna.frame} accent={safeAccent} SW={SW} SH={SH} />}
       {LogoOverlay}
       {children}
     </div>
@@ -402,7 +433,7 @@ export function SlideInner({
       borderTop: border ? `1px solid ${light ? "rgba(255,255,255,0.18)" : effectiveBorder}` : "none",
       paddingTop: border ? 20 : 0, marginTop: "auto", flexShrink: 0,
     }}>
-      {!hideBrandText && <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: effectiveAccent, opacity: 0.75 }}>{slideLabel}</span>}
+      {!hideBrandText && <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: safeAccent, opacity: 0.75 }}>{slideLabel}</span>}
       {hideBrandText && <span />}
       <span style={{ fontSize: 12, color: effectiveText, opacity: 0.45 }}>{!hideCounter && n > 1 ? `${i + 1} / ${n}` : ""}</span>
     </div>
@@ -415,14 +446,14 @@ export function SlideInner({
       <Wrapper style={{ display: "flex", flexDirection: "column", justifyContent: isCenterLayout ? "center" : "space-between", alignItems: isCenterLayout ? "center" : undefined, textAlign: isCenterLayout ? "center" : textAlign, padding: pad }}>
         {!isCenterLayout && (
           <div style={{ paddingLeft: frameBarLeft, display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", flexShrink: 0 }}>
-            {!hideBrandText && <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: effectiveAccent, opacity: 0.8 }}>{slideLabel}</span>}
+            {!hideBrandText && <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: safeAccent, opacity: 0.8 }}>{slideLabel}</span>}
             {hideBrandText && <span />}
             <span style={{ fontSize: 12, color: effectiveText, opacity: 0.5 }}>{!hideCounter && n > 1 ? `${i + 1} / ${n}` : ""}</span>
           </div>
         )}
         <div style={{ paddingLeft: !isCenterLayout ? frameBarLeft : 0, position: "relative", flex: isCenterLayout ? undefined : 1, display: "flex", flexDirection: "column", justifyContent: isCenterLayout ? "center" : "flex-end", alignItems: isCenterLayout ? "center" : alignItems, maxWidth: isCenterLayout ? "92%" : undefined }}>
           <Pill tag={s.tag} type={type} variant={pillVariant} T={slideTheme} />
-          <div style={{ width: isCenterLayout ? 48 : 64, height: 4, background: effectiveAccent, borderRadius: 2, margin: `${Math.round(22 * vScale)}px ${isCenterLayout ? "auto" : "0"} ${Math.round(18 * vScale)}px`, opacity: 0.8 }} />
+          <div style={{ width: isCenterLayout ? 48 : 64, height: 4, background: safeAccent, borderRadius: 2, margin: `${Math.round(22 * vScale)}px ${isCenterLayout ? "auto" : "0"} ${Math.round(18 * vScale)}px`, opacity: 0.8 }} />
           <h1 style={{ fontFamily: headingFont, fontSize: headlineSize, fontWeight: headingWeight, lineHeight: spec.headlineLH, color: headlineColor, fontStyle: headingItalic && spec.headlineItalic ? "italic" : "normal", margin: `0 0 ${Math.round(18 * vScale)}px` }}>
             {s.headline}
           </h1>
@@ -430,7 +461,7 @@ export function SlideInner({
         </div>
         {isCenterLayout && (
           <div style={{ position: "absolute", bottom: contentPadBottom, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 20 }}>
-            {!hideBrandText && <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: effectiveAccent, opacity: 0.6 }}>{slideLabel}</span>}
+            {!hideBrandText && <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: safeAccent, opacity: 0.6 }}>{slideLabel}</span>}
             <span style={{ fontSize: 12, color: effectiveText, opacity: 0.4 }}>{!hideCounter && n > 1 ? `${i + 1} / ${n}` : ""}</span>
           </div>
         )}
@@ -460,13 +491,13 @@ export function SlideInner({
       return (
         <Wrapper style={{ display: "flex", flexDirection: "column", alignItems: isCenterLayout ? "center" : alignItems, justifyContent: "center", textAlign: isCenterLayout ? "center" : textAlign, padding: pad }}>
           <Pill tag={s.tag} type={type} variant={pillVariant} T={slideTheme} />
-          <div style={{ fontFamily: headingFont, fontSize: centerStatSize, fontWeight: headingWeight, color: effectiveAccent, lineHeight: 1, margin: `${Math.round(16 * vScale)}px 0 ${Math.round(6 * vScale)}px`, whiteSpace: "nowrap" }}>{sn}</div>
-          {s.statLabel && <div style={{ fontSize: spec.labelSize + 1, fontWeight: 600, color: effectiveAccent, opacity: 0.65, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: Math.round(18 * vScale) }}>{s.statLabel}</div>}
-          <div style={{ width: 40, height: 3, background: effectiveAccent, borderRadius: 2, marginBottom: Math.round(14 * vScale), opacity: 0.5 }} />
+          <div style={{ fontFamily: headingFont, fontSize: centerStatSize, fontWeight: headingWeight, color: safeAccent, lineHeight: 1, margin: `${Math.round(16 * vScale)}px 0 ${Math.round(6 * vScale)}px`, whiteSpace: "nowrap" }}>{sn}</div>
+          {s.statLabel && <div style={{ fontSize: spec.labelSize + 1, fontWeight: 600, color: safeAccent, opacity: 0.65, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: Math.round(18 * vScale) }}>{s.statLabel}</div>}
+          <div style={{ width: 40, height: 3, background: safeAccent, borderRadius: 2, marginBottom: Math.round(14 * vScale), opacity: 0.5 }} />
           <h2 style={{ fontFamily: headingFont, fontSize: headlineSize - 4, fontWeight: headingWeight, lineHeight: 1.25, color: headlineColor, margin: `0 0 ${Math.round(10 * vScale)}px`, maxWidth: isCenterLayout ? "88%" : undefined }}>{s.headline}</h2>
           <p style={{ fontSize: spec.bodySize, lineHeight: 1.72, color: effectiveBody, margin: 0, opacity: bodyOpacity, maxWidth: isCenterLayout ? "85%" : undefined }}>{s.body}</p>
           <div style={{ position: "absolute", bottom: contentPadBottom, left: 0, right: 0, display: "flex", justifyContent: isCenterLayout ? "center" : "space-between", gap: 20, padding: `0 ${contentPadLeft}px` }}>
-            {!hideBrandText && <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: effectiveAccent, opacity: 0.55 }}>{slideLabel}</span>}
+            {!hideBrandText && <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: safeAccent, opacity: 0.55 }}>{slideLabel}</span>}
             <span style={{ fontSize: 11, color: effectiveText, opacity: 0.3 }}>{!hideCounter && n > 1 ? `${i + 1} / ${n}` : ""}</span>
           </div>
         </Wrapper>
@@ -479,9 +510,9 @@ export function SlideInner({
     return (
       <div style={{ width: SW, height: SH, background: dna ? effectiveBg : T.card, overflow: "hidden", display: "flex", flexDirection: isFlipped ? "row-reverse" : "row", boxSizing: "border-box", position: "relative" }}>
         {GradientOverlay}
-        {useDnaDecos && <DnaDecorations deco={dna?.deco} accent={effectiveAccent} SW={SW} SH={SH} slideIndex={i} textColor={effectiveText} />}
+        {useDnaDecos && <DnaDecorations deco={dna?.deco} accent={safeAccent} SW={SW} SH={SH} slideIndex={i} textColor={effectiveText} />}
         {!useDnaDecos && <Decorations items={fallbackDecos} />}
-        {dna && <DnaFrame frame={dna.frame} accent={effectiveAccent} SW={SW} SH={SH} />}
+        {dna && <DnaFrame frame={dna.frame} accent={safeAccent} SW={SW} SH={SH} />}
         {LogoOverlay}
         <div style={{ width: spec.panelW, flexShrink: 0, background: statPanelBg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: `${Math.round(32 * vScale)}px 14px`, position: "relative", overflow: "hidden" }}>
           <div style={{ fontFamily: headingFont, fontSize: clampedPanelSf, fontWeight: headingWeight, color: statCt, lineHeight: 1, textAlign: "center", whiteSpace: "nowrap", position: "relative", zIndex: 1, maxWidth: spec.panelW - 28 }}>{sn}</div>
@@ -490,7 +521,7 @@ export function SlideInner({
         <div style={{ flex: 1, padding: `${Math.round(44 * vScale)}px ${isFlipped ? "42px" : "42px"} ${Math.round(40 * vScale)}px ${isFlipped ? "42px" : "36px"}`, display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
           <Pill tag={s.tag} type={type} variant="default" T={slideTheme} />
           <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: `${Math.round(22 * vScale)}px 0` }}>
-            <div style={{ width: 44, height: 4, background: effectiveAccent, borderRadius: 2, marginBottom: Math.round(20 * vScale) }} />
+            <div style={{ width: 44, height: 4, background: safeAccent, borderRadius: 2, marginBottom: Math.round(20 * vScale) }} />
             <h2 style={{ fontFamily: headingFont, fontSize: headlineSize - 4, fontWeight: headingWeight, lineHeight: 1.25, color: dna ? effectiveText : T.text, margin: `0 0 ${Math.round(16 * vScale)}px` }}>{s.headline}</h2>
             <p style={{ fontSize: spec.bodySize, lineHeight: 1.72, color: dna ? effectiveBody : T.muted, margin: 0, opacity: bodyOpacity }}>{s.body}</p>
           </div>
@@ -510,19 +541,19 @@ export function SlideInner({
           <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", fontFamily: "'DM Serif Display',serif", fontSize: spec.quoteMarkSize * 1.4, lineHeight: 0.8, color: effectiveText, opacity: 0.04, userSelect: "none", pointerEvents: "none", zIndex: 0 }}>&ldquo;</div>
         ) : (
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
-            <div style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.quoteMarkSize, lineHeight: 0.78, color: effectiveAccent, opacity: spec.quoteMarkOpacity || 0.17, userSelect: "none", marginLeft: -10, marginTop: -8 }}>&ldquo;</div>
+            <div style={{ fontFamily: "'DM Serif Display',serif", fontSize: spec.quoteMarkSize, lineHeight: 0.78, color: safeAccent, opacity: spec.quoteMarkOpacity || 0.17, userSelect: "none", marginLeft: -10, marginTop: -8 }}>&ldquo;</div>
             <span style={{ fontSize: 12, color: effectiveText, paddingTop: 8, opacity: 0.5 }}>{!hideCounter && n > 1 ? `${i + 1} / ${n}` : ""}</span>
           </div>
         )}
         <div style={{ flex: isCenterLayout ? undefined : 1, display: "flex", flexDirection: "column", justifyContent: "center", marginTop: isCenterLayout ? 0 : -26, position: "relative", zIndex: 1, maxWidth: isCenterLayout ? "90%" : undefined }}>
           <h2 style={{ fontFamily: headingFont, fontSize: headlineSize, fontWeight: headingWeight, lineHeight: spec.headlineLH, color: headlineColor, fontStyle: headingItalic ? "italic" : "normal", margin: `0 0 ${Math.round(18 * vScale)}px` }}>{s.headline}</h2>
-          {spec.showAccentUnderline && <div style={{ width: "40%", height: 3, background: effectiveAccent, borderRadius: 2, marginBottom: Math.round(16 * vScale), marginLeft: isCenterLayout ? "auto" : 0, marginRight: isCenterLayout ? "auto" : undefined }} />}
+          {spec.showAccentUnderline && <div style={{ width: "40%", height: 3, background: safeAccent, borderRadius: 2, marginBottom: Math.round(16 * vScale), marginLeft: isCenterLayout ? "auto" : 0, marginRight: isCenterLayout ? "auto" : undefined }} />}
           <p style={{ fontSize: spec.bodySize, lineHeight: 1.72, color: effectiveBody, margin: 0, opacity: bodyOpacity }}>{s.body}</p>
         </div>
         {!isCenterLayout && (
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid ${effectiveBorder}`, paddingTop: 20, flexShrink: 0 }}>
             <Pill tag={s.tag} type={type} variant={isLightBg ? "default" : "light"} T={slideTheme} />
-            {!hideBrandText && <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: effectiveAccent, opacity: 0.8 }}>{slideLabel}</span>}
+            {!hideBrandText && <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: safeAccent, opacity: 0.8 }}>{slideLabel}</span>}
           </div>
         )}
         {isCenterLayout && !hideBrandText && (
@@ -583,7 +614,7 @@ export function SlideInner({
     <Wrapper style={{ display: "flex", flexDirection: "column", justifyContent: isCenterLayout ? "center" : undefined, alignItems: isCenterLayout ? "center" : undefined, textAlign: isCenterLayout ? "center" : textAlign, padding: pad }}>
       {/* Ghost number — only if no DNA deco watermark */}
       {!dna && activeBgMode === "off" && ghostNumbers !== "off" && !(ghostNumbers === "middle" && (i === 0 || i === n - 1)) && (
-        <div style={{ position: "absolute", bottom: -14, right: -8, fontFamily: "'DM Serif Display',serif", fontSize: spec.ghostSize, fontWeight: 400, lineHeight: 1, color: effectiveAccent, opacity: spec.ghostOpacity, userSelect: "none", letterSpacing: "-0.04em", pointerEvents: "none" }}>
+        <div style={{ position: "absolute", bottom: -14, right: -8, fontFamily: "'DM Serif Display',serif", fontSize: spec.ghostSize, fontWeight: 400, lineHeight: 1, color: safeAccent, opacity: spec.ghostOpacity, userSelect: "none", letterSpacing: "-0.04em", pointerEvents: "none" }}>
           {String(i + 1).padStart(2, "0")}
         </div>
       )}
@@ -594,15 +625,15 @@ export function SlideInner({
       {isEditorial && <Pill tag={s.tag} type={type} variant={isLightBg ? "default" : "default"} T={slideTheme} />}
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: isCenterLayout ? undefined : `${Math.round(18 * vScale)}px 0`, maxWidth: isCenterLayout ? "88%" : undefined, paddingLeft: !isCenterLayout && !isEditorial ? frameBarLeft : 0 }}>
-        {!isEditorial && <div style={{ width: isCenterLayout ? 40 : spec.dividerW, height: spec.dividerH, background: effectiveAccent, borderRadius: 2, marginBottom: Math.round(18 * vScale), marginLeft: isCenterLayout ? "auto" : 0, marginRight: isCenterLayout ? "auto" : undefined }} />}
+        {!isEditorial && <div style={{ width: isCenterLayout ? 40 : spec.dividerW, height: spec.dividerH, background: safeAccent, borderRadius: 2, marginBottom: Math.round(18 * vScale), marginLeft: isCenterLayout ? "auto" : 0, marginRight: isCenterLayout ? "auto" : undefined }} />}
         <h2 style={{ fontFamily: headingFont, fontSize: isEditorial ? Math.round(headlineSize * 1.15) : headlineSize, fontWeight: headingWeight, lineHeight: isEditorial ? 1.06 : spec.headlineLH, color: headlineColor, margin: `0 0 ${Math.round(14 * vScale)}px` }}>{s.headline}</h2>
-        {isEditorial && <div style={{ width: "100%", height: 3, background: effectiveAccent, borderRadius: 2, marginBottom: Math.round(12 * vScale), opacity: 0.7 }} />}
+        {isEditorial && <div style={{ width: "100%", height: 3, background: safeAccent, borderRadius: 2, marginBottom: Math.round(12 * vScale), opacity: 0.7 }} />}
         <p style={{ fontSize: spec.bodySize, lineHeight: 1.72, color: effectiveBody, margin: 0, opacity: bodyOpacity }}>{s.body}</p>
       </div>
 
       {isCenterLayout ? (
         <div style={{ position: "absolute", bottom: contentPadBottom, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 20 }}>
-          {!hideBrandText && <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: effectiveAccent, opacity: 0.55 }}>{slideLabel}</span>}
+          {!hideBrandText && <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: safeAccent, opacity: 0.55 }}>{slideLabel}</span>}
           <span style={{ fontSize: 11, color: effectiveText, opacity: 0.3 }}>{!hideCounter && n > 1 ? `${i + 1} / ${n}` : ""}</span>
         </div>
       ) : (
