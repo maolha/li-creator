@@ -356,7 +356,7 @@ export function ScaledSpeakerSlide({ data, T, brand, size, brandFonts, brandLogo
   const sc = size / w;
   const scaledH = h * sc;
   return (
-    <div style={{ width: size, height: scaledH, borderRadius: 16, overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)" }}>
+    <div style={{ width: size, height: scaledH, borderRadius: 0, overflow: "hidden", flexShrink: 0, boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
       <div style={{ width: w, height: h, transform: `scale(${sc})`, transformOrigin: "top left" }}>
         <SpeakerSlideInner data={data} T={T} brand={brand} brandFonts={brandFonts} brandLogos={brandLogos} />
       </div>

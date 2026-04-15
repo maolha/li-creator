@@ -621,7 +621,7 @@ export function ScaledSlide({ s, brand, i, n, T, size, intensity, aspect = "1:1"
   const sc = size / w;
   const scaledH = h * sc;
   return (
-    <div style={{ width: size, height: scaledH, borderRadius: 16, overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)" }}>
+    <div style={{ width: size, height: scaledH, borderRadius: 0, overflow: "hidden", flexShrink: 0, boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
       <div style={{ width: w, height: h, transform: `scale(${sc})`, transformOrigin: "top left" }}>
         <SlideInner s={s} brand={brand} i={i} n={n} T={T} intensity={intensity} aspect={aspect} bgMode={bgMode} logoConfig={logoConfig} brandLogos={brandLogos} brandFonts={brandFonts} brandBgImage={brandBgImage} bgImageMode={bgImageMode} ghostNumbers={ghostNumbers} hideAllCounters={hideAllCounters} slideLayout={slideLayout} />
       </div>
