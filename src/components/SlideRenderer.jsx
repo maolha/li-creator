@@ -441,16 +441,26 @@ export function SlideInner({
   // ═════════════ STAT ═════════════
   if (type === "stat") {
     const sn = s.stat || "?";
-    const sf = s.statFontSize || (spec.statSize ? spec.statSize(sn.length) : 90);
+    // Smart auto-sizing: account for character count AND width of wide chars
+    const wideChars = (sn.match(/[MW%CHF]/gi) || []).length;
+    const effectiveLen = sn.length + wideChars * 0.4; // wide chars count ~1.4x
+    const autoSize = effectiveLen > 8 ? 48 : effectiveLen > 6 ? 58 : effectiveLen > 4 ? 72 : effectiveLen > 2 ? 90 : 110;
+    const sf = s.statFontSize || autoSize;
     const isCenterLayout = layout === "centered" || align === "center";
     const isFlipped = layout === "editorial";
+
+    // For centered/minimal: stat is inline with other content, must be smaller
+    const centerStatSize = Math.min(sf, effectiveLen > 6 ? 52 : effectiveLen > 4 ? 64 : 80);
+    // For split panel: stat must fit within panel width
+    const panelStatSize = Math.min(sf, Math.floor(spec.panelW * 0.42 / Math.max(1, effectiveLen * 0.55)));
+    const clampedPanelSf = Math.max(36, Math.min(panelStatSize, sf));
 
     // Centered/minimal stat: no split panel
     if (isCenterLayout || layout === "minimal") {
       return (
         <Wrapper style={{ display: "flex", flexDirection: "column", alignItems: isCenterLayout ? "center" : alignItems, justifyContent: "center", textAlign: isCenterLayout ? "center" : textAlign, padding: pad }}>
           <Pill tag={s.tag} type={type} variant={pillVariant} T={slideTheme} />
-          <div style={{ fontFamily: headingFont, fontSize: sf * 1.25, fontWeight: headingWeight, color: effectiveAccent, lineHeight: 1, margin: `${Math.round(18 * vScale)}px 0 ${Math.round(6 * vScale)}px`, whiteSpace: "nowrap" }}>{sn}</div>
+          <div style={{ fontFamily: headingFont, fontSize: centerStatSize, fontWeight: headingWeight, color: effectiveAccent, lineHeight: 1, margin: `${Math.round(16 * vScale)}px 0 ${Math.round(6 * vScale)}px`, whiteSpace: "nowrap" }}>{sn}</div>
           {s.statLabel && <div style={{ fontSize: spec.labelSize + 1, fontWeight: 600, color: effectiveAccent, opacity: 0.65, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: Math.round(18 * vScale) }}>{s.statLabel}</div>}
           <div style={{ width: 40, height: 3, background: effectiveAccent, borderRadius: 2, marginBottom: Math.round(14 * vScale), opacity: 0.5 }} />
           <h2 style={{ fontFamily: headingFont, fontSize: headlineSize - 4, fontWeight: headingWeight, lineHeight: 1.25, color: headlineColor, margin: `0 0 ${Math.round(10 * vScale)}px`, maxWidth: isCenterLayout ? "88%" : undefined }}>{s.headline}</h2>
@@ -473,8 +483,8 @@ export function SlideInner({
         {!useDnaDecos && <Decorations items={fallbackDecos} />}
         {dna && <DnaFrame frame={dna.frame} accent={effectiveAccent} SW={SW} SH={SH} />}
         {LogoOverlay}
-        <div style={{ width: spec.panelW, flexShrink: 0, background: statPanelBg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: `${Math.round(32 * vScale)}px 18px`, position: "relative", overflow: "hidden" }}>
-          <div style={{ fontFamily: headingFont, fontSize: sf, fontWeight: headingWeight, color: statCt, lineHeight: 1, textAlign: "center", whiteSpace: "nowrap", position: "relative", zIndex: 1 }}>{sn}</div>
+        <div style={{ width: spec.panelW, flexShrink: 0, background: statPanelBg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: `${Math.round(32 * vScale)}px 14px`, position: "relative", overflow: "hidden" }}>
+          <div style={{ fontFamily: headingFont, fontSize: clampedPanelSf, fontWeight: headingWeight, color: statCt, lineHeight: 1, textAlign: "center", whiteSpace: "nowrap", position: "relative", zIndex: 1, maxWidth: spec.panelW - 28 }}>{sn}</div>
           {s.statLabel && <div style={{ fontSize: spec.labelSize, fontWeight: 600, color: statCt, opacity: 0.7, marginTop: Math.round(14 * vScale), textAlign: "center", textTransform: "uppercase", letterSpacing: spec.labelSpacing || "0.06em", position: "relative", zIndex: 1 }}>{s.statLabel}</div>}
         </div>
         <div style={{ flex: 1, padding: `${Math.round(44 * vScale)}px ${isFlipped ? "42px" : "42px"} ${Math.round(40 * vScale)}px ${isFlipped ? "42px" : "36px"}`, display: "flex", flexDirection: "column", boxSizing: "border-box" }}>

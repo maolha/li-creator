@@ -125,7 +125,7 @@ const statSpecs = {
   clean: (T, l, ct) => ({
     panelW: 220,
     panelBg: T.accent,
-    statSize: (sl) => sl > 5 ? 70 : sl > 3 ? 90 : 112,
+    statSize: (sl) => sl > 7 ? 44 : sl > 5 ? 56 : sl > 3 ? 72 : 90,
     labelSize: 12,
     headlineSize: 36,
     bodySize: 15,
@@ -137,7 +137,7 @@ const statSpecs = {
   bold: (T, l, ct) => ({
     panelW: 250,
     panelBg: T.gradient || T.accent,
-    statSize: (sl) => sl > 5 ? 78 : sl > 3 ? 100 : 126,
+    statSize: (sl) => sl > 7 ? 50 : sl > 5 ? 64 : sl > 3 ? 82 : 100,
     labelSize: 14,
     headlineSize: 40,
     bodySize: 16,
@@ -150,7 +150,7 @@ const statSpecs = {
   dramatic: (T, l, ct) => ({
     panelW: 300,
     panelBg: T.accent,
-    statSize: (sl) => sl > 5 ? 88 : sl > 3 ? 116 : 150,
+    statSize: (sl) => sl > 7 ? 56 : sl > 5 ? 72 : sl > 3 ? 92 : 116,
     labelSize: 11,
     labelSpacing: "0.14em",
     headlineSize: 34,
