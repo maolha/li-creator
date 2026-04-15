@@ -136,11 +136,11 @@ ${SOURCE_RULES}`;
 // ── POST COPY STYLES ──
 
 export const POST_STYLES = [
-  { id: "authentic", label: "Authentic", desc: "Specific, opinionated, sounds like you" },
-  { id: "observation", label: "Observation", desc: "Short market observation, no lesson" },
-  { id: "contrarian", label: "Contrarian", desc: "Challenge what everyone assumes" },
-  { id: "storytelling", label: "Story", desc: "Start from a scene, let the point emerge" },
-  { id: "builder", label: "Builder", desc: "Share work-in-progress, no announcements" },
+  { id: "authentic", label: "Authentic", desc: "Specific, opinionated, sounds like you", tip: "Starts from a real observation — a meeting, a number, a conversation. One clear opinion, no hedging. Rhythm varies deliberately. Ends naturally without asking for engagement." },
+  { id: "observation", label: "Observation", desc: "Short market observation, no lesson", tip: "3-6 lines max. Just one precise thing you noticed in the market. No takeaway, no lesson. Requires confidence because there's no 'value' to justify the post. Can end mid-thought." },
+  { id: "contrarian", label: "Contrarian", desc: "Challenge what everyone assumes", tip: "One clear claim that goes against conventional wisdom. Not clickbait — the claim must be defensible. The stronger the claim, the more specific the evidence. 8-15 lines building the case." },
+  { id: "storytelling", label: "Story", desc: "Start from a scene, let the point emerge", tip: "Opens with a specific moment: where you were, what happened, the exact words someone used. The reader discovers the point as you did. The insight, if any, comes at the end — or not at all." },
+  { id: "builder", label: "Builder", desc: "Share work-in-progress, no announcements", tip: "Dispatches from what you're building. No 'Excited to announce'. Instead: what happened, what you learned, what question stayed with you. Includes one specific detail that proves you were there." },
 ];
 
 const POST_STYLE_INSTRUCTIONS = {

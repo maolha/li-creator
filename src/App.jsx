@@ -2601,21 +2601,37 @@ Return the same JSON structure with just the post object updated.`;
                   {/* Post style selector */}
                   <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                     {POST_STYLES.map((s) => (
-                      <button
-                        key={s.id}
-                        onClick={() => setPostStyle(s.id)}
-                        title={s.desc}
-                        style={{
-                          padding: "5px 10px", borderRadius: 7, fontSize: 11, fontWeight: 600,
-                          border: `1px solid ${postStyle === s.id ? A.accent : A.border}`,
-                          background: postStyle === s.id ? A.soft : "transparent",
-                          color: postStyle === s.id ? A.accent : A.muted,
-                          cursor: "pointer", fontFamily: "'Inter', sans-serif",
-                          transition: "all 0.15s",
-                        }}
+                      <div key={s.id} style={{ position: "relative" }}
+                        onMouseEnter={(e) => { const tip = e.currentTarget.querySelector("[data-tip]"); if (tip) tip.style.opacity = 1; tip.style.pointerEvents = "auto"; }}
+                        onMouseLeave={(e) => { const tip = e.currentTarget.querySelector("[data-tip]"); if (tip) tip.style.opacity = 0; tip.style.pointerEvents = "none"; }}
                       >
-                        {s.label}
-                      </button>
+                        <button
+                          onClick={() => setPostStyle(s.id)}
+                          style={{
+                            padding: "5px 10px", borderRadius: 7, fontSize: 11, fontWeight: 600,
+                            border: `1px solid ${postStyle === s.id ? A.accent : A.border}`,
+                            background: postStyle === s.id ? A.soft : "transparent",
+                            color: postStyle === s.id ? A.accent : A.muted,
+                            cursor: "pointer", fontFamily: "'Inter', sans-serif",
+                            transition: "all 0.15s",
+                          }}
+                        >
+                          {s.label}
+                        </button>
+                        <div data-tip style={{
+                          position: "absolute", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)",
+                          width: 240, padding: "10px 12px", borderRadius: 10,
+                          background: A.card, border: `1px solid ${A.border}`,
+                          boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+                          opacity: 0, pointerEvents: "none", transition: "opacity 0.15s",
+                          zIndex: 30,
+                        }}>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: A.accent, marginBottom: 4 }}>{s.label}</div>
+                          <div style={{ fontSize: 11, lineHeight: 1.5, color: A.muted }}>{s.tip}</div>
+                          {/* Arrow */}
+                          <div style={{ position: "absolute", bottom: -5, left: "50%", transform: "translateX(-50%) rotate(45deg)", width: 10, height: 10, background: A.card, borderRight: `1px solid ${A.border}`, borderBottom: `1px solid ${A.border}` }} />
+                        </div>
+                      </div>
                     ))}
                   </div>
 
