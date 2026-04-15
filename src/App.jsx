@@ -59,8 +59,10 @@ import {
   QUOTE_CARD_PROMPT,
   STAT_CARD_PROMPT,
   TEXT_POST_PROMPT,
+  POST_STYLES,
+  getPostStylePrompt,
 } from "./utils/prompts";
-import { ScaledSlide, SlideInner, SLIDE_ASPECTS } from "./components/SlideRenderer";
+import { ScaledSlide, SlideInner, SLIDE_ASPECTS, SLIDE_LAYOUTS } from "./components/SlideRenderer";
 import { ScaledSpeakerSlide, SpeakerSlideInner, SPEAKER_LAYOUTS, SPEAKER_ASPECTS } from "./components/SpeakerSlide";
 import { buildPdf } from "./utils/buildPdf";
 import { downloadSinglePng, downloadAllPngs } from "./utils/exportPng";
@@ -203,8 +205,11 @@ export default function App() {
   const [brandUrl, setBrandUrl] = useState("");
   const [showDesign, setShowDesign] = useState(false);
   const [ghostNumbers, setGhostNumbers] = useState(() => loadState("ghostNumbers", "on")); // on|off|middle
+  const [hideAllCounters, setHideAllCounters] = useState(() => loadState("hideAllCounters", false));
   const [bgImageMode, setBgImageMode] = useState(() => loadState("bgImageMode", "off"));
   const [genInstructions, setGenInstructions] = useState(() => loadState("genInstructions", ""));
+  const [postStyle, setPostStyle] = useState(() => loadState("postStyle", "authentic"));
+  const [slideLayout, setSlideLayout] = useState(() => loadState("slideLayout", "classic"));
 
   const fileRef = useRef();
   const rightRef = useRef();
@@ -333,7 +338,10 @@ export default function App() {
   useEffect(() => { saveState("slideLogo", slideLogo); }, [slideLogo]);
   useEffect(() => { saveState("bgImageMode", bgImageMode); }, [bgImageMode]);
   useEffect(() => { saveState("ghostNumbers", ghostNumbers); }, [ghostNumbers]);
+  useEffect(() => { saveState("hideAllCounters", hideAllCounters); }, [hideAllCounters]);
   useEffect(() => { saveState("genInstructions", genInstructions); }, [genInstructions]);
+  useEffect(() => { saveState("postStyle", postStyle); }, [postStyle]);
+  useEffect(() => { saveState("slideLayout", slideLayout); }, [slideLayout]);
   useEffect(() => {
     const slim = { ...speakerData,
       eventLogo: speakerData.eventLogo?.startsWith?.("data:") ? null : speakerData.eventLogo,
@@ -437,7 +445,9 @@ export default function App() {
         userContext += `\n\nCUSTOM INSTRUCTIONS (follow these strictly):\n${ab.voice.aiInstructions.trim()}`;
       }
     }
-    return base + toneInstructions + audienceInstructions + userContext;
+    // Post style instructions
+    const styleInstructions = postStyle && postStyle !== "authentic" ? `\n\n${getPostStylePrompt(postStyle)}` : `\n\n${getPostStylePrompt("authentic")}`;
+    return base + styleInstructions + toneInstructions + audienceInstructions + userContext;
   }
 
   function getGenerateText(type) {
@@ -476,7 +486,7 @@ export default function App() {
 
   // Fingerprint of inputs that affect generation
   function genFingerprint() {
-    return JSON.stringify([input, files.map((f) => f.name), sc, contentType, tone, audience, source, activeBrand?.id, genInstructions]);
+    return JSON.stringify([input, files.map((f) => f.name), sc, contentType, tone, audience, source, activeBrand?.id, genInstructions, postStyle]);
   }
   // Note: isOutputStale computed later, after hasOutput is defined
 
@@ -525,6 +535,7 @@ export default function App() {
       else setActiveTab("slides");
 
       setLastGenFingerprint(genFingerprint());
+      setGenInstructions(""); // Clear instructions after successful generation
       // No auto-save — user saves manually via "Save to Library"
     } catch (e) {
       setError(e.message || "Generation failed. Please try again.");
@@ -634,12 +645,12 @@ ${input.trim() ? `\nOriginal source context:\n${input.slice(0, 500)}` : ""}`;
       // Save current state for undo
       setUndoPost((prev) => [...prev, { ...post }]);
       const prompt = getPromptForType(contentType);
-      const context = `Rewrite this LinkedIn post copy. Keep the same topic and structure.
+      const context = `Rewrite this LinkedIn post copy. Keep the same topic but apply the style from the system prompt.
 Current hook: "${post.hook}"
 Current body: "${post.body}"
 Current CTA: "${post.cta}"
 Current hashtags: ${(Array.isArray(post.hashtags) ? post.hashtags : []).join(", ")}
-${postRewritePrompt.trim() ? `\nInstructions for rewrite: ${postRewritePrompt}` : "Make it more engaging, bolder, and more scroll-stopping."}
+${postRewritePrompt.trim() ? `\nInstructions for rewrite: ${postRewritePrompt}` : "Rewrite to be more authentic, specific, and less AI-sounding. Start from a specific observation, not a thesis."}
 ${source.trim() ? `\nSource/reference: "${source}"` : ""}
 ${input.trim() ? `\nOriginal source context:\n${input.slice(0, 500)}` : ""}
 
@@ -712,7 +723,7 @@ Return the same JSON structure with just the post object updated.`;
 
         await new Promise((resolve) => {
           root.render(
-            <SlideInner s={slides[i]} brand={brand} i={i} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} bgImageMode={bgImageMode} ghostNumbers={ghostNumbers} />
+            <SlideInner s={slides[i]} brand={brand} i={i} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} bgImageMode={bgImageMode} ghostNumbers={ghostNumbers} hideAllCounters={hideAllCounters} slideLayout={slideLayout} />
           );
           requestAnimationFrame(() => requestAnimationFrame(resolve));
         });
@@ -946,6 +957,8 @@ Return the same JSON structure with just the post object updated.`;
         customThemeDef: customThemeDef || null,
         slideLogo: slideLogo || { show: "none", position: "top-right" },
         ghostNumbers: ghostNumbers || "on",
+        hideAllCounters: !!hideAllCounters,
+        slideLayout: slideLayout || "classic",
         genInstructions: genInstructions || "",
       };
       await saveCreation(user.uid, cleanForFirestore(payload));
@@ -1001,6 +1014,7 @@ Return the same JSON structure with just the post object updated.`;
       customThemeDef: customThemeDef || null,
       slideLogo: slideLogo || { show: "none", position: "top-right" },
       ghostNumbers: ghostNumbers || "on",
+      hideAllCounters: !!hideAllCounters,
       genInstructions: genInstructions || "",
     };
     await saveCreation(user.uid, cleanForFirestore(copyPayload));
@@ -1061,7 +1075,7 @@ Return the same JSON structure with just the post object updated.`;
       {slide && (
         <div style={{ position: "fixed", left: -9999, top: 0, zIndex: -1 }}>
           <div ref={hiddenSlideRef} style={{ width: (SLIDE_ASPECTS[slideAspect] || SLIDE_ASPECTS["1:1"]).w, height: (SLIDE_ASPECTS[slideAspect] || SLIDE_ASPECTS["1:1"]).h }}>
-            <SlideInner s={slide} brand={brand} i={cur} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} bgImageMode={bgImageMode} ghostNumbers={ghostNumbers} />
+            <SlideInner s={slide} brand={brand} i={cur} n={slides.length} T={T} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} bgImageMode={bgImageMode} ghostNumbers={ghostNumbers} hideAllCounters={hideAllCounters} slideLayout={slideLayout} />
           </div>
         </div>
       )}
@@ -1264,6 +1278,8 @@ Return the same JSON structure with just the post object updated.`;
               setSlideBgMode(c.slideBgMode || "default");
               setSlideLogo(c.slideLogo || { show: "none", position: "top-right" });
               setGhostNumbers(c.ghostNumbers || "on");
+              setHideAllCounters(!!c.hideAllCounters);
+              setSlideLayout(c.slideLayout || "classic");
               setBgImageMode(c.bgImageMode || "off");
               setGenInstructions(c.genInstructions || "");
               setTone(c.tone || "professional");
@@ -1397,7 +1413,7 @@ Return the same JSON structure with just the post object updated.`;
                     <Palette size={12} style={{ marginRight: 6, verticalAlign: -2 }} />
                     Design
                     <span style={{ fontWeight: 400, color: A.muted, marginLeft: 8, fontSize: 11 }}>
-                      {intensity} · {slideAspect} · {slideBgMode}
+                      {intensity} · {slideLayout} · {slideAspect} · {slideBgMode}
                     </span>
                   </span>
                   <ChevronDown size={14} style={{ color: A.muted, transform: showDesign ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
@@ -1419,6 +1435,27 @@ Return the same JSON structure with just the post object updated.`;
                     {/* Custom colors */}
                     <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                       <span style={{ fontSize: 10, color: A.muted, flexShrink: 0 }}>Colors:</span>
+                      {/* Reset to saved brand defaults */}
+                      {activeBrand?.id && userProfile?.profile?.brands?.some((b) => b.id === activeBrand.id) && (
+                        <button
+                          onClick={() => {
+                            const saved = userProfile.profile.brands.find((b) => b.id === activeBrand.id);
+                            if (saved) {
+                              setActiveBrand(saved);
+                              if (brandAccent(saved)) {
+                                const v = makeCustomVariants(brandAccent(saved));
+                                if (v) {
+                                  const tid = `brand-${saved.id}`;
+                                  setCustomThemes((p) => ({ ...p, [tid]: v }));
+                                  setTheme(tid);
+                                }
+                              }
+                            }
+                          }}
+                          title="Reset colors to saved brand defaults"
+                          style={{ padding: "2px 6px", borderRadius: 4, fontSize: 8, fontWeight: 700, border: `1px solid ${A.border}`, background: "transparent", color: A.muted, cursor: "pointer", whiteSpace: "nowrap" }}
+                        >Reset</button>
+                      )}
                       {[0, 1].map((ci) => {
                         const colorKey = ci === 0 ? "primary" : "secondary";
                         const currentColor = activeBrand?.colors?.[colorKey] || (ci === 0 ? T.accent : "");
@@ -1498,6 +1535,12 @@ Return the same JSON structure with just the post object updated.`;
                         <button key={v} onClick={() => setIntensity(v)} style={{ flex: 1, padding: "6px 4px", borderRadius: 6, fontSize: 10, fontWeight: 700, border: `1px solid ${intensity === v ? A.accent : A.border}`, background: intensity === v ? A.soft : "transparent", color: intensity === v ? A.accent : A.muted, cursor: "pointer", textTransform: "capitalize", fontFamily: "'Inter', sans-serif" }}>{v}</button>
                       ))}
                     </div>
+                    {/* Layout variants */}
+                    <div style={{ display: "flex", gap: 4 }}>
+                      {SLIDE_LAYOUTS.map((l) => (
+                        <button key={l.id} onClick={() => setSlideLayout(l.id)} style={{ flex: 1, padding: "6px 4px", borderRadius: 6, fontSize: 10, fontWeight: 700, border: `1px solid ${slideLayout === l.id ? A.accent : A.border}`, background: slideLayout === l.id ? A.soft : "transparent", color: slideLayout === l.id ? A.accent : A.muted, cursor: "pointer", fontFamily: "'Inter', sans-serif" }}>{l.label}</button>
+                      ))}
+                    </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                       <div style={{ display: "flex", gap: 3 }}>
                         {["1:1", "4:5", "16:9"].map((a) => (
@@ -1559,22 +1602,41 @@ Return the same JSON structure with just the post object updated.`;
                         <button onClick={() => { setActiveBrand((prev) => ({ ...(prev || {}), backgroundImage: null })); setBgImageMode("off"); }} style={{ background: "none", border: "none", color: A.muted, cursor: "pointer", fontSize: 9, padding: 0 }}>✕</button>
                       )}
                     </div>
-                    {/* Ghost numbers */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                      <span style={{ fontSize: 10, color: A.muted, flexShrink: 0 }}>Ghost #:</span>
-                      {[
-                        { id: "on", label: "All" },
-                        { id: "middle", label: "Middle" },
-                        { id: "off", label: "Off" },
-                      ].map((o) => (
-                        <button key={o.id} onClick={() => setGhostNumbers(o.id)} style={{
+                    {/* Ghost numbers + Counter */}
+                    <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <span style={{ fontSize: 10, color: A.muted, flexShrink: 0 }}>Ghost #:</span>
+                        {[
+                          { id: "on", label: "All" },
+                          { id: "middle", label: "Middle" },
+                          { id: "off", label: "Off" },
+                        ].map((o) => (
+                          <button key={o.id} onClick={() => setGhostNumbers(o.id)} style={{
+                            padding: "3px 7px", borderRadius: 4, fontSize: 9, fontWeight: 600,
+                            border: `1px solid ${ghostNumbers === o.id ? A.accent : A.border}`,
+                            background: ghostNumbers === o.id ? A.soft : "transparent",
+                            color: ghostNumbers === o.id ? A.accent : A.muted,
+                            cursor: "pointer",
+                          }}>{o.label}</button>
+                        ))}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <span style={{ fontSize: 10, color: A.muted, flexShrink: 0 }}>Counter:</span>
+                        <button onClick={() => setHideAllCounters(false)} style={{
                           padding: "3px 7px", borderRadius: 4, fontSize: 9, fontWeight: 600,
-                          border: `1px solid ${ghostNumbers === o.id ? A.accent : A.border}`,
-                          background: ghostNumbers === o.id ? A.soft : "transparent",
-                          color: ghostNumbers === o.id ? A.accent : A.muted,
+                          border: `1px solid ${!hideAllCounters ? A.accent : A.border}`,
+                          background: !hideAllCounters ? A.soft : "transparent",
+                          color: !hideAllCounters ? A.accent : A.muted,
                           cursor: "pointer",
-                        }}>{o.label}</button>
-                      ))}
+                        }}>On</button>
+                        <button onClick={() => setHideAllCounters(true)} style={{
+                          padding: "3px 7px", borderRadius: 4, fontSize: 9, fontWeight: 600,
+                          border: `1px solid ${hideAllCounters ? A.accent : A.border}`,
+                          background: hideAllCounters ? A.soft : "transparent",
+                          color: hideAllCounters ? A.accent : A.muted,
+                          cursor: "pointer",
+                        }}>Off</button>
+                      </div>
                     </div>
                     {/* Global slide label */}
                     <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
@@ -2226,7 +2288,7 @@ Return the same JSON structure with just the post object updated.`;
                   <div ref={slideContainerRef} style={{ position: "relative" }}>
                     <AnimatePresence mode="wait">
                       <motion.div key={cur} initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.2 }}>
-                        <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={cardPx} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} bgImageMode={bgImageMode} ghostNumbers={ghostNumbers} />
+                        <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={cardPx} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} bgImageMode={bgImageMode} ghostNumbers={ghostNumbers} hideAllCounters={hideAllCounters} slideLayout={slideLayout} />
                       </motion.div>
                     </AnimatePresence>
                     {cur > 0 && <button onClick={() => setCur((c) => c - 1)} style={navBtnStyle(T, "left")}><ChevronLeft size={20} /></button>}
@@ -2328,7 +2390,7 @@ Return the same JSON structure with just the post object updated.`;
 
                   {/* Mini preview */}
                   <div style={{ display: "flex", justifyContent: "center" }}>
-                    <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={Math.min(cardPx, slideAspect === "16:9" ? cardPx : 360)} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} bgImageMode={bgImageMode} ghostNumbers={ghostNumbers} />
+                    <ScaledSlide s={slide} brand={brand} i={cur} n={slides.length} T={T} size={Math.min(cardPx, slideAspect === "16:9" ? cardPx : 360)} intensity={intensity} aspect={slideAspect} bgMode={slideBgMode} logoConfig={slideLogo} brandLogos={activeBrand?.logos} brandFonts={activeBrand?.fonts} brandBgImage={activeBrand?.backgroundImage} bgImageMode={bgImageMode} ghostNumbers={ghostNumbers} hideAllCounters={hideAllCounters} slideLayout={slideLayout} />
                   </div>
 
                   {/* Edit fields */}
@@ -2383,7 +2445,12 @@ Return the same JSON structure with just the post object updated.`;
                     {/* Row: Label */}
                     <div>
                       <label style={{ ...labelStyle(A), marginBottom: 3 }}>Slide Label</label>
-                      <input type="text" value={slide.label ?? brand} onChange={(e) => updateSlideField(cur, "label", e.target.value || undefined)} placeholder={brand || "Source, URL, tagline..."} style={{ ...inputStyle(A), padding: "7px 10px" }} />
+                      <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                        <input type="text" value={slide.label !== undefined ? slide.label : brand} onChange={(e) => updateSlideField(cur, "label", e.target.value)} placeholder={brand || "Source, URL, tagline..."} style={{ ...inputStyle(A), padding: "7px 10px", flex: 1 }} />
+                        {slide.label !== undefined && (
+                          <button onClick={() => updateSlideField(cur, "label", undefined)} title="Reset to brand default" style={{ background: A.soft, border: `1px solid ${A.border}`, borderRadius: 6, padding: "5px 8px", fontSize: 9, fontWeight: 600, color: A.muted, cursor: "pointer", whiteSpace: "nowrap" }}>Reset</button>
+                        )}
+                      </div>
                     </div>
 
                     {/* Per-slide toggles */}
@@ -2529,6 +2596,27 @@ Return the same JSON structure with just the post object updated.`;
                       {copied ? <Check size={13} /> : <Copy size={13} />}
                       {copied ? "Copied!" : "Copy All"}
                     </motion.button>
+                  </div>
+
+                  {/* Post style selector */}
+                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                    {POST_STYLES.map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => setPostStyle(s.id)}
+                        title={s.desc}
+                        style={{
+                          padding: "5px 10px", borderRadius: 7, fontSize: 11, fontWeight: 600,
+                          border: `1px solid ${postStyle === s.id ? A.accent : A.border}`,
+                          background: postStyle === s.id ? A.soft : "transparent",
+                          color: postStyle === s.id ? A.accent : A.muted,
+                          cursor: "pointer", fontFamily: "'Inter', sans-serif",
+                          transition: "all 0.15s",
+                        }}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
                   </div>
 
                   {/* Rewrite post */}
