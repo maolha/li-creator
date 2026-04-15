@@ -63,6 +63,7 @@ import {
   getPostStylePrompt,
 } from "./utils/prompts";
 import { ScaledSlide, SlideInner, SLIDE_ASPECTS, SLIDE_LAYOUTS } from "./components/SlideRenderer";
+import { generateCarouselDna, generateSlideDna, DNA_OPTIONS } from "./utils/visualDna";
 import { ScaledSpeakerSlide, SpeakerSlideInner, SPEAKER_LAYOUTS, SPEAKER_ASPECTS } from "./components/SpeakerSlide";
 import { buildPdf } from "./utils/buildPdf";
 import { downloadSinglePng, downloadAllPngs } from "./utils/exportPng";
@@ -528,7 +529,13 @@ export default function App() {
       const data = await res.json();
       const raw = data.content?.find((b) => b.type === "text")?.text || "";
       const p = JSON.parse(raw.replace(/```json|```/g, "").trim());
-      setSlides(p.slides?.length ? p.slides : null);
+      // Auto-assign visual DNA to each slide
+      const rawSlides = p.slides?.length ? p.slides : null;
+      if (rawSlides) {
+        const dnaSet = generateCarouselDna(rawSlides.length);
+        rawSlides.forEach((sl, idx) => { sl.visualDna = dnaSet[idx]; });
+      }
+      setSlides(rawSlides);
       setTitle(p.title);
       setPost(p.post || null);
       if (contentType === "text-post") setActiveTab("post");
@@ -558,6 +565,7 @@ export default function App() {
       if (input.trim()) context += `\n\nOriginal source context:\n${input.slice(0, 500)}`;
 
       const result = await callApi(SINGLE_SLIDE_PROMPT, context);
+      result.visualDna = generateSlideDna();
       setSlides((prev) => {
         const updated = [...prev];
         updated[index] = result;
@@ -621,6 +629,7 @@ ${s.stat ? `Current stat: "${s.stat}"` : ""}
 ${slideRewritePrompt.trim() ? `\nInstructions for rewrite: ${slideRewritePrompt}` : "Make it punchier, more engaging, and more surprising."}
 ${input.trim() ? `\nOriginal source context:\n${input.slice(0, 500)}` : ""}`;
       const result = await callApi(SINGLE_SLIDE_PROMPT, context);
+      result.visualDna = s.visualDna || generateSlideDna(); // keep existing DNA on rewrite
       setSlides((prev) => {
         const updated = [...prev];
         updated[index] = result;
@@ -1541,6 +1550,25 @@ Return the same JSON structure with just the post object updated.`;
                         <button key={l.id} onClick={() => setSlideLayout(l.id)} style={{ flex: 1, padding: "6px 4px", borderRadius: 6, fontSize: 10, fontWeight: 700, border: `1px solid ${slideLayout === l.id ? A.accent : A.border}`, background: slideLayout === l.id ? A.soft : "transparent", color: slideLayout === l.id ? A.accent : A.muted, cursor: "pointer", fontFamily: "'Inter', sans-serif" }}>{l.label}</button>
                       ))}
                     </div>
+                    {/* Randomize visual DNA */}
+                    {slides?.length > 0 && (
+                      <button
+                        onClick={() => {
+                          const dnaSet = generateCarouselDna(slides.length);
+                          setSlides((prev) => prev.map((sl, idx) => ({ ...sl, visualDna: dnaSet[idx] })));
+                        }}
+                        style={{
+                          width: "100%", padding: "7px 10px", borderRadius: 7, fontSize: 11, fontWeight: 700,
+                          border: `1px solid ${A.accent}44`, background: `${A.accent}11`,
+                          color: A.accent, cursor: "pointer", fontFamily: "'Inter', sans-serif",
+                          display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                          transition: "all 0.15s",
+                        }}
+                        title="Randomize backgrounds, frames, decorations, and alignment for every slide"
+                      >
+                        <RefreshCw size={12} /> Shuffle Visual Style
+                      </button>
+                    )}
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                       <div style={{ display: "flex", gap: 3 }}>
                         {["1:1", "4:5", "16:9"].map((a) => (
@@ -2452,6 +2480,72 @@ Return the same JSON structure with just the post object updated.`;
                         )}
                       </div>
                     </div>
+
+                    {/* Per-slide visual DNA */}
+                    {slide.visualDna && (
+                      <div style={{ borderTop: `1px solid ${A.border}`, paddingTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ fontSize: 10, fontWeight: 700, color: A.muted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Visual Style</span>
+                          <button
+                            onClick={() => {
+                              const newDna = generateSlideDna();
+                              updateSlideField(cur, "visualDna", newDna);
+                            }}
+                            style={{ background: "none", border: `1px solid ${A.border}`, borderRadius: 5, padding: "2px 7px", fontSize: 9, fontWeight: 600, color: A.accent, cursor: "pointer", display: "flex", alignItems: "center", gap: 3 }}
+                          >
+                            <RefreshCw size={9} /> Shuffle
+                          </button>
+                        </div>
+                        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                          {/* Background */}
+                          <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                            <span style={{ fontSize: 9, color: A.muted }}>BG:</span>
+                            <select
+                              value={slide.visualDna.bg}
+                              onChange={(e) => updateSlideField(cur, "visualDna", { ...slide.visualDna, bg: e.target.value })}
+                              style={{ ...selectStyle(A), padding: "2px 4px", fontSize: 9, width: "auto", minWidth: 60 }}
+                            >
+                              {DNA_OPTIONS.bg.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+                            </select>
+                          </div>
+                          {/* Frame */}
+                          <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                            <span style={{ fontSize: 9, color: A.muted }}>Frame:</span>
+                            <select
+                              value={slide.visualDna.frame}
+                              onChange={(e) => updateSlideField(cur, "visualDna", { ...slide.visualDna, frame: e.target.value })}
+                              style={{ ...selectStyle(A), padding: "2px 4px", fontSize: 9, width: "auto", minWidth: 60 }}
+                            >
+                              {DNA_OPTIONS.frame.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+                            </select>
+                          </div>
+                          {/* Deco */}
+                          <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                            <span style={{ fontSize: 9, color: A.muted }}>Deco:</span>
+                            <select
+                              value={slide.visualDna.deco}
+                              onChange={(e) => updateSlideField(cur, "visualDna", { ...slide.visualDna, deco: e.target.value })}
+                              style={{ ...selectStyle(A), padding: "2px 4px", fontSize: 9, width: "auto", minWidth: 60 }}
+                            >
+                              {DNA_OPTIONS.deco.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+                            </select>
+                          </div>
+                          {/* Align */}
+                          <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                            <span style={{ fontSize: 9, color: A.muted }}>Align:</span>
+                            {DNA_OPTIONS.align.map((o) => (
+                              <button key={o.id} onClick={() => updateSlideField(cur, "visualDna", { ...slide.visualDna, align: o.id })} style={{
+                                padding: "2px 6px", borderRadius: 4, fontSize: 9, fontWeight: 600,
+                                border: `1px solid ${slide.visualDna.align === o.id ? A.accent : A.border}`,
+                                background: slide.visualDna.align === o.id ? A.soft : "transparent",
+                                color: slide.visualDna.align === o.id ? A.accent : A.muted,
+                                cursor: "pointer", textTransform: "capitalize",
+                              }}>{o.label}</button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Per-slide toggles */}
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
