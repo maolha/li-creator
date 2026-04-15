@@ -2414,6 +2414,17 @@ Return the same JSON structure with just the post object updated.`;
                     >
                       <RefreshCw size={12} /> Regenerate
                     </button>
+                    <button
+                      onClick={() => updateSlideField(cur, "visualDna", generateSlideDna())}
+                      title="Shuffle visual style of this slide"
+                      style={{
+                        padding: "6px 10px", borderRadius: 8, border: `1px solid ${A.accent}44`, background: `${A.accent}11`,
+                        color: A.accent, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter', sans-serif",
+                        display: "flex", alignItems: "center", gap: 4, whiteSpace: "nowrap",
+                      }}
+                    >
+                      <Palette size={12} /> Shuffle Style
+                    </button>
                   </div>
 
                   {/* Mini preview */}
